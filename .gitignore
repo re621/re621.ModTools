@@ -102,3 +102,14 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Build files
+/build/
+bin/extension-key.pem
+
+# TamperDAV server
+dav/
+
+# Jetbrains IDE
+.idea
+.DS_Store

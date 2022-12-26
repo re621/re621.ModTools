@@ -1,0 +1,51 @@
+{
+    "name": "mod621",
+    "displayName": "RE621 Mod Tools",
+    "namespace": "mod621.bitwolfy.com",
+    "version": "1.0.0",
+    "description": "Moderation toolkit for e621.net",
+    "author": "bitWolfy",
+    "contributors": [
+        "bitWolfy <@bitWolfy#7932>",
+        "Earlopain <@Earlopain#9703>"
+    ],
+    "main": "./dist/script.user.js",
+    "license": "GPL-3.0",
+    "homepage": "https://github.com/re621/re621.ModTools",
+    "funding": "https://ko-fi.com/bitwolfy",
+    "repository": "github:re621/re621.ModTools",
+    "scripts": {
+        "push": "npm version patch && git push --follow-tags",
+        "push-minor": "npm version minor&& git push --follow-tags",
+        "build": "webpack",
+        "eslint": "npx eslint ."
+    },
+    "dependencies": {
+        "@re621/zestyapi": "^0.1.13",
+        "jquery": "^3.6.0",
+        "jquery-ui": "^1.13.2",
+        "jquery.hotkeys": "^0.1.0"
+    },
+    "devDependencies": {
+        "@types/jquery": "^3.5.14",
+        "@types/jqueryui": "^1.12.16",
+        "@types/tampermonkey": "^4.0.5",
+        "@typescript-eslint/eslint-plugin": "^5.4.0",
+        "@typescript-eslint/parser": "^5.4.0",
+        "css-loader": "^6.7.1",
+        "dotenv": "^16.0.1",
+        "eslint": "^8.2.0",
+        "eslint-webpack-plugin": "^3.2.0",
+        "sass": "^1.43.4",
+        "sass-loader": "^13.0.2",
+        "sass-to-string": "^1.6.3",
+        "style-loader": "^3.3.1",
+        "terser": "^5.14.2",
+        "terser-webpack-plugin": "^5.3.3",
+        "to-string-loader": "^1.2.0",
+        "ts-loader": "^9.3.1",
+        "typescript": "^4.5.2",
+        "webpack": "^5.74.0",
+        "webpack-cli": "^4.10.0"
+    }
+}

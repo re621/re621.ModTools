@@ -1,0 +1,62 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "push",
+            "type": "npm",
+            "script": "push",
+            "group": {
+                "kind": "none",
+                "isDefault": true
+            },
+            "presentation": {
+                "clear": true,
+                "reveal": "silent",
+                "panel": "shared"
+            },
+            "options": {
+                "statusbar": {
+                    "hide": false
+                }
+            }
+        },
+        {
+            "label": "build",
+            "type": "npm",
+            "script": "build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "clear": true,
+                "reveal": "silent",
+                "panel": "shared"
+            },
+            "options": {
+                "statusbar": {
+                    "hide": false
+                }
+            }
+        },
+        {
+            "label": "eslint",
+            "type": "npm",
+            "script": "eslint",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "clear": true,
+                "reveal": "silent",
+                "panel": "shared"
+            },
+            "options": {
+                "statusbar": {
+                    "hide": false
+                }
+            }
+        },
+    ]
+}

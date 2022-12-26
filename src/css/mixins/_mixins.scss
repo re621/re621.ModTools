@@ -1,0 +1,60 @@
+/* Common Mixins */
+
+// Scrollbar Styling
+@mixin scrollbars() {
+
+    // For Chrome
+    &::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        height: 6px;
+        background-color: #ffffff55;
+    }
+
+    &::-webkit-scrollbar-button {
+        width: 0;
+        height: 0;
+        display: none;
+    }
+
+    &::-webkit-scrollbar-track,
+    &::-webkit-scrollbar-corner {
+        background-color: transparent;
+    }
+
+    // For Firefox
+    & {
+        scrollbar-width: thin;
+        scrollbar-color: #ffffff55 transparent;
+    }
+}
+
+@mixin fontawesome() {
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    display: inline-block;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    line-height: 1;
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+}
+
+@mixin nonselectable {
+    -webkit-touch-callout: none;
+    /* iOS Safari */
+    -webkit-user-select: none;
+    /* Safari */
+    -khtml-user-select: none;
+    /* Konqueror HTML */
+    -moz-user-select: none;
+    /* Old versions of Firefox */
+    -ms-user-select: none;
+    /* Internet Explorer/Edge */
+    user-select: none;
+    /* Chrome, Edge, Opera and Firefox */
+}

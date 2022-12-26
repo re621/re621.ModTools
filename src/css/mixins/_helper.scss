@@ -1,0 +1,79 @@
+a {
+    cursor: pointer;
+}
+
+// Floats
+.float-left {
+    float: left;
+}
+
+.float-right {
+    float: right;
+}
+
+.text-left {
+    text-align: left;
+}
+
+// Text Alignment
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.align-middle {
+    align-self: center;
+}
+
+// Display
+.display-none {
+    display: none;
+}
+
+.display-none-important {
+    display: none !important;
+}
+
+.display-inline {
+    display: inline;
+}
+
+.display-block {
+    display: block;
+}
+
+.display-flex {
+    display: flex;
+}
+
+// Visibility
+.vis-hidden {
+    visibility: hidden;
+}
+
+.vis-shown {
+    visibility: visible;
+}
+
+// Border
+.border-left {
+    border-width: 0px !important;
+    border-left-width: 1px !important;
+}
+
+// Alignment
+.justify-center {
+    justify-content: center;
+}
+
+// Styling
+.text-bold {
+    font-weight: bold;
+}
+
+.color-red {
+    color: red;
+}
