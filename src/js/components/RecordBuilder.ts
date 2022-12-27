@@ -122,14 +122,15 @@ export default class RecordBuilder extends Component {
         for (const [id, text] of Object.entries(Records.Reasons)) {
             $("<option>")
                 .attr("value", id)
-                .text(text)
+                .text(text.split("\n")[0])
                 .appendTo(reasonSelector);
         }
 
         let reasonInputTimer = null;
-        reasonInput = $("<input>")
+        reasonInput = $("<textarea>")
             .attr({
                 id: "custom-reason-" + id,
+                class: "custom-reason",
                 placeholder: "Custom Reason",
             })
             .appendTo(reasonContainer)
@@ -264,8 +265,11 @@ export default class RecordBuilder extends Component {
         }
 
         // Compose the record text
-        const sourceOutputJoined = sourceOutput.join(" "),
-            sourceReason = (reason.length > 0 ? (reason + " ") : "") + sourceOutputJoined,
+        const
+            sourceOutputJoined = sourceOutput.join(" "),
+            sourceReason = reason.includes("%SOURCES%")
+                ? reason.replace("%SOURCES%", sourceOutputJoined)
+                : ((reason.length > 0 ? (reason + " ") : "") + sourceOutputJoined),
             rulesOutputJoined = rulesOutput.join("\n");
         return sourceReason + (rulesOutputJoined ? ("\n\n" + rulesOutputJoined + "\n") : "");
 
