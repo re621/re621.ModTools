@@ -3,6 +3,7 @@ export default class Records {
 
     public static readonly Reasons = {
         vandalism: "Don't remove valid tags from posts.",
+        tagging: `[s]Strikethrough[/s] tags were invalid or inapplicable and have been removed or changed. %SOURCES%\nPlease use the "Wiki":/wiki/show?title=help:home if you need help understanding the usage of any tags, or ask directly at the Helpdesk on our "Discord":/static/discord. You can also search our "Forum":/forum_topics.`,
         inappropriate: "Please don't make comments like this.",
         tmi: "We don't need to know that, please keep it to yourself.",
         spamming: "Don't spam.",
