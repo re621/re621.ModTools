@@ -9,6 +9,7 @@ export default class Records {
         spamming: "Don't spam.",
         trolling: "Don't be a troll.",
         blacklist: "Please use your blacklist.",
+        blacklist2: "Blacklist quietly, please.",
         roleplay: "Please don't role-play in the comments.",
         roleplay2: "This is not the place to look for roleplay partners.",
         plagiarism: "We do not tolerate plagiarism.",
