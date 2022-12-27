@@ -282,6 +282,7 @@ export default class RecordBuilder extends Component {
                 .replace(/https:\/\/e(?:621|926).net\//g, "/")              // Make links relative
                 .replace(/\/posts\/(\d+)#comment-(\d+)/g, "/comments/$2")   // Convert comment links
                 .replace(/\?lr=\d+&/, "?")                                  // Trim the tag history links
+                .replace(/\?commit=Search&/, "?")                           // Get rid of the useless search parameter
 
                 .replace(/post #(\d+)/, "/posts/$1")
                 .replace(/comment #(\d+)/, "/comments/$1")
