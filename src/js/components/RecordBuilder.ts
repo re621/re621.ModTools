@@ -286,6 +286,7 @@ export default class RecordBuilder extends Component {
                 .replace(/post #(\d+)/, "/posts/$1")
                 .replace(/comment #(\d+)/, "/comments/$1")
                 .replace(/topic #(\d+)/, "/forum_topics/$1")
+                .replace(/post changes #(\d+)/, "/post_versions?search[post_id]=$1")
                 ;
         }
     }
