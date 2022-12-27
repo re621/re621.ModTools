@@ -16,7 +16,8 @@ export default class Records {
         cdnp: "[[artist]] is conditionally DNP.",
         paysite: "Paysite/commercial content is Do Not Post.",
         banevasion: "Ban evasion.",
-        underage: "You need to be 18 to access this page.\nThis ban won't expire, but if you have reached the sufficient age you can request your ban to be lifted by writing an email to management@e621.net."
+        underage: "You need to be 18 to access this page.\nThis ban won't expire, but if you have reached the sufficient age you can request your ban to be lifted by writing an email to management@e621.net.",
+
     };
 
     public static readonly Rules: { [name: string]: SiteRule } = {
@@ -233,7 +234,7 @@ export default class Records {
             ],
             common: true,
         },
-        "taggingAbuse": {
+        taggingAbuse: {
             title: "Tagging Abuse / Tagging Vandalism",
             rules: [
                 "Failure to cite a minimum of 4 tags to an uploaded post",
@@ -253,7 +254,7 @@ export default class Records {
         {
             title: "Tagging",
             reason: "vandalism",
-            rules: "taggingabuse",
+            rules: "taggingAbuse",
         },
         {
             title: "Creepy",
