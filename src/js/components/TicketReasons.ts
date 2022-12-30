@@ -24,6 +24,7 @@ export default class TicketReasons extends Component {
             { name: "Old", text: "That comment is from N years ago.\nWe do not punish people for comments older than 6 months." },
             { name: "Reply", text: "I believe that you tried to reply to a comment, but reported it instead.\nPlease, be more careful in the future." },
             { name: "Already", text: "User already received a record for that message." },
+            { name: "Banned", text: "This user is already banned." },
             { name: "Blacklist", text: "If you find the contents of that post objectionable, use your [[e621:blacklist|blacklist]]." },
         ],
     }
