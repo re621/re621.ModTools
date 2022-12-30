@@ -16,6 +16,7 @@ export default class Records {
         dnp: "[[artist]] is Do Not Post.",
         cdnp: "[[artist]] is conditionally DNP.",
         paysite: "Paysite/commercial content is Do Not Post.",
+        deleted: "Don't reupload previously deleted posts. %SOURCES%\nIf they were deleted once, they will be deleted again.",
         banevasion: "Ban evasion.",
         underage: "You need to be 18 to access this page.\nThis ban won't expire, but if you have reached the sufficient age you can request your ban to be lifted by writing an email to management@e621.net.",
 
