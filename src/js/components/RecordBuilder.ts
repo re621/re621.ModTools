@@ -241,7 +241,7 @@ export default class RecordBuilder extends Component {
 
 
         // Sources
-        const sourceList = (form.data("sources") || "").split("\n").filter(n => n);
+        const sourceList = (form.data("sources") || "").split("\n").filter(n => n.trim());
         let sourceOutput = [];
         if (sourceList.length == 0) sourceOutput = [];
         else if (sourceList.length == 1) sourceOutput = [`"[Source]":${processSource(sourceList[0])}`];
@@ -279,6 +279,7 @@ export default class RecordBuilder extends Component {
          */
         function processSource(source: string): string {
             return decodeURI(source)
+                .trim()
                 .replace(/https:\/\/e(?:621|926).net\//g, "/")              // Make links relative
                 .replace(/\/posts\/(\d+)#comment-(\d+)/g, "/comments/$2")   // Convert comment links
                 .replace(/\?lr=\d+&/, "?")                                  // Trim the tag history links
