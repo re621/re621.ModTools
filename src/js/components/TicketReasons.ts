@@ -26,6 +26,7 @@ export default class TicketReasons extends Component {
             { name: "Already", text: "User already received a record for that message." },
             { name: "Banned", text: "This user is already banned." },
             { name: "Blacklist", text: "If you find the contents of that post objectionable, use your [[e621:blacklist|blacklist]]." },
+            { name: "Takedown", text: "Artists and character owners may request a takedown here: https://e621.net/static/takedown.\nWe do not accept third party takedowns." }
         ],
     }
 
