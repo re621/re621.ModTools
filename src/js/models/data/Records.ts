@@ -3,7 +3,7 @@ export default class Records {
 
     public static readonly Reasons = {
         vandalism: "Don't remove valid tags from posts.",
-        tagging: `[s]Strikethrough[/s] tags were invalid or inapplicable and have been removed or changed. %SOURCES%\nPlease use the "Wiki":/wiki/show?title=help:home if you need help understanding the usage of any tags, or ask directly at the Helpdesk on our "Discord":/static/discord. You can also search our "Forum":/forum_topics.`,
+        tagging: `[s]Strikethrough[/s] tags were invalid or inapplicable and have been removed or changed. $S\nPlease use the "Wiki":/wiki/show?title=help:home if you need help understanding the usage of any tags, or ask directly at the Helpdesk on our "Discord":/static/discord. You can also search our "Forum":/forum_topics.`,
         inappropriate: "Please don't make comments like this.",
         tmi: "We don't need to know that, please keep it to yourself.",
         spamming: "Don't spam.",
@@ -16,7 +16,7 @@ export default class Records {
         dnp: "[[artist]] is Do Not Post.",
         cdnp: "[[artist]] is conditionally DNP.",
         paysite: "Paysite/commercial content is Do Not Post.",
-        deleted: "Don't reupload previously deleted posts. %SOURCES%\nIf they were deleted once, they will be deleted again.",
+        deleted: "Don't reupload previously deleted posts. $S\nIf they were deleted once, they will be deleted again.",
         banevasion: "Ban evasion.",
         underage: "You need to be 18 to access this page.\nThis ban won't expire, but if you have reached the sufficient age you can request your ban to be lifted by writing an email to management@e621.net.",
 

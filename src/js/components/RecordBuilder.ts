@@ -267,8 +267,8 @@ export default class RecordBuilder extends Component {
         // Compose the record text
         const
             sourceOutputJoined = sourceOutput.join(" "),
-            sourceReason = reason.includes("%SOURCES%")
-                ? reason.replace("%SOURCES%", sourceOutputJoined)
+            sourceReason = reason.includes("$S")
+                ? reason.replace("$S", sourceOutputJoined)
                 : ((reason.length > 0 ? (reason + " ") : "") + sourceOutputJoined),
             rulesOutputJoined = rulesOutput.join("\n");
         return sourceReason + (rulesOutputJoined ? ("\n\n" + rulesOutputJoined + "\n") : "");
