@@ -2,6 +2,7 @@ import ZestyAPI from "@re621/zestyapi";
 import css from "./css/style.module.scss";
 
 import { ComponentList } from "./js/components/Component";
+import LinkGrabber from "./js/components/LinkGrabber";
 import RecordBuilder from "./js/components/RecordBuilder";
 import TicketData from "./js/components/TicketData";
 import TicketReasons from "./js/components/TicketReasons";
@@ -25,6 +26,8 @@ export default class REMT {
 
         TicketData,
         TicketReasons,
+
+        LinkGrabber,
     ];
 
     public async run(): Promise<void> {
@@ -106,4 +109,6 @@ interface ComponentListAnnotated extends ComponentList {
 
     TicketData?: TicketData,
     TicketReasons?: TicketReasons,
+
+    LinkGrabber?: LinkGrabber,
 }
