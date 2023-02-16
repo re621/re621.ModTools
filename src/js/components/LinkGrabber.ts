@@ -1,7 +1,7 @@
 import Page, { PageDefinition } from "../models/data/Page";
 import Component from "./Component";
 
-export default class RecordBuilder extends Component {
+export default class LinkGrabber extends Component {
 
     public constructor() {
         super({
