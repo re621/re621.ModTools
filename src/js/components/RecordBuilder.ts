@@ -174,19 +174,21 @@ export default class RecordBuilder extends Component {
 
 
         // Rules
-        const commonRuleContainer = $("<div>")
+        const ruleWrapper = $("<div>")
+            .addClass("rule-wrapper")
             .appendTo(container);
-        $("<label>")
-            .attr("for", "rules-buttons")
-            .text("Common Rules")
-            .appendTo(commonRuleContainer);
 
-        const otherRuleContainer = $("<div>")
-            .appendTo(container);
-        $("<label>")
-            .attr("for", "rules-buttons")
-            .text("Other Rules")
-            .appendTo(otherRuleContainer);
+        const ruleGroupIndex: { [name: string]: JQuery<HTMLElement> } = {};
+        for(const groupName of Object.values(Records.RuleGroups)) {
+            const ruleContainer = $("<div>")
+                .addClass("rule-container")
+                .appendTo(ruleWrapper);
+            $("<label>")
+                .attr("for", "rules-buttons")
+                .text(groupName)
+                .appendTo(ruleContainer);
+            ruleGroupIndex[groupName] = ruleContainer;
+        }
 
         for (const [name, data] of Object.entries(Records.Rules)) {
             $("<button>")
@@ -196,7 +198,7 @@ export default class RecordBuilder extends Component {
                     name: name,
                 })
                 .text(data.title)
-                .appendTo(data.common ? commonRuleContainer : otherRuleContainer)
+                .appendTo(data.group ? ruleGroupIndex[data.group] : Records.RuleGroups.other)
                 .on("click", (event) => {
                     event.preventDefault();
                     const button = $(event.currentTarget);
@@ -208,9 +210,7 @@ export default class RecordBuilder extends Component {
 
         container.on("remt:buttons", (event, preventChange) => {
             const buttons = [];
-            for (const btn of commonRuleContainer.find("button.active"))
-                buttons.push((btn as HTMLInputElement).name);
-            for (const btn of otherRuleContainer.find("button.active"))
+            for (const btn of ruleWrapper.find("button.active"))
                 buttons.push((btn as HTMLInputElement).name);
 
             container.data("buttons", buttons);
@@ -256,9 +256,11 @@ export default class RecordBuilder extends Component {
             const ruleLines = [];
             for (const ruleLine of ruleData.rules)
                 ruleLines.push((ruleLine.startsWith("*") ? "*" : "* ") + ruleLine);
+            
             rulesOutput.push(`[section=${ruleData.title}]\n` +
-                `[b]This category includes:[/b]\n\n` +
+                (ruleData.preface ? (ruleData.preface + "\n\n") : "") + 
                 `${ruleLines.join("\n")}\n\n` +
+                (ruleData.postface ? (ruleData.postface + "\n\n") : "") + 
                 `"[Code of Conduct - ${ruleData.title}]":${ruleData.link ? ruleData.link : `/wiki_pages/e621:rules#${name.toLowerCase()}`}\n` +
                 `[/section]`
             );

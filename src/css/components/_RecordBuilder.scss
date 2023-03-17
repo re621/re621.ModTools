@@ -60,4 +60,13 @@
             background: #e8c446;
         }
     }
+
+    .rule-wrapper {
+        display: flex;
+        flex-flow: column;
+        
+        .rule-container label:only-child {
+            display: none;
+        }
+    }
 }
