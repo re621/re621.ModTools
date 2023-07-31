@@ -1,11 +1,16 @@
 import Page, { PageDefinition } from "../models/data/Page";
+import Util from "../utilities/Util";
 import Component from "./Component";
 
 export default class LinkGrabber extends Component {
 
+    private pizzaDelivery = [
+        /^\/users\/18776\/?$/,
+    ]
+
     public constructor() {
         super({
-            constraint: [PageDefinition.changes, PageDefinition.comments.list, PageDefinition.votes.comment, PageDefinition.votes.post],
+            constraint: [PageDefinition.changes, PageDefinition.comments.list, PageDefinition.votes.comment, PageDefinition.votes.post, PageDefinition.users.view],
             waitForDOM: true,
         });
     }
@@ -27,6 +32,20 @@ export default class LinkGrabber extends Component {
             const latest = $("#votes tbody tr td").first();
             if(!latest.length) return;
             id = parseInt(latest.text());
+        } else if(Page.matches(this.pizzaDelivery)) {
+
+            const separator = $("<li>|</li>").appendTo(menu);
+            const container = $("<li>").appendTo(menu);
+            const link = $("<a>")
+                .text("???")
+                .appendTo(container)
+                .on("click", () => {
+                    $("body").css("cursor", `url(${Util.DOM.getPizza()}), auto`);
+                    link.remove();
+                    separator.remove();
+                });
+            return;
+
         } else return;
 
         if(!id) return;

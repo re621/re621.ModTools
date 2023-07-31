@@ -62,6 +62,10 @@ export class UtilDOM {
         return "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
     }
 
+    static getPizza(): string {
+        return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARCAYAAAA7bUf6AAAAAklEQVR4AewaftIAAAFOSURBVL3BMWrcQBiA0W82OoVg6wWJPcL+7RQC3WCLPYeauNA53PgEAyqUIsXMEQYJjDsPiOB0voCigRUMQk5iCHmPf0GxuJyPMwnng+ITMu5sXyPaYPMCgZmE80HxGxk7bF4g04jtayLRZibhfFAkFIvL+TjbviYSbYhsX/MR0YaV80F9YfH69v7w/duPr7fridv1xO16IiXa8Pj0zO16Inp8eqapStzLT17f3h8O/IFog80LbF4g2rDnwCeJNjRVSerAhmiDaMPK9jUyjcg0YvuaVdsNOB8UC0Xicj7ONi+IZBqxfU1KtKGpSqK2G3A+KBYH/pJoQ1OVRG034HxQ3GVsyDQS2b5mJdrQVCVR2w04HxSJjA3b16xEG6KmKonabsD5oNhQbFzOx5m7pipZtd2A80GxI2NHU5Ws2m4gcj4oPpCxo+0GVs4Hxf/wCzeQgfpPWb9hAAAAAElFTkSuQmCC";
+    }
+
 }
 
 interface SettingsButton {
