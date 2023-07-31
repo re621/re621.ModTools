@@ -193,6 +193,11 @@ export const PageDefinition = {
         new: /^\/bans\/new/,
     },
 
+    votes: {
+        comment: /^\/comment_votes\/?/,
+        post: /^\/post_votes\/?/,
+    },
+
     // Custom
     pluginSettings: /^\/plugins\/remt.*/,
 };

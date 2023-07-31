@@ -5,7 +5,7 @@ export default class LinkGrabber extends Component {
 
     public constructor() {
         super({
-            constraint: [PageDefinition.changes, PageDefinition.comments.list],
+            constraint: [PageDefinition.changes, PageDefinition.comments.list, PageDefinition.votes.comment, PageDefinition.votes.post],
             waitForDOM: true,
         });
     }
@@ -23,6 +23,10 @@ export default class LinkGrabber extends Component {
             const latest = $("article.comment").first();
             if(!latest.length) return;
             id = parseInt(latest.data("commentId")) || null;
+        } else if(Page.matches(PageDefinition.votes.comment) || Page.matches(PageDefinition.votes.post)) {
+            const latest = $("#votes tbody tr td").first();
+            if(!latest.length) return;
+            id = parseInt(latest.text());
         } else return;
 
         if(!id) return;
