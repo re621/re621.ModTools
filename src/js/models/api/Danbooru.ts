@@ -187,14 +187,13 @@ export default class Danbooru {
 
     }
 
-    public static Utility = {
+    public static Shortcuts = {
 
-        disableShortcuts(state?: boolean): Promise<boolean> {
-            if (state !== undefined) Danbooru.Modules.Utility.disableShortcuts = state;
-            return Promise.resolve(Danbooru.Modules.Utility.disableShortcuts);
-        },
+        set disabled(value: boolean) {
+            Danbooru.Modules.Shortcuts.disabled = value;
+        }
 
-    };
+    }
 
     public static E621 = {
 
