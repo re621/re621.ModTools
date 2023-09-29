@@ -23,7 +23,7 @@ export default class Records {
     };
 
     public static readonly RuleGroups: { [name: string]: string } = {
-        messages: "Messages, Private and Public",
+        messages: "Messages – Private and Public",
         posts: "Posts and Tags",
         tools: "Abuse of Site Tools",
         illegal: "Illegal Activities",
@@ -37,35 +37,35 @@ export default class Records {
         disruptive: {
             title: "Disruptive Behavior",
             group: this.RuleGroups.messages,
-            preface: `e621 is an open and friendly community that people visit to share and enjoy furry artwork.\nPeople can have different opinions and are free to state them, but that does not allow them to make someone else feel uncomfortable or unwanted.`,
+            preface: `e621 is an open and friendly community that people visit to share and enjoy furry artwork.\nPeople can have different opinions, but that does not give them permission to make someone else feel uncomfortable or unwanted.`,
             rules: [
                 "Do not make messages with the apparent purpose of upsetting someone. That includes picking fights, baiting arguments, calling names, or making remarks regarding personal grievances, quarrels, or malicious rumors.",
-                "Do not purposefully spread false or defamatory information.",
+                "Do not purposefully or repeatedly spread false or defamatory information.",
                 "Do not mention any actions of suicide, self harm / mutilation, depression-induced pain, or other malicious acts directed towards the self.",
-                "Do not encourage other users to engage in harmful behaviors, including suicide, eating disorders, or other forms of self harm.",
-                "Do not give other users medical or veterinary advice that could result in harm coming to them or their pets.",
-                "Do not promote ideologies harmful to public safety.",
+                "Do not encourage others to engage in harmful behaviors, including suicide, eating disorders, or other forms of self harm.",
+                "Do not give others medical or legal advice that could result in harm coming to themselves or others.",
+                "Do not promote ideologies that are harmful to public safety.",
                 "Do not brag about saving DNP or pirated material, and do not encourage others to do so.",
-                "Do not try to impersonate others, including users, artists, public figures, staff members, or Bad Dragon employees.",
-                "Do not demand that certain administrative actions be taken against another user. Do not indicate personal influence over staff decisions.",
-                "Do not disobey any direct instructions made by a staff member or a Bad Dragon employee.",
+                "Do not maliciously impersonate any individuals or organizations.",
+                "Do not demand that certain administrative actions be taken against another user. Do not claim personal influence over staff decisions.",
+                "Do not disobey any direct instructions made by staff members.",
             ]
         },
         harassment: {
             title: "Harassment, Doxxing, and Real-Life Threats",
             group: this.RuleGroups.messages,
             rules: [
-                "Do not stalk or harass anyone. Do not repeatedly try to contact someone if they expressed that they do not wish to speak with you.",
-                "Do not make any messages that call for or may lead to harassment of any user, staff member, Bad Dragon employee, or anyone else.",
-                "Do not promote or threaten violence in any capacity against any person, entity, company, or property.",
-                "Do not share or try to obtain any personal or identifiable information. That includes any privileged or personal information of other individuals or businesses, such as real-life names, addresses, unlisted contact information, social security numbers, credit card numbers, and correspondence (logs, emails, notes, etc).",
+                "Do not stalk or harass anyone. Do not try to contact someone if they have expressed that they do not wish to speak with you.",
+                "Do not make any messages that call for or may lead to harassment.",
+                "Do not promote or threaten violence in any capacity.",
+                "Do not share or try to obtain any personal or identifiable information. That includes any privileged or personal information of other individuals or businesses, such as real-life names, addresses, unlisted contact information, social security numbers (or equivalents), credit card numbers, and correspondence (logs, emails, notes, etc.).",
             ],
         },
         hatred: {
             title: "National, Racial, or Ethnic Hatred",
             group: this.RuleGroups.messages,
             rules: [
-                "Do not promote, allude to, or express national, racial, or ethnic hatred. That includes usage or allusions to slurs or symbols as well.",
+                "Do not promote, allude to, or express national, racial, or ethnic hatred. That also includes usage or allusions to slurs or symbols.",
                 "Do not identify with, allude to, or promote terrorist organizations, mass murderers, serial killers, or their ideologies.",
             ],
             postface: "Usage of these themes in artwork will be decided on a case-by-case basis.",
@@ -74,8 +74,8 @@ export default class Records {
             title: "Sexual Identity and Orientation",
             group: this.RuleGroups.messages,
             rules: [
-                "Do not insultingly refer to any aspect of sexual identity or orientation, both in reference to yourself and to other users.",
-                "Do not purposefully misgender or deadname users or characters.",
+                "Do not insultingly refer to any aspect of sexual identity or orientation, both in reference to yourself or to others.",
+                "Do not purposefully misgender or deadname users, characters, or anyone else.",
             ],
         },
         blacklist: {
@@ -83,7 +83,7 @@ export default class Records {
             group: this.RuleGroups.messages,
             preface: "This site hosts a wide variety of content, and not all of it may appeal to everyone.",
             rules: [
-                "Do not complain about image and video content that could be blacklisted. Simply add the corresponding tag to your blacklist. If you believe that a post is missing a valid tag, you should add the tag yourself.",
+                "Do not complain about content that could be blacklisted. Simply add the corresponding tag to your blacklist. If you believe that a post is missing a valid tag, add the tag yourself.",
                 "Do not make messages announcing that you have blacklisted a specific tag or certain kinds of content.",
             ],
         },
@@ -93,9 +93,9 @@ export default class Records {
             preface: "Everyone who browses the website has the right, within realistic expectations, to not encounter sexualized comments that may make them uncomfortable.",
             rules: [
                 "Do not create messages that share explicit details about sexual encounters, fantasies, fetishes, or actions.",
-                "Do not create comments that exceed the post's rating."
+                "Do not create comments that exceed the post's rating.",
             ],
-            postface: "You may find a few detailed examples \"here\":/help/inappropriate_comments.",
+            postface: "You may find a few detailed examples of what kind of comments are considered inappropriate \"here\":/help/inappropriate_comments.",
         },
         roleplay: {
             title: "Role-Play",
@@ -112,7 +112,7 @@ export default class Records {
             group: this.RuleGroups.messages,
             rules: [
                 "Do not excessively communicate the same phrase, similar phrases, or gibberish.",
-                "Do not make non-constructive or derailing messages, including fad statements like \"first\", \TL;DR\", \"ITT\", and so on.",
+                `Do not make non-constructive or derailing messages, including fad statements like "first", "TL;DR", "ITT", and so on.`,
                 "Do not excessively post in old threads without adding anything to the discussion.",
                 "Do not create pointless threads like forum games, asking for free art, and so on.",
             ],
@@ -122,9 +122,9 @@ export default class Records {
             group: this.RuleGroups.messages,
             rules: [
                 "Do not promote any external sites, resources, products, or services.",
-                "If you are an artist or content owner, you are permitted to advertise products and services you may offer. You may do so in the \"description\" field of your posts, on the artist page, and in your profile description."
+                `If you are an artist or content owner, you are permitted to advertise products and services you may offer. You may do so in the "description" field of your posts, on the artist page, and in your profile description.`,
             ],
-            postface: "If you wish to promote your products or services through a banner ad, please contact ads@dragonfru.it with any questions. See the \"advertisement\":/help/advertising help page for more information.",
+            postface: "If you wish to promote your products or services through a banner ad, please contact `ads@dragonfru.it` with any questions. See the \"advertisement help page\":/help/advertising for more information.",
         },
 
 
@@ -134,36 +134,59 @@ export default class Records {
             group: this.RuleGroups.posts,
             rules: [
                 "Do not knowingly or repeatedly upload content that goes against the \"Uploading Guidelines\":/help/uploading_guidelines.",
-                "* Do not post works made by any of the artists or publishers on the \"Avoid Posting list\":/help/avoid_posting.",
+                "* Do not post works made by any of the artists or publishers on the \"Avoid Posting list\":/help/avoid_posting or break any uploading conditions set there.",
                 "* Do not post any commercial or pay-to-view content. \"Free\" pay-to-view content – where you are allowed to set the price to $0 if you so choose – cannot be posted unless 60 days have passed after it was made available for free.",
-                "* Do not knowingly upload or share previously deleted content. If it was deleted once, it will almost certainly be deleted again. If you wish to dispute a post's removal, contact the staff member responsible for the deletion via a private message.",
+                "* Do not knowingly upload or share previously deleted content. If you wish to dispute a post's removal, contact the staff member responsible for the deletion via a private message.",
                 "Do not knowingly or repeatedly upload or share unauthorized edits of artwork after the original artist or character owner asked others not to.",
                 "Do not knowingly or repeatedly upload content made by minors or featuring characters created or owned by minors.",
+                "* Do not upload content that was made when the artist was underage, even if they are of age now.",
                 "Do not upscale or otherwise manipulate images to artificially create a \"better\" version of an existing image.",
-                "Do not upload content that is involved in, depicts, or glorifies recent real-life tragedies.",
+                "Do not upload content that is associated with recent real-life tragedies.",
             ]
         },
         tagging: {
-            title: "Tagging, Rating, and Note Abuse",
+            title: "Tagging, Rating, and Sourcing Abuse",
             group: this.RuleGroups.posts,
             rules: [
-                "You are expected to add a minimum of four general, non-implied tags to any post that you upload.",
                 "Do not add any tags that are invalid, and do not remove tags that are valid.",
                 "* Tags in the general category are considered valid if they follow the \"Tag What You See principle\":/help/twys – that is, they must be describing what is visible in the post.",
-                "* Tags in other categories are valid if the information they are conveying is objectively true, such as the artist's name or the image's aspect ratio.",
-                "Do not add any disruptive tags or tags that could be considered defamatory or spam.",
-                "Do not apply post ratings that are wrong or go against the \"Rating Guidelines\":/help/ratings.",
-                "Do not engage in disruptive behavior in post descriptions or edit reasons, including flaming, insults, personal feelings, drama, fanfiction, and so on.",
-                "Do not edit post notes with irrelevant information or remove existing valid notes. Do not add any notes in languages other than English or that go against the \"Translation Guidelines\":/help/translation_guidelines.",
+                "* Tags in the lore category convey the artist's intentions or other background information.",
+                "* Tags in other categories are valid if the information that they convey is objectively true, such as the artist's name or the image's aspect ratio.",
+                "Do not upload posts with fewer than ten general, non-implied tags.",
+                "* This restriction will be eased if the post does not have ten distinct tags that are reasonably applicable to it.",
+                "Do not use tag or description edits to be disruptive.",
+                "Do not change tags to incorrect categories.",
+                "Do not apply post ratings that go against the \"Rating Guidelines\":/help/ratings.",
+                null,
+                "Do not add any sources that are invalid, and do not remove any sources that are valid.",
+                "* Valid sources are defined as web pages where the artwork can be found.",
+                "* At least one source page should be publicly available, unless you are the artist, commissioner, or copyright owner of the artwork.",
+                "* Do not use links to piracy sites as sources.",
+                "* Links to the exact submission page where the artwork can be found should be prioritized. This is not the same as the direct image link, which isn’t helpful. Links to the artist's gallery pages should be added to their artist page.",
+                "* Do not add source links that redirect to a different URL (eg. URL shorteners).",
+                "* Dead links to pages where the artwork could be found in the past are still considered valid and should instead be disabled by prefixing them with `-`.",
+            ]
+        },
+        noteabuse: {
+            title: "Note Abuse",
+            group: this.RuleGroups.posts,
+            rules: [
+                "Do not edit post notes with irrelevant information or remove existing valid notes. Examples of valid notes include, but are not limited to:",
+                "* Identifying characters in images with an especially high number of characters.",
+                "* Linking to a picture that is featured inside another picture.",
+                "* Translating non-English text into English.",
+                "* Deciphering a coded message.",
+                "* Correcting spelling and grammatical mistakes in text.",
+                "Do not add any notes in languages other than English or that go against the \"Translation Guidelines\":/help/translation_guidelines.",
             ]
         },
         plagiarism: {
-            title: "Plagiarism",
+            title: "Plagiarism or Character Theft",
             group: this.RuleGroups.posts,
             rules: [
-                "Do not wrongfully claim ownership of any artwork.",
+                "Do not claim ownership of any artwork or characters that don't belong to you.",
                 "Do not upload or share any traced artwork without the consent of the copyright owner.",
-                "Do not upload or share any artwork that had original watermarks or signatures removed from it. Similarly, do not add third party watermarks or signatures to unrelated content.",
+                "Do not upload or share any artwork that had original watermarks or signatures removed from it. Similarly, do not add third-party watermarks or signatures to unrelated content.",
             ]
         },
 
@@ -173,20 +196,22 @@ export default class Records {
             title: "Abuse of Site Tools",
             group: this.RuleGroups.tools,
             rules: [
-                "Do not use any site tools in a fashion that can be construed as disruptive, spamming, or defamatory.",
-                "Do not knowingly or repeatedly submit invalid or unnecessary requests, such as incorrect tickets or flags.",
+                "Do not use any site tools in a manner that could be construed as disruptive.",
+                "Do not submit invalid or unnecessary requests, such as incorrect tickets or flags.",
                 "Do not encourage other users to make duplicate reports for the same violation.",
-                "Do not use multiple accounts to abuse the voting system or manipulate public opinion.",
-                "Do not indiscriminately downvote posts based on their content. You should blacklist the offending subject matter instead.",
+                "Do not indiscriminately downvote posts based on their content. Blacklist the offending subject matter instead.",
+                "Do not target users by downvoting their comments on unrelated posts. Blacklist the user instead.",
                 "Do not attempt to game the voting system by offering incentives in exchange for upvotes, downvotes, or favorite counts.",
             ]
         },
         banevasion: {
-            title: "Circumventing a Suspension / Ban",
+            title: "Circumventing Site Restrictions or Suspensions",
             group: this.RuleGroups.tools,
             rules: [
-                "Do not use alternate accounts to circumvent bans, records, upload limits, or any other site restriction.",
-                "Do not suggest or coerce another user to post on your behalf while currently under a suspension or a ban.",
+                "Do not use alternate accounts to circumvent any site restrictions.",
+                "* This includes, but is not limited to: bans, upload limits, time-based action limits, and so on.",
+                "* Do not use alternate accounts to abuse the voting system or manipulate public opinion.",
+                "Do not have others act on your behalf while currently under a suspension or a ban.",
                 "Do not delete and re-create an account to get rid of previous records.",
             ]
         },
@@ -194,14 +219,22 @@ export default class Records {
 
         // Illegal Activities
         illegalcontent: {
-            title: "Extreme or Illegal Content",
+            title: "Illegal Activities or Content",
             group: this.RuleGroups.illegal,
             rules: [
-                "Do not engage in, promote, encourage, plan, post, or link to any content or activities that violate federal US law or anything that could be used as directions for committing a crime.",
-                "Do not discuss details or experiences of committing illegal acts, such as drug use, sex, violence, or abuse against any human or creature.",
-                "Do not post images or videos depicting real-life children or animals in sexual situations or acts. Do not discuss the details, morality, or attraction to such acts.",
-                "Do not link to explicit real-life material featuring animal genitalia or animal mating.",
+                "Do not engage in, promote, encourage, plan, post, or link to any content or activities that violate US law or anything that could be used as directions for committing a crime.",
+                "Do not discuss details or experiences of committing illegal acts, such as drug use, non-consensual sex, violence, or abuse against any human or creature.",
+                "Do not post images or videos depicting real-life minors in sexual situations or acts.",
+            ]
+        },
+        extremecontent: {
+            title: "Extreme Activities or Content",
+            group: this.RuleGroups.illegal,
+            rules: [
+                "Do not upload or link to real-life material featuring animal genitalia or animals in sexual situations.",
+                "Do not express or indicate any degree of attraction to real-life minors or animals.",
                 "Do not link to any content featuring or referring to extreme real-life violence or violent sexual activities.",
+                "Do not discuss the details, morality, or attraction towards any of the aforementioned subjects.",
             ]
         },
         piracy: {
@@ -209,7 +242,7 @@ export default class Records {
             group: this.RuleGroups.illegal,
             rules: [
                 "Do not share any content or data that has been obtained through unauthorized or illegal means. Do not discuss or share methods or resources used to obtain such content.",
-                "Do not create messages that link to content only available through paid subscription services. Do not quote or otherwise reference other users doing that either – simply report them and move on.",
+                "Do not link to content only available through paid subscription services. Do not quote or otherwise reference other users doing that either – simply report them and move on.",
             ]
         },
         underage: {

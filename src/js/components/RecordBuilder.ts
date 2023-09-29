@@ -254,8 +254,13 @@ export default class RecordBuilder extends Component {
             const ruleData = Records.Rules[name];
 
             const ruleLines = [];
-            for (const ruleLine of ruleData.rules)
+            for (const ruleLine of ruleData.rules) {
+                if(!ruleLine) {
+                    ruleLines.push("");
+                    continue;
+                }
                 ruleLines.push((ruleLine.startsWith("*") ? "*" : "* ") + ruleLine);
+            }
             
             rulesOutput.push(`[section=${ruleData.title}]\n` +
                 (ruleData.preface ? (ruleData.preface + "\n\n") : "") + 
