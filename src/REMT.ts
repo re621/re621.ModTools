@@ -10,7 +10,6 @@ import Danbooru from "./js/models/api/Danbooru";
 import Page, { IgnoredPages } from "./js/models/data/Page";
 import Script from "./js/models/data/Script";
 import User from "./js/models/data/User";
-import Version from "./js/models/data/Version";
 import Debug from "./js/models/Debug";
 import PageObserver from "./js/models/structure/PageObserver";
 import ErrorHandler from "./js/utilities/ErrorHandler";
@@ -42,9 +41,6 @@ export default class REMT {
             userAgent: Script.userAgent,
             debug: Debug.Connect,
         });
-
-        // Load assets
-        await Version.init();
 
         // Initialize basic functionality
         let headLoaded: Promise<void>, bodyLoaded: Promise<void>;

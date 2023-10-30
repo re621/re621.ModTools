@@ -9,7 +9,7 @@ export default class Script {
         version: GM_info.version,
     }
     public static url = {
-        website: "https://re621.bitwolfy.com",
+        website: "https://re621.app",
         repo: "https://github.com/re621/re621.ModTools",
         issues: "https://github.com/re621/re621.ModTools/issues",
         thread: "https://e621.net/forum_topics/25872",

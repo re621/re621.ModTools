@@ -45,7 +45,6 @@ module.exports = {
 
     connect: [
         "static1.e621.net",
-        "re621.bitwolfy.com",
         "*",
     ],
 
