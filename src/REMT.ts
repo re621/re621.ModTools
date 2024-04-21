@@ -58,7 +58,6 @@ export default class REMT {
             bodyLoaded = PageObserver.watch("body").then(() => {
                 Debug.log("+ BODY is ready");
                 $("body").attr("remt", Script.version);
-                Danbooru.Shortcuts.disabled = true;
                 Util.DOM.setupDialogContainer(); // TODO Move to the dialog class
                 User.init();
             });
