@@ -2,24 +2,82 @@ export default class Records {
 
 
     public static readonly Reasons = {
-        vandalism: "Don't remove valid tags from posts.",
-        tagging: `[s]Strikethrough[/s] tags were invalid or inapplicable and have been removed or changed. $S\nPlease use the "Wiki":/wiki/show?title=help:home if you need help understanding the usage of any tags, or ask directly at the Helpdesk on our "Discord":/static/discord. You can also search our "Forum":/forum_topics.`,
-        inappropriate: "Please don't make comments like this.",
-        tmi: "We don't need to know that, please keep it to yourself.",
-        spamming: "Don't spam.",
-        trolling: "Don't be a troll.",
-        blacklist: "Please use your [[e621:blacklist|blacklist]].",
-        blacklist2: "[[e621:blacklist|Blacklist]] quietly, please.",
-        roleplay: "Please don't role-play in the comments.",
-        roleplay2: "This is not the place to look for roleplay partners.",
-        plagiarism: "We do not tolerate plagiarism.",
-        dnp: "[[artist]] is Do Not Post.",
-        cdnp: "[[artist]] is conditionally DNP.",
-        paysite: "Paysite/commercial content is Do Not Post.",
-        deleted: "Don't reupload previously deleted posts. $S\nIf they were deleted once, they will be deleted again.",
-        banevasion: "Ban evasion.",
-        underage: "You need to be 18 to access this page.\nThis ban won't expire, but if you have reached the sufficient age you can request your ban to be lifted by writing an email to management@e621.net.",
-
+        vandalism: {
+            text: "Don't remove valid tags from posts.",
+            rules: "tagging",
+        },
+        tagging: {
+            text: `[s]Strikethrough[/s] tags were invalid or inapplicable and have been removed or changed. $S\nPlease use the "Wiki":/wiki/show?title=help:home if you need help understanding the usage of any tags, or ask directly at the Helpdesk on our "Discord":/static/discord. You can also search our "Forum":/forum_topics.`,
+            rules: "tagging",
+        },
+        inappropriate: {
+            text: "Please don't make comments like this.",
+            rules: "inappropriate",
+        },
+        tmi: {
+            text: "We don't need to know that, please keep it to yourself.",
+            rules: "inappropriate",
+        },
+        spamming: {
+            text: "Don't spam.",
+            rules: "spamming",
+        },
+        trolling: {
+            text: "Don't be a troll.",
+            rules: "disruptive",
+        },
+        blacklist: {
+            text: "Please use your [[e621:blacklist|blacklist]].",
+            rules: "blacklist",
+        },
+        blacklist2: {
+            text: "[[e621:blacklist|Blacklist]] quietly, please.",
+            rules: "blacklist",
+        },
+        roleplay: {
+            text: "Please don't role-play in the comments.",
+            rules: "roleplay",
+        },
+        roleplay2: {
+            text: "This is not the place to look for roleplay partners.",
+            rules: "roleplay",
+        },
+        plagiarism: {
+            text: "We do not tolerate plagiarism.",
+            rules: "plagiarism",
+        },
+        dnp: {
+            text: "[[artist]] is Do Not Post.",
+            rules: "posting",
+        },
+        cdnp: {
+            text: "[[artist]] is conditionally DNP.",
+            rules: "posting",
+        },
+        paysite: {
+            text: "Paysite/commercial content is Do Not Post.",
+            rules: "posting",
+        },
+        deleted: {
+            text: "Don't reupload previously deleted posts. $S\nIf they were deleted once, they will be deleted again.",
+            rules: "posting",
+        },
+        banevasion: {
+            text: "Ban evasion.",
+            rules: "sitetools",
+        },
+        votecheating: {
+            text: "Do not use alt accounts to cheat the voting system.",
+            rules: "sitetools",
+        },
+        votecheating1: {
+            text: "Vote cheating alt.",
+            rules: "sitetools",
+        },
+        underage: {
+            text: "You need to be 18 to access this page.\nThis ban won't expire, but if you have reached the sufficient age you can request your ban to be lifted by writing an email to management@e621.net.",
+            rules: "underage",
+        },
     };
 
     public static readonly RuleGroups: { [name: string]: string } = {

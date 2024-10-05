@@ -68,9 +68,12 @@ export default class RecordBuilder extends Component {
                 .on("click", (event) => {
                     event.preventDefault();
 
-                    reasonSelector
-                        .val(prebuilt.reason)
-                        .trigger("remt:change", true);
+                    const reason = Records.Reasons[prebuilt.reason];
+
+                    reasonSelector.val(prebuilt.reason);
+                    reasonInput
+                        .val(reason.text)
+                        .trigger("remt:input", true);;
 
                     container.find("button.rules-button").removeClass("active");
                     for (const rule of [prebuilt.rules])
@@ -111,18 +114,24 @@ export default class RecordBuilder extends Component {
             .addClass("record-reason")
             .appendTo(reasonContainer)
             .on("change remt:change", (event, preventChange) => {
+                const reason = Records.Reasons[reasonSelector.val() + ""];
                 reasonInput
-                    .val(Records.Reasons[reasonSelector.val() + ""] || "")
+                    .val(reason.text || "")
                     .trigger("remt:input", preventChange);
+
+                container.find("button.rules-button").removeClass("active");
+                for (const rule of [reason.rules])
+                    container.find("button.rules-button[name='" + rule + "']").addClass("active");
+                container.trigger("remt:buttons", true);
             });
 
         $("<option>")
             .attr("value", "null")
             .appendTo(reasonSelector);
-        for (const [id, text] of Object.entries(Records.Reasons)) {
+        for (const [id, data] of Object.entries(Records.Reasons)) {
             $("<option>")
                 .attr("value", id)
-                .text(text.split("\n")[0])
+                .text(data.text.split("\n")[0])
                 .appendTo(reasonSelector);
         }
 
