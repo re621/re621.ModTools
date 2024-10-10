@@ -10,6 +10,10 @@ export default class Records {
             text: `[s]Strikethrough[/s] tags were invalid or inapplicable and have been removed or changed. $S\nPlease use the "Wiki":/wiki/show?title=help:home if you need help understanding the usage of any tags, or ask directly at the Helpdesk on our "Discord":/static/discord. You can also search our "Forum":/forum_topics.`,
             rules: "tagging",
         },
+        mintags: {
+            text: `You are expected to add at least 10 general category tags when uploading posts. $S\nPlease see our "Tagging Checklist":/help/tagging_checklist, view our "Uploading Guidelines":/help_uploading_guidelines, and consider using the "Related Tags" function on the upload form.\nUse the "Wiki":/wiki/show?title=help:home if you need help understanding the usage of any tags, or ask directly at the Helpdesk on our "Discord":/static/discord. You can also search our "Forum":/forum_topics.`,
+            rules: "tagging",
+        },
         inappropriate: {
             text: "Please don't make comments like this.",
             rules: "inappropriate",
