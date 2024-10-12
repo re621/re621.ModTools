@@ -73,7 +73,7 @@ export default class RecordBuilder extends Component {
                     reasonSelector.val(prebuilt.reason);
                     reasonInput
                         .val(reason.text)
-                        .trigger("remt:input", true);;
+                        .trigger("remt:input", true);
 
                     container.find("button.rules-button").removeClass("active");
                     for (const rule of [prebuilt.rules])
@@ -123,6 +123,8 @@ export default class RecordBuilder extends Component {
                 for (const rule of [reason.rules])
                     container.find("button.rules-button[name='" + rule + "']").addClass("active");
                 container.trigger("remt:buttons", true);
+
+                this.generateRecordText();
             });
 
         $("<option>")
