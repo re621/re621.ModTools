@@ -16,7 +16,7 @@ export default class LinkGrabber extends Component {
     }
 
     protected create(): Promise<void> {
-        const menu = $("nav > menu:last-of-type");
+        const menu = $("menu.nav-secondary");
         if(!menu.length) return;
 
         let id: number = null;
