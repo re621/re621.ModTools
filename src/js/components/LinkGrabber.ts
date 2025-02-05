@@ -33,8 +33,7 @@ export default class LinkGrabber extends Component {
             if(!latest.length) return;
             id = parseInt(latest.text());
         } else if(Page.matches(this.pizzaDelivery)) {
-
-            const separator = $("<li>|</li>").appendTo(menu);
+            const separator = $(`<li class="divider"></li>`).appendTo(menu);
             const container = $("<li>").appendTo(menu);
             const link = $("<a>")
                 .text("???")
@@ -50,7 +49,7 @@ export default class LinkGrabber extends Component {
 
         if(!id) return;
 
-        menu.append("<li>|</li>");
+        menu.append(`<li class="divider"></li>`);
         const container = $("<li>").appendTo(menu);
         const url = new URL(location.href);
         url.searchParams.set("page", "b" + (id + 1));
