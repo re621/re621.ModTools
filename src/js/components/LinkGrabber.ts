@@ -6,6 +6,7 @@ export default class LinkGrabber extends Component {
 
     private pizzaDelivery = [
         /^\/users\/18776\/?$/,
+        /^\/users\/203592\/?$/,
     ]
 
     public constructor() {
