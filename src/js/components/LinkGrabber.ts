@@ -20,6 +20,7 @@ export default class LinkGrabber extends Component {
         const menu = $("menu.nav-secondary");
         if(!menu.length) return;
 
+        /*
         let id: number = null;
         if(Page.matches(PageDefinition.changes)) {
             const latest = $("div.post-version").first();
@@ -33,7 +34,10 @@ export default class LinkGrabber extends Component {
             const latest = $("#votes tbody tr td").first();
             if(!latest.length) return;
             id = parseInt(latest.text());
-        } else if(Page.matches(this.pizzaDelivery)) {
+        } else
+        */
+        
+        if(Page.matches(this.pizzaDelivery)) {
             const separator = $(`<li class="divider"></li>`).appendTo(menu);
             const container = $("<li>").appendTo(menu);
             const link = $("<a>")
@@ -48,6 +52,7 @@ export default class LinkGrabber extends Component {
 
         } else return;
 
+        /*
         if(!id) return;
 
         menu.append(`<li class="divider"></li>`);
@@ -60,5 +65,6 @@ export default class LinkGrabber extends Component {
             .appendTo(container);
 
         return;
+        */
     }
 }
