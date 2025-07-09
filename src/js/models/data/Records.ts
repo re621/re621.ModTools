@@ -68,7 +68,7 @@ export default class Records {
         },
         banevasion: {
             text: "Ban evasion.",
-            rules: "sitetools",
+            rules: "banevasion",
         },
         votecheating: {
             text: "Do not use alt accounts to cheat the voting system.",
