@@ -196,7 +196,7 @@ export default class Records {
             group: this.RuleGroups.posts,
             rules: [
                 "Do not knowingly or repeatedly upload content that goes against the \"Uploading Guidelines\":/help/uploading_guidelines.",
-                "* Do not post works made by any of the artists or publishers on the \"Avoid Posting list\":/help/avoid_posting or break any uploading conditions set there.",
+                "* Do not post works made by any of the artists or publishers on the \"Avoid Posting list\":/static/avoid_posting or break any uploading conditions set there.",
                 "* Do not post any commercial or pay-to-view content. \"Free\" pay-to-view content – where you are allowed to set the price to $0 if you so choose – cannot be posted unless 60 days have passed after it was made available for free.",
                 "* Do not knowingly upload or share previously deleted content. If you wish to dispute a post's removal, contact the staff member responsible for the deletion via a private message.",
                 "Do not knowingly or repeatedly upload or share unauthorized edits of artwork after the original artist or character owner asked others not to.",
