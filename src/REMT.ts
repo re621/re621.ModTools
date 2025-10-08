@@ -14,6 +14,7 @@ import Debug from "./js/models/Debug";
 import PageObserver from "./js/models/structure/PageObserver";
 import ErrorHandler from "./js/utilities/ErrorHandler";
 import Util from "./js/utilities/Util";
+import DMailToStaffNote from "./js/components/DMailToStaffNote";
 
 export default class REMT {
 
@@ -27,6 +28,8 @@ export default class REMT {
         TicketReasons,
 
         LinkGrabber,
+		
+		DMailToStaffNote,
     ];
 
     public async run(): Promise<void> {
@@ -106,4 +109,5 @@ interface ComponentListAnnotated extends ComponentList {
     TicketReasons?: TicketReasons,
 
     LinkGrabber?: LinkGrabber,
+    DMailToStaffNote?: DMailToStaffNote,
 }
