@@ -74,7 +74,7 @@ export default class REMT {
                 if (token) REMT.API.login(token.attr("content"));
             });
         } catch (error) {
-            ErrorHandler.write("An error ocurred during script initialization", error);
+            ErrorHandler.write("An error occurred during script initialization", error);
             return;
         }
 
@@ -109,5 +109,6 @@ interface ComponentListAnnotated extends ComponentList {
     TicketReasons?: TicketReasons,
 
     LinkGrabber?: LinkGrabber,
+
     DMailToStaffNote?: DMailToStaffNote,
 }
