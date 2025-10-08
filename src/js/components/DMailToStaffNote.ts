@@ -15,33 +15,27 @@ export default class DMailToStaffNote extends Component {
 		});
 	}
 
-	// NOTE: Currently needs to get the raw DText from server.
+	// NOTE: Currently needs to get the body's raw DText from server.
 	protected create(): Promise<void> {
 		const dmailInfo = DMailToStaffNote.findDMailIds();
 		this.dmailTitleText = dmailInfo.title;
-
-		const form = document.createElement("form");
-		const staff_note_body = document.createElement("textarea");
-		form.appendChild(staff_note_body);
-		const submit = document.createElement("input");
-		form.appendChild(submit);
-
+		
 		const cBox = document.createElement("input");
 		const cBoxLabel = document.createElement("label");
 
 		const inputBox = document.createElement("div");
-
 		const noteHeaderLabel = document.createElement("label");
-		inputBox.appendChild(noteHeaderLabel);
 		const noteHeader = document.createElement("textarea");
-		inputBox.appendChild(noteHeader);
 		const noteFooterLabel = document.createElement("label");
-		inputBox.appendChild(noteFooterLabel);
 		const noteFooter = document.createElement("textarea");
-		inputBox.appendChild(noteFooter);
+		
+		const form = document.createElement("form");
+		const staff_note_body = document.createElement("textarea");
+		const staff_note_bodyLabel = document.createElement("label");
+		const submit = document.createElement("input");
 
 		const updateStaffNoteBodyDisplay = () => {
-			staff_note_body.value = `${noteHeader.value}\n[section=${this.dmailTitleText || ""}]${this.dmailBodyText || ""}\n[/section]\n${noteFooter.value}`;
+			staff_note_body.value = `${noteHeader.value}\n[section=${this.dmailTitleText || ""}]\n${this.dmailBodyText || ""}\n[/section]\n${noteFooter.value}`;
 		}
 
 		const fetchDMailJSON = async () => {
@@ -54,32 +48,59 @@ export default class DMailToStaffNote extends Component {
 			updateStaffNoteBodyDisplay();
 		};
 
+		// #region form
 		form.action = `/staff_notes?user_id=${dmailInfo.senderId}`;
+		form.style.display = "none";
 
+		form.id = "staff-note-data-form";
+		form.style.width = "100%";
+		// #endregion form
+
+		// #region staff_note_body & label
 		staff_note_body.id = "staff_note_body";
-		staff_note_body.name = "staff_note[body]";
+		staff_note_body.name = staff_note_bodyLabel.htmlFor = "staff_note[body]";
 		staff_note_body.disabled = true;
 
+		staff_note_body.style.width = "100%";
+		staff_note_body.style.overflowY = "scroll";
+		staff_note_bodyLabel.innerText = "Final Staff Note Body";
+		// #endregion staff_note_body & label
+
+		// #region submit
 		submit.type = "submit";
-		submit.innerText = "Create";
+		submit.innerText = "Create Staff Note";
 		submit.disabled = true;
+		// #endregion submit
 
-		form.style.display = inputBox.style.display = "none";
+		// #region inputBox
+		inputBox.style.display = "none";
 
+		inputBox.style.width = "100%"
+		// #endregion inputBox
+
+		// #region noteHeaderLabel & noteHeader
 		noteHeaderLabel.innerText = "Staff Note Header";
 		noteHeaderLabel.htmlFor = noteHeader.id = noteHeader.name = "note-header-input";
 		noteHeader.innerText = `"DMail":[/dmails/${dmailInfo.id}] sent regarding ticket #`;
 		noteHeader.oninput = updateStaffNoteBodyDisplay;
+		
+		noteHeader.style.width = "100%";
+		// #endregion noteHeaderLabel & noteHeader
 
+		// #region noteFooterLabel & noteFooter
 		noteFooterLabel.innerText = "Staff Note Footer";
-
 		noteFooterLabel.htmlFor = noteFooter.id = noteFooter.name = "note-footer-input";
 		noteFooter.innerText = "";
 		noteFooter.oninput = updateStaffNoteBodyDisplay;
+		
+		noteFooter.style.width = "100%";
+		// #endregion noteFooterLabel & noteFooter
 
+		// #region cBox & cBoxLabel
 		cBox.type = "checkbox";
 		cBoxLabel.htmlFor = cBox.id = cBox.name = "add-staff-note";
 		cBoxLabel.innerText = "Add Staff Note to Recipient?";
+		// #endregion cBox & cBoxLabel
 		cBox.onchange = () => {
 			if (cBox.checked) {
 				form.style.display = inputBox.style.display = "revert";
@@ -95,10 +116,17 @@ export default class DMailToStaffNote extends Component {
 			}
 		};
 		const content = document.querySelector(".dmail");
-		content.insertAdjacentElement("afterend", cBoxLabel);
-		content.insertAdjacentElement("afterend", cBox);
-		content.insertAdjacentElement("afterend", inputBox);
-		content.insertAdjacentElement("afterend", form);
+		content.insertAdjacentElement("beforeend", cBoxLabel);
+		content.insertAdjacentElement("beforeend", cBox);
+		content.insertAdjacentElement("beforeend", inputBox);
+		content.insertAdjacentElement("beforeend", form);
+		inputBox.appendChild(noteHeaderLabel);
+		inputBox.appendChild(noteHeader);
+		inputBox.appendChild(noteFooterLabel);
+		inputBox.appendChild(noteFooter);
+		form.appendChild(staff_note_bodyLabel);
+		form.appendChild(staff_note_body);
+		form.appendChild(submit);
 
 		return;
 	}
