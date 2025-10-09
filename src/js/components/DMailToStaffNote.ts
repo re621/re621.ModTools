@@ -1,6 +1,7 @@
 import Danbooru from "../models/api/Danbooru";
 import { PageDefinition } from "../models/data/Page";
 import Component from "./Component";
+import { UtilDOM } from "../utilities/UtilDOM";
 
 export default class DMailToStaffNote extends Component {
 	private dmailBodyText: undefined | string;
@@ -37,6 +38,7 @@ export default class DMailToStaffNote extends Component {
 
 		const updateStaffNoteBodyDisplay = () => {
 			staff_note_body.value = `${noteHeader.value}\n[section=${this.dmailTitleText || ""}]\n${this.dmailBodyText || ""}\n[/section]\n${noteFooter.value}`;
+			$(staff_note_body).trigger("input.danbooru.formatter");
 		}
 
 		const fetchDMailJSON = async () => {
@@ -63,14 +65,14 @@ export default class DMailToStaffNote extends Component {
 		staff_note_body.name = staff_note_bodyLabel.htmlFor = "staff_note[body]";
 		staff_note_body.disabled = true;
 
-		staff_note_body.style.width = "100%";
+		// staff_note_body.style.width = "100%";
 		staff_note_body.style.overflowY = "scroll";
 		staff_note_bodyLabel.innerText = "Final Staff Note Body";
 		// #endregion staff_note_body & label
 
 		// #region submit
 		submit.type = "submit";
-		submit.innerText = "Create Staff Note";
+		submit.value = "Create Staff Note";
 		submit.disabled = true;
 		// #endregion submit
 
@@ -102,6 +104,9 @@ export default class DMailToStaffNote extends Component {
 		cBox.type = "checkbox";
 		cBoxLabel.htmlFor = cBox.id = cBox.name = "add-staff-note";
 		cBoxLabel.innerText = "Add Staff Note to Recipient?";
+
+		cBox.style.display = "block";
+		cBox.style.marginTop = "4px";
 		// #endregion cBox & cBoxLabel
 		cBox.onchange = () => {
 			if (cBox.checked) {
@@ -127,9 +132,12 @@ export default class DMailToStaffNote extends Component {
 		inputBox.appendChild(noteFooterLabel);
 		inputBox.appendChild(noteFooter);
 		form.appendChild(staff_note_bodyLabel);
-		const fancyDText = DMailToStaffNote.buildDTextInput(staff_note_body) as HTMLDivElement;
-		form.appendChild(fancyDText);
-		Danbooru.DText.initialze_input($(fancyDText));
+		/* const fancyDText =  */UtilDOM.buildDTextInput(staff_note_body, {
+			showHelpText: true,
+			container: form,
+		}) as HTMLDivElement;
+		// form.appendChild(fancyDText);
+		// Danbooru.DText.initialize_input($(fancyDText));
 		form.appendChild(submit);
 
 		return;
@@ -146,7 +154,7 @@ export default class DMailToStaffNote extends Component {
 		return retVal;
 	}
 
-	public static buildDTextInput(textarea: HTMLElement, limit = 0, allow_color = false, showHelpText = false) {
+	public static buildDTextInputOld(textarea: HTMLElement, limit = 0, allow_color = false, showHelpText = false) {
 		const root = document.createElement("div");
 		root.className = "dtext-formatter"
 		root.dataset.editing = "true"
