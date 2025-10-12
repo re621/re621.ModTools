@@ -65,6 +65,7 @@ export class UtilDOM {
 	 * @param options 
 	 * @returns Either the root element or an array w/ the root element & the help text.
 	 * @todo Better utilize `innerHTML` to slim down.
+	 * @todo Turn into a web component for consistent interop.
 	 */
 	public static buildDTextInput(textarea: HTMLTextAreaElement, options?: DTextInputOptions): HTMLDivElement | HTMLElement[] {
 		const root = document.createElement("div");
@@ -233,7 +234,6 @@ export class UtilDOM {
 }
 
 export interface DTextInputOptions {
-
 	/** Character limit; used for indicator text (& for our inputs, validation). */
 	limit?: number;
 	/** Starting character count. */
