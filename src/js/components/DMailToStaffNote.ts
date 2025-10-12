@@ -1,6 +1,7 @@
 import { PageDefinition } from "../models/data/Page";
 import Component from "./Component";
 import { UtilDOM } from "../utilities/UtilDOM";
+import REMT from "../../REMT";
 
 export default class DMailToStaffNote extends Component {
 	private dmailBodyText: undefined | string;
@@ -32,6 +33,7 @@ export default class DMailToStaffNote extends Component {
 			noteFooter = document.createElement("textarea"),
 		
 			form = document.createElement("form"),
+			authToken = document.createElement("input"),
 			staff_note_body = document.createElement("textarea"),
 			staff_note_bodyLabel = document.createElement("label"),
 			submit = document.createElement("input");
@@ -52,18 +54,30 @@ export default class DMailToStaffNote extends Component {
 		};
 
 		// #region form
-		form.action = `/staff_notes?user_id=${dmailInfo.senderId}`;
+		form.action = `/staff_notes?user_id=${dmailInfo.recipientId}`;
+		form.noValidate = true;
+		form.acceptCharset = "UTF-8";
+		form.method = "post";
 		form.style.display = "none";
 
 		form.id = "staff-note-data-form";
 		form.style.width = "100%";
 		// #endregion form
 
+		// #region authToken
+		authToken.type = "hidden";
+		authToken.name = "authenticity_token";
+		authToken.autocomplete = "off";
+		authToken.value = REMT.API.getAuthToken();
+
+		// authToken.style.display = "none";
+		// #endregion authToken
+
 		// #region staff_note_body & label
 		staff_note_body.id = "staff_note_body";
 		staff_note_body.className = "dtext-formatter-input";
 		staff_note_body.name = staff_note_bodyLabel.htmlFor = "staff_note[body]";
-		staff_note_body.disabled = true;
+		// staff_note_body.disabled = true;
 
 		// staff_note_body.style.width = "100%";
 		staff_note_body.style.overflowY = "scroll";
@@ -131,6 +145,7 @@ export default class DMailToStaffNote extends Component {
 		inputBox.appendChild(noteHeader);
 		inputBox.appendChild(noteFooterLabel);
 		inputBox.appendChild(noteFooter);
+		form.appendChild(authToken);
 		form.appendChild(staff_note_bodyLabel);
 		UtilDOM.buildDTextInput(staff_note_body, {
 			showHelpText: true,
