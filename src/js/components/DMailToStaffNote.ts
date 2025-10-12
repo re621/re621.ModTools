@@ -19,6 +19,7 @@ export default class DMailToStaffNote extends Component {
 
 	// NOTE: Currently needs to get the body's raw DText from server.
 	// IDEA: Add option to edit a preexisting staff note.
+	// TODO: Disable textarea & reenable it when the submit button is pressed so it's actually included in the form's output.
 	protected create(): Promise<void> {
 		const dmailInfo = DMailToStaffNote.findDMailIds();
 		this.dmailTitleText = dmailInfo.title;
@@ -69,17 +70,13 @@ export default class DMailToStaffNote extends Component {
 		authToken.name = "authenticity_token";
 		authToken.autocomplete = "off";
 		authToken.value = REMT.API.getAuthToken();
-
-		// authToken.style.display = "none";
 		// #endregion authToken
 
 		// #region staff_note_body & label
 		staff_note_body.id = "staff_note_body";
 		staff_note_body.className = "dtext-formatter-input";
 		staff_note_body.name = staff_note_bodyLabel.htmlFor = "staff_note[body]";
-		// staff_note_body.disabled = true;
 
-		// staff_note_body.style.width = "100%";
 		staff_note_body.style.overflowY = "scroll";
 		staff_note_bodyLabel.innerText = "Final Staff Note Body";
 		// #endregion staff_note_body & label
