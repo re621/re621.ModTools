@@ -40,7 +40,7 @@ export default class DMailToStaffNote extends Component {
 			submit = document.createElement("input");
 
 		const updateStaffNoteBodyDisplay = () => {
-			staff_note_body.value = `${noteHeader.value}\n[section=${this.dmailTitleText || ""}]\n${this.dmailBodyText || ""}\n[/section]\n${noteFooter.value}`;
+			staff_note_body.value = `${noteHeader.value.replace("$title", this.dmailTitleText || "")}\n${this.dmailBodyText || ""}\n${noteFooter.value}`;
 			$(staff_note_body).trigger("input.danbooru.formatter");
 		}
 
@@ -99,7 +99,7 @@ export default class DMailToStaffNote extends Component {
 		// #region noteHeaderLabel & noteHeader
 		noteHeaderLabel.innerText = "Staff Note Header";
 		noteHeaderLabel.htmlFor = noteHeader.id = noteHeader.name = "note-header-input";
-		noteHeader.innerText = `"DMail":[/dmails/${dmailInfo.id}] sent regarding ticket #`;
+		noteHeader.value = `"DMail":[/dmails/${dmailInfo.id}] sent regarding ticket #\n[section=$title]`;
 		noteHeader.oninput = updateStaffNoteBodyDisplay;
 		
 		noteHeader.style.width = "100%";
@@ -108,7 +108,7 @@ export default class DMailToStaffNote extends Component {
 		// #region noteFooterLabel & noteFooter
 		noteFooterLabel.innerText = "Staff Note Footer";
 		noteFooterLabel.htmlFor = noteFooter.id = noteFooter.name = "note-footer-input";
-		noteFooter.innerText = "";
+		noteFooter.value = "[/section]\n";
 		noteFooter.oninput = updateStaffNoteBodyDisplay;
 		
 		noteFooter.style.width = "100%";
