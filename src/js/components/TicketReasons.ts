@@ -1,10 +1,17 @@
+import Danbooru from "../models/api/Danbooru";
 import { PageDefinition } from "../models/data/Page";
+import { DialogForm } from "../models/structure/DialogForm";
 import Component from "./Component";
 
+/**
+ * @todo Add button removal mode.
+ * @todo Refresh button UI on addition.
+ */
 export default class TicketReasons extends Component {
 
     private input: JQuery<HTMLElement>;
     private container: JQuery<HTMLElement>;
+	// private dialog?: HTMLDialogElement;
 
     public constructor() {
         super({
@@ -64,6 +71,33 @@ export default class TicketReasons extends Component {
                 .text(button.name)
                 .appendTo(this.container);
         }
+		this.buildAddButton().appendTo(this.container);
     }
 
+	private buildAddButton() {
+		return $("<button>")
+			.attr({
+				name: "Add Custom Button",
+				text: "...You shouldn't see this...",
+			})
+			.text("+")
+			.on("click", (e) => {
+				e.preventDefault();
+				e.stopImmediatePropagation();
+				new DialogForm("Add Button...", [
+					$('<label for="new-button-name">Name</label>'),
+					$('<input id="new-button-name" name="new-button-name" required min=1 />'),
+					$('<label for="new-button-text">Text</label>'),
+					$('<textarea id="new-button-text" name="new-button-text" required min=1></textarea>'),
+				]).promise.then((e: FormData) => {
+					const temp = this.Settings.buttons;
+					temp.push({
+						name: e.get("new-button-name").toString(),
+						text: e.get("new-button-text").toString(),
+					});
+					this.Settings.buttons = temp;
+					this.rebuildButtons();
+				})
+			});
+	}
 }

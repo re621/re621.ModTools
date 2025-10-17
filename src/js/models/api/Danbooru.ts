@@ -70,6 +70,17 @@ export default class Danbooru {
         },
     }
 
+    public static Dialog = (!Danbooru.hasModules) ? Danbooru.Modules.Dialog : undefined/*  class {
+        static get container(): JQuery<HTMLDivElement> {
+            if (!Danbooru.hasModules) return;
+            return Danbooru.Modules.Dialog.container;
+        }
+        constructor(element, params = {}): any {
+            if (!Danbooru.hasModules) return;
+            Danbooru.Modules.Dialog.process_formatting = fn;
+        },
+    } */;
+
     public static DText = {
         get buttons(): DTextButton[] {
             if (!Danbooru.hasModules) return;

@@ -71,7 +71,7 @@ export default class REMT {
                 if (token) REMT.API.login(token.attr("content"));
             });
         } catch (error) {
-            ErrorHandler.write("An error ocurred during script initialization", error);
+            ErrorHandler.write("An error occurred during script initialization", error);
             return;
         }
 
@@ -93,6 +93,11 @@ export default class REMT {
             promises.push(instance.load());
         Promise.all(promises).then(() => {
             console.log("%c[RE621.ModTools]%c loaded", "color: maroon", "color: unset");
+			if (!document.querySelector("#modal-container")) {
+                console.log("%c[RE621.ModTools]%c: no re621 detected; manually creating 'div#modal-container'...", "color: maroon", "color: unset");
+				// TODO: Doesn't work; account for race condition
+				$("<div>").attr("id", "modal-container").prependTo("div#page");
+			}
         });
     }
 
