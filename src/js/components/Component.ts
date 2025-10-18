@@ -95,14 +95,10 @@ export default class Component {
                         XM.Storage.setValueAsync(this.name + "." + key, newValue).then((e) => {
 							console.log(`Stored:`);
 							console.log(GM_getValue(this.name + "." + key, "None"));
-							GM.getValue(this.name + "." + key, "None").then((e) => {console.log("ASYNC READ:");console.log(e)});
 						});
                     }
-					console.log(`After:`);
-					console.log(this.SettingsCache[key]);
 					console.log(`Stored:`);
 					console.log(XM.Storage.getValue(this.name + "." + key, "None"));
-					console.log(XMStorage.listValues());
                 }
             })
 
