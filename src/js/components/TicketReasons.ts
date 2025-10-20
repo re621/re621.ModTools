@@ -54,12 +54,20 @@ export default class TicketReasons extends Component {
 
     private rebuildButtons(): void {
         this.container.html("");
+            
+        // Get the name of the reporting user
+        const rows = [...document.querySelectorAll<HTMLElement>("#c-tickets .section tr")];
+        const req = rows.find(e=>e.innerText.includes("Requested by"));
+        const name = req.querySelector<HTMLElement>("td a").innerText;
+
+        // Prepend a greeting to the user before stating the response
+        const greeting = `Hi ${name},`;
 
         for (const button of this.Settings.buttons) {
             $("<button>")
                 .attr({
                     name: button.name,
-                    text: button.text,
+                    text: `${greeting}\n\n${button.text}`,
                 })
                 .text(button.name)
                 .appendTo(this.container);
