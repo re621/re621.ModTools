@@ -24,18 +24,24 @@ export default class TicketReasons extends Component {
 		});
 	}
 
+	static readonly flagText = "Thank you for the report. However, when a post is not suited for our site, a [i]\"flag\":[/help/flag_for_deletion][/i] is the correct remedy, as the moderators who handle reports can't delete posts (that's our janitors' job). [i]Reports[/i] are for when the [i]conduct[/i] relating to the post is disallowed (e.g. tag warring, removal of valid sources, uploaded with not enough tags, etc.), not for when the post's [i]content[/i] itself is disallowed.\n\n"
+	static readonly flagTextEnd = ", but for future reference, you can flag posts by selecting `Flag` instead of `Report` in the sidebar. If you have trouble remembering, selecting the appropriate reason on either page will redirect you to the correct mechanism if the current one is incorrect."
 	private static createDefaultSettingsButtons() {
 		return [
-			{ name: "Handled", text: "Handled, thank you." },
-			{ name: "Reviewed", text: "Reviewed, thank you." },
-			{ name: "NAT", text: "Reviewed, no action taken." },
-			{ name: "Closed", text: "Ticket closed." },
-			{ name: "Old", text: "Thank you for your report, but that comment is from N years ago, & we do not punish people for comments older than 6 months." },
+			{ name: "Handled", text: "This ticket has been handled, thank you!" },
+			{ name: "Reviewed", text: "This ticket has been reviewed, thank you!" },
+			{ name: "NAT", text: `Thank you for the heads-up! We've reviewed the ticket and completed our investigation into the matter; however, we've decided it does not warrant action at this time.` },
+			{ name: "Closed", text: "This ticket has been closed." },
+			{ name: "Old (NAT)", text: "Thank you for your report, but that comment is from N years ago, & we do not punish people for comments older than 6 months." },
+			{ name: "Old (Hide)", text: "Thank you for your report, but that comment is from N years ago, & we do not punish people for comments older than 6 months. We've removed the comment." },
 			{ name: "Reply", text: "I believe that you tried to reply to a comment, but reported it instead.\nPlease, be more careful in the future." },
-			{ name: "Already", text: "Thank you for your report, but this user already received a record for that message." },
-			{ name: "Banned", text: "Thank you for your report, but this user is already banned." },
+			{ name: "Already (Rec)", text: "Thank you for your report, but this user has already received a record for this matter." },
+			{ name: "Already (Ban)", text: "Thank you for your report, but this user is already banned." },
 			{ name: "Blacklist", text: "Thank you for your report, but this post's content does not violate our \"\":[/help/uploading_guidelines].\nIf you find the contents of the post objectionable, we'd ask you to add the relevant tags (or the post's id itself) to your \"blacklist\":[/help/blacklist]." },
-			{ name: "Takedown", text: "Artists and character owners may request a takedown \"here\":/static/takedown.\nWe do not accept third party takedowns." }
+			{ name: "Takedown", text: "Thank you for your report, but this matter needs to be handled via a takedown request.\nArtists and character owners may request a takedown \"here\":/static/takedown.\nWe do not accept third party takedowns." },
+			{ name: "DMed", text: "Thank you for your report, we've discussed the matter with them." },
+			{ name: "Flag (Del)", text: `${TicketReasons.flagText}The post has already been deleted by our janitors${TicketReasons.flagTextEnd}` },
+			{ name: "Flag (Flag)", text: `${TicketReasons.flagText}The post has already been flagged${TicketReasons.flagTextEnd}` },
 		];
 	}
 	public Settings = {
@@ -48,9 +54,6 @@ export default class TicketReasons extends Component {
 		this.input = $("textarea[name='ticket[response]']");
 
 		const wrapper = this.input.parents("td");
-		wrapper.on("click", "button", (e) => {
-			this.input.val("Would you look at that!");
-		});
 		this.container = $("<div>")
 			.addClass("ticket-responses")
 			.prependTo(wrapper)
