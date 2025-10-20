@@ -132,7 +132,7 @@ export default class TicketReasons extends Component {
 	}
 
 	private bindButtons() {
-		this.addButton.on("click", (e) => {
+		this.addButton.on("click", () => {
 			DialogForm.getRequestedInput(
 				[
 					$('<label for="new-button-name">Name</label>'),
@@ -170,7 +170,7 @@ export default class TicketReasons extends Component {
 			// Stop propagation & prevent default.
 			return false;
 		});
-		this.resetButton.on("click", (e) => {
+		this.resetButton.on("click", () => {
 			if (confirm("Are you sure you want to reset the buttons to the defaults?\n\nThis will permanently remove your custom buttons.")) {
 				this.Settings.buttons = TicketReasons.createDefaultSettingsButtons();
 				this.buildButtons();
