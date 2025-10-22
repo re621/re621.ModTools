@@ -2,6 +2,7 @@ import { PageDefinition } from "../models/data/Page";
 import Component from "./Component";
 import { UtilDOM } from "../utilities/UtilDOM";
 import REMT from "../../REMT";
+import Danbooru from "../models/api/Danbooru";
 
 export default class DMailToStaffNote extends Component {
 	private dmailBodyText: undefined | string;
@@ -144,10 +145,13 @@ export default class DMailToStaffNote extends Component {
 		inputBox.appendChild(noteFooter);
 		form.appendChild(authToken);
 		form.appendChild(staff_note_bodyLabel);
-		UtilDOM.buildDTextInput(staff_note_body, {
-			showHelpText: true,
-			container: form,
-		}) as HTMLDivElement;
+		// UtilDOM.buildDTextInput(staff_note_body, {
+		// 	showHelpText: true,
+		// 	container: form,
+		// }) as HTMLDivElement;
+		form.appendChild(staff_note_body);
+		// UtilDOM.buildDTextInput($("#staff_note_body"))// as HTMLDivElement;
+		Danbooru.DTextFormatter.buildFromTextarea($(staff_note_body));
 		form.appendChild(submit);
 		return;
 	}
