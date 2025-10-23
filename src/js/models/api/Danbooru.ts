@@ -81,20 +81,32 @@ export default class Danbooru {
         },
     } */;
 
-    public static DText = {
-        get buttons(): DTextButton[] {
-            if (!Danbooru.hasModules) return;
-            return Danbooru.Modules.DText.buttons;
-        },
-        set buttons(values: DTextButton[]) {
-            if (!Danbooru.hasModules) return;
-            Danbooru.Modules.DText.buttons = values;
-        },
-        override_formatting(fn: (content: string, input: JQuery<HTMLInputElement>) => void): void {
-            if (!Danbooru.hasModules) return;
-            Danbooru.Modules.DText.process_formatting = fn;
-        },
-    };
+    // public static DText = {
+    //     get buttons(): DTextButton[] {
+    //         if (!Danbooru.hasModules) return;
+    //         return Danbooru.Modules.DText.buttons;
+    //     },
+    //     set buttons(values: DTextButton[]) {
+    //         if (!Danbooru.hasModules) return;
+    //         Danbooru.Modules.DText.buttons = values;
+    //     },
+    //     override_formatting(fn: (content: string, input: JQuery<HTMLInputElement>) => void): void {
+    //         if (!Danbooru.hasModules) return;
+    //         Danbooru.Modules.DText.process_formatting = fn;
+    //     },
+    //     initialize_input($element: JQuery<HTMLDivElement>): void {
+    //         if (!Danbooru.hasModules) return;
+    //         (Danbooru.Modules.DText.initialize_input || Danbooru.Modules.DText.initialze_input)($element);
+    //     },
+	// 	/** Add formatters to all appropriate inputs */
+	// 	initialize_all_inputs() {
+	// 		if (!Danbooru.hasModules) return;
+    //         Danbooru.Modules.DText.initialize_all_inputs();
+	// 	},
+    // };
+
+    // public static DTextFormatter = Danbooru.hasModules ? Danbooru.Modules.DTextFormatter : undefined;
+    public static get DTextFormatter() { return XM.Window["Danbooru"]?.DTextFormatter; }
 
     public static Post = {
         vote(post_id: number, scoreDifference: number, preventUnvote?: boolean): void {

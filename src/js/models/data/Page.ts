@@ -158,6 +158,11 @@ export const PageDefinition = {
         list: /^\/blips\/?/,
         view: /^\/blips\/\d+\/?$/,
     },
+    dmails: {
+        list: /^\/dmails\/?/,
+        view: /^\/dmails\/\d+\/?$/,
+        new: /^\/dmails\/new/,
+    },
 
     // Post groups
     pools: {
@@ -197,6 +202,11 @@ export const PageDefinition = {
         comment: /^\/comment_votes\/?/,
         post: /^\/post_votes\/?/,
     },
+
+    // staff_notes: {
+    //     comment: /^\/comment_votes\/?/,
+    //     post: /^\/post_votes\/?/,
+    // },
 
     // Custom
     pluginSettings: /^\/plugins\/remt.*/,
