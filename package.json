@@ -2,7 +2,7 @@
     "name": "mod621",
     "displayName": "RE621 Mod Tools",
     "namespace": "mod621.bitwolfy.com",
-    "version": "1.0.20",
+    "version": "1.1.0",
     "description": "Moderation toolkit for e621.net",
     "author": "bitWolfy",
     "contributors": [
