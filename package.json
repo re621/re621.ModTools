@@ -16,7 +16,7 @@
     "repository": "github:re621/re621.ModTools",
     "scripts": {
         "push": "npm version patch && git push --follow-tags",
-        "push-minor": "npm version minor&& git push --follow-tags",
+        "push-minor": "npm version minor && git push --follow-tags",
         "build": "webpack",
         "eslint": "npx eslint ."
     },

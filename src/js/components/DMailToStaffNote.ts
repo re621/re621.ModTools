@@ -1,6 +1,5 @@
 import { PageDefinition } from "../models/data/Page";
 import Component from "./Component";
-import { UtilDOM } from "../utilities/UtilDOM";
 import REMT from "../../REMT";
 import Danbooru from "../models/api/Danbooru";
 
