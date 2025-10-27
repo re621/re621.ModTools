@@ -1,6 +1,5 @@
 import REMT from "../../REMT";
 import XM from "../models/api/XM";
-import XMStorage from "../models/api/XMStorage";
 import KeybindManager, { Keybind, ResponseFunction } from "../models/data/Keybinds";
 import Page from "../models/data/Page";
 import Debug from "../models/Debug";

@@ -4,6 +4,7 @@ import Component from "./Component";
 
 /**
  * @todo Add red styling in removal mode.
+ * @todo Uncomment hover-over.
  */
 export default class TicketReasons extends Component {
 
@@ -50,7 +51,6 @@ export default class TicketReasons extends Component {
 	};
 
 	protected create(): Promise<void> {
-		TicketReasons.ensureModalContainer();
 		this.input = $("textarea[name='ticket[response]']");
 
 		const wrapper = this.input.parents("td");
@@ -88,6 +88,7 @@ export default class TicketReasons extends Component {
 					class: "ticket-response-button",
 					name: button.name,
 					text: button.text,
+					// title: button.text,
 				})
 				.text(button.name)
 				.appendTo(this.container);
@@ -179,15 +180,5 @@ export default class TicketReasons extends Component {
 			// Stop propagation & prevent default.
 			return false;
 		});
-	}
-
-	/**
-	 * This class doesn't work unless re621 has added the `#modal-container` element, so this manually ensures it's added to enable it to work w/o re621.
-	 */
-	private static ensureModalContainer() {
-		if (!document.querySelector("#modal-container")) {
-			console.log("%c[RE621.ModTools]%c: no re621 detected; manually creating 'div#modal-container'...", "color: maroon", "color: unset");
-			$("<div>").attr("id", "modal-container").prependTo("div#page");
-		}
 	}
 }
