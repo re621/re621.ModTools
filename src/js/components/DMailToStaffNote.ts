@@ -23,16 +23,20 @@ export default class DMailToStaffNote extends Component {
 	protected create(): Promise<void> {
 		const dmailInfo = DMailToStaffNote.findDMailIds();
 		this.dmailTitleText = dmailInfo.title;
-		
+
 		const cBox = document.createElement("input"),
 			cBoxLabel = document.createElement("label"),
 
 			inputBox = document.createElement("div"),
+			userDropdownLabel = document.createElement("label"),
+			userDropdown = document.createElement("select"),
+			userDropdownRecipient = document.createElement("option"),
+			userDropdownSender = document.createElement("option"),
 			noteHeaderLabel = document.createElement("label"),
 			noteHeader = document.createElement("textarea"),
 			noteFooterLabel = document.createElement("label"),
 			noteFooter = document.createElement("textarea"),
-		
+
 			form = document.createElement("form"),
 			authToken = document.createElement("input"),
 			staff_note_body = document.createElement("textarea"),
@@ -49,6 +53,10 @@ export default class DMailToStaffNote extends Component {
 			this.dmailJson = t;
 			this.dmailTitleText = t["title"];
 			this.dmailBodyText = t["body"];
+			userDropdownRecipient.innerText = t["to_name"];
+			userDropdownSender.innerText = t["from_name"];
+			userDropdownRecipient.value = t["to_id"];
+			userDropdownSender.value = t["from_id"];
 			submit.disabled = false;
 			this.isFetching = false;
 			updateStaffNoteBodyDisplay();
@@ -96,12 +104,25 @@ export default class DMailToStaffNote extends Component {
 		inputBox.style.width = "100%"
 		// #endregion inputBox
 
+		// #region Dropdown
+		userDropdownLabel.innerText = "User to add staff note to: ";
+		userDropdownLabel.htmlFor = userDropdown.id = userDropdown.name = "user-dropdown-input";
+		userDropdown.appendChild(userDropdownRecipient);
+		userDropdown.appendChild(userDropdownSender);
+		userDropdown.selectedIndex = 0;
+		userDropdown.onchange = () => form.action = `/staff_notes?user_id=${userDropdown.value}`;
+		userDropdownRecipient.innerText = dmailInfo.recipientName;
+		userDropdownRecipient.value = dmailInfo.recipientId;
+		userDropdownSender.innerText = dmailInfo.senderName;
+		userDropdownSender.value = dmailInfo.senderId;
+		// #endregion Dropdown
+
 		// #region noteHeaderLabel & noteHeader
 		noteHeaderLabel.innerText = "Staff Note Header";
 		noteHeaderLabel.htmlFor = noteHeader.id = noteHeader.name = "note-header-input";
 		noteHeader.value = `"DMail":[/dmails/${dmailInfo.id}] sent regarding ticket #\n[section=$title]`;
 		noteHeader.oninput = updateStaffNoteBodyDisplay;
-		
+
 		noteHeader.style.width = "100%";
 		// #endregion noteHeaderLabel & noteHeader
 
@@ -110,14 +131,14 @@ export default class DMailToStaffNote extends Component {
 		noteFooterLabel.htmlFor = noteFooter.id = noteFooter.name = "note-footer-input";
 		noteFooter.value = "[/section]\n";
 		noteFooter.oninput = updateStaffNoteBodyDisplay;
-		
+
 		noteFooter.style.width = "100%";
 		// #endregion noteFooterLabel & noteFooter
 
 		// #region cBox & cBoxLabel
 		cBox.type = "checkbox";
 		cBoxLabel.htmlFor = cBox.id = cBox.name = "add-staff-note";
-		cBoxLabel.innerText = "Add Staff Note to Recipient?";
+		cBoxLabel.innerText = "Add Staff Note?";
 		// #endregion cBox & cBoxLabel
 		cBox.onchange = () => {
 			if (cBox.checked) {
@@ -138,30 +159,39 @@ export default class DMailToStaffNote extends Component {
 		content.insertAdjacentElement("beforeend", cBox);
 		content.insertAdjacentElement("beforeend", inputBox);
 		content.insertAdjacentElement("beforeend", form);
+		inputBox.appendChild(userDropdownLabel);
+		inputBox.appendChild(userDropdown);
+		inputBox.appendChild(document.createElement("br"));
 		inputBox.appendChild(noteHeaderLabel);
 		inputBox.appendChild(noteHeader);
 		inputBox.appendChild(noteFooterLabel);
 		inputBox.appendChild(noteFooter);
 		form.appendChild(authToken);
 		form.appendChild(staff_note_bodyLabel);
-		// UtilDOM.buildDTextInput(staff_note_body, {
-		// 	showHelpText: true,
-		// 	container: form,
-		// }) as HTMLDivElement;
 		form.appendChild(staff_note_body);
-		// UtilDOM.buildDTextInput($("#staff_note_body"))// as HTMLDivElement;
 		Danbooru.DTextFormatter.buildFromTextarea($(staff_note_body));
 		form.appendChild(submit);
 		return;
 	}
 
 	public static findDMailIds() {
-		const retVal = { id: undefined, recipientId: undefined, senderId: undefined, title: undefined };
+		const retVal = {
+			id: undefined,
+			recipientId: undefined,
+			senderId: undefined,
+			recipientName: undefined,
+			senderName: undefined,
+			title: undefined,
+		};
 		const id = /^\/dmails\/([0-9]+)/.exec(window.location.pathname);
 		if (!id) return null;
 		retVal.id = id[1];
-		retVal.recipientId = /^\/users\/([0-9]+)/.exec(new URL(document.querySelector<HTMLAnchorElement>(".dmail ul li:nth-of-type(2) a[href^='/users/']").href).pathname)[1];
-		retVal.senderId = /^\/users\/([0-9]+)/.exec(new URL(document.querySelector<HTMLAnchorElement>(".dmail ul li:nth-of-type(1) a[href^='/users/']").href).pathname)[1];
+		const recipient = document.querySelector<HTMLAnchorElement>(".dmail ul li:nth-of-type(2) a[href^='/users/']");
+		retVal.recipientId = /^\/users\/([0-9]+)/.exec(new URL(recipient.href).pathname)[1];
+		retVal.recipientName = recipient.innerText;
+		const sender = document.querySelector<HTMLAnchorElement>(".dmail ul li:nth-of-type(1) a[href^='/users/']");
+		retVal.senderId = /^\/users\/([0-9]+)/.exec(new URL(sender.href).pathname)[1];
+		retVal.senderName = sender.innerText;
 		retVal.title = document.querySelector<HTMLAnchorElement>(".dmail h2").innerText;
 		return retVal;
 	}
