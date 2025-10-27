@@ -110,7 +110,7 @@ export default class DMailToStaffNote extends Component {
 		userDropdown.appendChild(userDropdownRecipient);
 		userDropdown.appendChild(userDropdownSender);
 		userDropdown.selectedIndex = 0;
-		userDropdown.onchange = () => form.action = `/staff_notes?user_id=${userDropdown.value}`;
+		userDropdown.onchange = () => form.action = `/staff_notes?user_id=${Number(userDropdown.value)}`;
 		userDropdownRecipient.innerText = dmailInfo.recipientName;
 		userDropdownRecipient.value = dmailInfo.recipientId;
 		userDropdownSender.innerText = dmailInfo.senderName;
