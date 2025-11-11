@@ -12,7 +12,12 @@ export default class TicketReasons extends Component {
 	private _addButton?: JQuery<HTMLElement>;
 	private _removeButton?: JQuery<HTMLElement>;
 	private _resetButton?: JQuery<HTMLElement>;
+	private _greetingButton?: JQuery<HTMLElement>;
 	private container: JQuery<HTMLElement>;
+	/** 
+	 * The name of the user that filed the report ticket.
+	 * Used for template variable replacement across both greetings & button text.
+	 **/
 	private reporterName: string;
 	private inRemovalState = false;
 	/** @returns {boolean} The resultant state. */
@@ -49,7 +54,7 @@ export default class TicketReasons extends Component {
 	public Settings = {
 		enabled: true,
 		buttons: TicketReasons.createDefaultSettingsButtons(),
-		greeting: "Hi %%reporterName%%,\n\n",
+		greeting: "Hi %reporterName%,\n\n",
 	};
 
 	protected create(): Promise<void> {
@@ -63,7 +68,7 @@ export default class TicketReasons extends Component {
 				const button = $(event.currentTarget);
 				if (!this.inRemovalState) {
 					// Prepend a greeting to the user before stating the response
-					this.input.val(`${this.Settings.greeting}${button.attr("text")}`.replace(/%%reporterName%%/g, this.reporterName || ""));
+					this.input.val(`${this.Settings.greeting}${button.attr("text")}`.replace(/%reporterName%/g, this.reporterName || ""));
 				} else if (confirm(`Are you sure you want to delete this button?\n\n\tNAME: ${event.target.name}\n\tTEXT: "${event.target.getAttribute("text")}"`)) {
 					let temp = this.Settings.buttons;
 					temp = temp.filter((e) => e.name !== event.target.name || e.text !== event.target.getAttribute("text"));
@@ -105,6 +110,7 @@ export default class TicketReasons extends Component {
 		this.addButton.appendTo(this.container);
 		this.removeButton.appendTo(this.container);
 		this.resetButton.appendTo(this.container);
+		this.greetingButton.appendTo(this.container);
 		// (Re)bind the events
 		this.bindButtons();
 	}
@@ -139,6 +145,16 @@ export default class TicketReasons extends Component {
 				title: "Reset buttons to their default values.",
 			})
 			.text("Reset");
+	}
+
+	private get greetingButton() {
+		return this._greetingButton ||= $("<button>")
+			.attr({
+				class: "greeting-ticket-response-button",
+				name: "Edit Greeting",
+				text: "...You shouldn't see this...",
+			})
+			.text("Edit");
 	}
 
 	private bindButtons() {
@@ -185,6 +201,23 @@ export default class TicketReasons extends Component {
 				this.Settings.buttons = TicketReasons.createDefaultSettingsButtons();
 				this.buildButtons();
 			}
+
+			// Stop propagation & prevent default.
+			return false;
+		});
+		this.greetingButton.on("click", () => {
+			DialogForm.getRequestedInput(
+				[
+					$('<label for="greeting-text">Greeting Text</label>'),
+					// $(`<textarea id="greeting-text" name="greeting-text" required min=1>${this.Settings.greeting}</textarea>`),
+					$(`<textarea id="greeting-text" name="greeting-text" required min=1></textarea>`).text(this.Settings.greeting),
+				],
+				"Edit Greeting...",
+				(e: FormData) => {
+					this.Settings.greeting = e.get("greeting-text").toString();
+					// this.buildButtons();
+				},
+			);
 
 			// Stop propagation & prevent default.
 			return false;
