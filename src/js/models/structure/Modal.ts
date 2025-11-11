@@ -30,6 +30,8 @@ export default class Modal {
         this.triggersMulti = config.triggerMulti;
         this.isDisabled = config.disabled;
 
+		Modal.ensureModalContainer();
+
         // Create the DOM structure for the modal window
         this.$modal = $("<div>")
             .attr("title", config.title)
@@ -180,6 +182,15 @@ export default class Modal {
         return this.activeTrigger;
     }
 
+	/**
+	 * This class doesn't work unless re621 has added the `#modal-container` element, so this manually ensures it's added to enable it to work w/o re621.
+	 */
+	private static ensureModalContainer() {
+		if (!document.querySelector("#modal-container")) {
+			console.log("%c[RE621.ModTools]%c: no re621 detected; manually creating 'div#modal-container'...", "color: maroon", "color: unset");
+			$("<div>").attr("id", "modal-container").prependTo("div#page");
+		}
+	}
 }
 
 interface ModalConfig {

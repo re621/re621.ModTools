@@ -18,6 +18,8 @@ export default class LocalStorage {
         b1: "r6.blk.off",
         b2: "r6.blk.list",
 
+        // b0: "r6.blk.list",
+
         v0: "r6.ver.expires",
         v1: "r6.ver.remote",
     }

@@ -2,7 +2,7 @@
     "name": "mod621",
     "displayName": "RE621 Mod Tools",
     "namespace": "mod621.bitwolfy.com",
-    "version": "1.0.20",
+    "version": "1.3.0",
     "description": "Moderation toolkit for e621.net",
     "author": "bitWolfy",
     "contributors": [
@@ -16,7 +16,7 @@
     "repository": "github:re621/re621.ModTools",
     "scripts": {
         "push": "npm version patch && git push --follow-tags",
-        "push-minor": "npm version minor&& git push --follow-tags",
+        "push-minor": "npm version minor && git push --follow-tags",
         "build": "webpack",
         "eslint": "npx eslint ."
     },

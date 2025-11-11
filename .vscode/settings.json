@@ -90,5 +90,7 @@
         "xmlhttp",
         "zestyapi"
     ],
-    "deepscan.enable": true
+	"deepscan.enable": true,
+	"eslint.format.enable": true,
+	"eslint.lintTask.enable": true
 }

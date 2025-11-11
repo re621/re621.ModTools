@@ -4,6 +4,10 @@ export default class XMStorage {
         GM_setValue(name, value);
     }
 
+    public static async setValueAsync(name: string, value: any): Promise<void> {
+        await GM.setValue(name, value);
+    }
+
     public static getValue<T>(name: string, defaultValue: T): T {
         return GM_getValue<T>(name, defaultValue);
     }

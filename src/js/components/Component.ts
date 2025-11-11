@@ -2,6 +2,7 @@ import REMT from "../../REMT";
 import XM from "../models/api/XM";
 import KeybindManager, { Keybind, ResponseFunction } from "../models/data/Keybinds";
 import Page from "../models/data/Page";
+import Debug from "../models/Debug";
 import PageObserver from "../models/structure/PageObserver";
 import ErrorHandler from "../utilities/ErrorHandler";
 import Util from "../utilities/Util";
@@ -57,7 +58,16 @@ export default class Component {
         // Load in the saved settings values
         for (const [key, defaultValue] of Object.entries(settings || this.Settings)) {
 
+			// console.log(`Retrieving ${this.name}.${key} (Default value: ${defaultValue}) from storage...`);
+			// console.log(`Retrieving ${this.name}.${key} from storage...`);
+			// console.log(`\tDefault value: ${defaultValue}`);
+			// console.log(defaultValue);
             const savedValue = XM.Storage.getValue(this.name + "." + key, defaultValue);
+			// console.log(`Loaded ${savedValue} (Default value: ${defaultValue}) from storage for ${this.name}.${key}.`);
+			// console.log(`Loaded ${this.name}.${key} from storage.`);
+			// console.log(savedValue);
+			// console.log(`\tDefault value: ${defaultValue}`);
+			// console.log(defaultValue);
             this.SettingsCache[key] = savedValue;
             this.SettingsDefaults[key] = defaultValue;
             delete this.Settings[key];
@@ -65,18 +75,30 @@ export default class Component {
             // Define custom setters and getters
             Object.defineProperty(this.Settings, key, {
                 get: () => {
-                    // Debug.log("- fetching", passedThis.name + "." + key);
+                    Debug.log("- fetching", this.name + "." + key);
+					// console.log(`Fetching ${this.name}.${key}...`);
+					// console.log(this.SettingsCache[key]);
                     return this.SettingsCache[key];
                 },
                 set: (newValue) => {
-                    // Debug.log("- setting", passedThis.name + "." + key, newValue);
+                    Debug.log("- setting", this.name + "." + key, newValue);
+					// console.log(`Setting ${this.name}.${key}...\nDesired:`);
+					// console.log(newValue);
+					// console.log(`Before:`);
+					// console.log(this.SettingsCache[key]);
                     if (JSON.stringify(newValue) == JSON.stringify(defaultValue)) {
                         this.SettingsCache[key] = defaultValue;
                         XM.Storage.deleteValue(this.name + "." + key);
                     } else {
                         this.SettingsCache[key] = newValue;
-                        XM.Storage.setValue(this.name + "." + key, newValue);
+                        /* XM.Storage.setValueAsync(this.name + "." + key, newValue).then((e) => {
+							console.log(`Stored:`);
+							console.log(GM_getValue(this.name + "." + key, "None"));
+						}); */
+						XM.Storage.setValueAsync(this.name + "." + key, newValue);
                     }
+					// console.log(`Stored:`);
+					// console.log(XM.Storage.getValue(this.name + "." + key, "None"));
                 }
             })
 
