@@ -278,4 +278,73 @@ export default class Util {
         return array.slice(0, -1).join(", ") + ", " + delimiter + " " + array.slice(-1);
     }
 
+	/**
+	 * 
+	 * @param input The string to perform replacement on.
+	 * @param variables The things to replace an array of variables to be replaced using @see replacer .
+	 * @param replacer A function that takes a value from @see variables as input & returns the resultant output.
+	 * @returns {string} @see input with all @see variables replaced with their values.
+	 */
+	public static replaceTemplateVariables(
+		input: string,
+		variables: Array<string | RegExp>,
+		replacer: (key: string, ...args: any[]) => string,
+	): string;
+	/**
+	 * 
+	 * @param input The string to perform replacement on.
+	 * @param variables The things to replace as a Map with the keys as the variable name & the values as the resultant output.
+	 * @returns {string} @see input with all @see variables replaced with their values.
+	 */
+	public static replaceTemplateVariables(
+		input: string,
+		variables: Map<string | RegExp, string | ((key: string, ...args: any[]) => string)>,
+	): string;
+	/**
+	 * 
+	 * @param input The string to perform replacement on.
+	 * @param variables The things to replace. Should be either a Map with the keys as the variable name & the values as the resultant output, or an array of variables to be replaced using @see replacer .
+	 * @param replacer A function that takes a value from @see variables as input & returns the resultant output.
+	 * @returns {string} @see input with all @see variables replaced with their values.
+	 */
+	public static replaceTemplateVariables(
+		input: string,
+		variables: Array<string | RegExp> | Map<string | RegExp, string | ((key: string, ...args: any[]) => string)>/*  | StringDictionary<string | ((key: string, ...args: any[]) => string)> */,
+		replacer?: (key: string, ...args: any[]) => string,
+	): string {
+		if (variables instanceof Array) {
+			for (let e of variables) {
+				if (!(e instanceof RegExp)) {
+					e = RegExp((e.startsWith("$") || e.startsWith("$")) ? e : `\\$${e}|%${e}%?`, "g");
+				}
+				input = input.replace(e, replacer);
+			}
+		// } else if (variables instanceof Map) {
+		// 	for (let e of variables.keys()) {
+		// 		const v = variables.get(e);
+		// 		if (!(e instanceof RegExp)) {
+		// 			e = RegExp((e.startsWith("$") || e.startsWith("$")) ? e : `\\$${e}|%${e}%?`, "g");
+		// 		}
+		// 		// Hack for type stupidity
+		// 		input = typeof v === "string" ? 
+		// 			input.replace(e, v) :
+		// 			input.replace(e, v);
+		// 	}
+		} else {
+			for (let e of variables.keys()) {
+				const v = variables.get(e);
+				if (!(e instanceof RegExp)) {
+					e = RegExp((e.startsWith("$") || e.startsWith("$")) ? e : `\\$${e}|%${e}%?`, "g");
+				}
+				// Hack for type stupidity
+				input = typeof v === "string" ? 
+					input.replace(e, v) :
+					input.replace(e, v);
+			}
+		}
+		return input;
+	}
 }
+// interface StringDictionary<B> {
+// 	[index: string]: B;
+// }
