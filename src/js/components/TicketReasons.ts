@@ -209,14 +209,10 @@ export default class TicketReasons extends Component {
 			DialogForm.getRequestedInput(
 				[
 					$('<label for="greeting-text">Greeting Text</label>'),
-					// $(`<textarea id="greeting-text" name="greeting-text" required min=1>${this.Settings.greeting}</textarea>`),
-					$(`<textarea id="greeting-text" name="greeting-text" required min=1></textarea>`).text(this.Settings.greeting),
+					$(`<textarea id="greeting-text" name="greeting-text"></textarea>`).text(this.Settings.greeting),
 				],
 				"Edit Greeting...",
-				(e: FormData) => {
-					this.Settings.greeting = e.get("greeting-text").toString();
-					// this.buildButtons();
-				},
+				(e: FormData) => this.Settings.greeting = e.get("greeting-text").toString(),
 			);
 
 			// Stop propagation & prevent default.
