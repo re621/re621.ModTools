@@ -174,6 +174,11 @@ export default class DMailToStaffNote extends Component {
 		return;
 	}
 
+	/**
+	 * Pulls some info about DMail from the HTML.
+	 * @todo Refactor elsewhere?
+	 * @returns An object containing all the info about the DMail exchange that could be pulled from the page's HTML w/o querying the server.
+	 */
 	public static findDMailIds() {
 		const retVal = {
 			id: undefined,
@@ -186,13 +191,26 @@ export default class DMailToStaffNote extends Component {
 		const id = /^\/dmails\/([0-9]+)/.exec(window.location.pathname);
 		if (!id) return null;
 		retVal.id = id[1];
-		const recipient = document.querySelector<HTMLAnchorElement>(".dmail ul li:nth-of-type(2) a[href^='/users/']");
-		retVal.recipientId = /^\/users\/([0-9]+)/.exec(new URL(recipient.href).pathname)[1];
-		retVal.recipientName = recipient.innerText;
-		const sender = document.querySelector<HTMLAnchorElement>(".dmail ul li:nth-of-type(1) a[href^='/users/']");
-		retVal.senderId = /^\/users\/([0-9]+)/.exec(new URL(sender.href).pathname)[1];
-		retVal.senderName = sender.innerText;
+		const recipient = this.pullIdAndName(2);
+		retVal.recipientId = recipient.id;
+		retVal.recipientName = recipient.name;
+		const sender = this.pullIdAndName(1);
+		retVal.senderId = sender.id;
+		retVal.senderName = sender.name;
 		retVal.title = document.querySelector<HTMLAnchorElement>(".dmail h2").innerText;
 		return retVal;
+	}
+
+	/**
+	 * 
+	 * @param number 
+	 * @returns 
+	 */
+	private static pullIdAndName(number: number) {
+		const user = document.querySelector<HTMLAnchorElement>(`.dmail ul li:nth-of-type(${number}) a[href^='/users/']`);
+		return {
+			id: /^\/users\/([0-9]+)/.exec(new URL(user.href).pathname)[1],
+			name: user.innerText,
+		};
 	}
 }

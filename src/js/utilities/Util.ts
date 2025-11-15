@@ -309,40 +309,32 @@ export default class Util {
 	 */
 	public static replaceTemplateVariables(
 		input: string,
-		variables: Array<string | RegExp> | Map<string | RegExp, string | ((key: string, ...args: any[]) => string)>/*  | StringDictionary<string | ((key: string, ...args: any[]) => string)> */,
+		variables: Array<string|RegExp> | Map<string|RegExp, string|((key: string, ...args: any[]) => string)>/*  | StringDictionary<string|((key: string, ...args: any[]) => string)> */,
 		replacer?: (key: string, ...args: any[]) => string,
 	): string {
 		if (variables instanceof Array) {
-			for (let e of variables) {
-				if (!(e instanceof RegExp)) {
-					e = RegExp((e.startsWith("$") || e.startsWith("$")) ? e : `\\$${e}|%${e}%?`, "g");
-				}
-				input = input.replace(e, replacer);
+			for (const e of variables) {
+				input = input.replace(this.normalizeTemplateVariable(e), replacer);
 			}
-		// } else if (variables instanceof Map) {
-		// 	for (let e of variables.keys()) {
-		// 		const v = variables.get(e);
-		// 		if (!(e instanceof RegExp)) {
-		// 			e = RegExp((e.startsWith("$") || e.startsWith("$")) ? e : `\\$${e}|%${e}%?`, "g");
-		// 		}
-		// 		// Hack for type stupidity
-		// 		input = typeof v === "string" ? 
-		// 			input.replace(e, v) :
-		// 			input.replace(e, v);
-		// 	}
 		} else {
-			for (let e of variables.keys()) {
+			for (const e of variables.keys()) {
 				const v = variables.get(e);
-				if (!(e instanceof RegExp)) {
-					e = RegExp((e.startsWith("$") || e.startsWith("$")) ? e : `\\$${e}|%${e}%?`, "g");
-				}
 				// Hack for type stupidity
 				input = typeof v === "string" ? 
-					input.replace(e, v) :
-					input.replace(e, v);
+					input.replace(this.normalizeTemplateVariable(e), v) :
+					input.replace(this.normalizeTemplateVariable(e), v);
 			}
 		}
 		return input;
+	}
+
+	private static normalizeTemplateVariable(varName: string | RegExp) {
+		return !(varName instanceof RegExp) ?
+			RegExp(
+				(varName.startsWith("$") || varName.startsWith("%")) ? varName : `\\$${varName}|%${varName}%?`,
+				"g",
+			) :
+			varName;
 	}
 }
 // interface StringDictionary<B> {
