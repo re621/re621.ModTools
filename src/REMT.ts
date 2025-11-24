@@ -14,6 +14,7 @@ import PageObserver from "./js/models/structure/PageObserver";
 import ErrorHandler from "./js/utilities/ErrorHandler";
 import Util from "./js/utilities/Util";
 import DMailToStaffNote from "./js/components/DMailToStaffNote";
+import OldCommentTicket from "./js/components/OldCommentTicket";
 
 export default class REMT {
 
@@ -29,6 +30,7 @@ export default class REMT {
         LinkGrabber,
 		
 		DMailToStaffNote,
+		OldCommentTicket,
     ];
 
     public async run(): Promise<void> {
@@ -110,4 +112,5 @@ interface ComponentListAnnotated extends ComponentList {
     LinkGrabber?: LinkGrabber,
 
     DMailToStaffNote?: DMailToStaffNote,
+    OldCommentTicket?: OldCommentTicket,
 }
