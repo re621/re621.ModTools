@@ -1,3 +1,4 @@
+// import Debug from "../models/Debug";
 import { UtilDOM } from "./UtilDOM";
 import { UtilEvents } from "./UtilEvents";
 import UtilID from "./UtilID";
@@ -278,6 +279,7 @@ export default class Util {
         return array.slice(0, -1).join(", ") + ", " + delimiter + " " + array.slice(-1);
     }
 
+	// #region replaceTemplateVariables
 	/**
 	 * 
 	 * @param input The string to perform replacement on.
@@ -335,6 +337,91 @@ export default class Util {
 				"g",
 			) :
 			varName;
+	}
+	// #endregion replaceTemplateVariables
+
+	/**
+	 * 
+	 * @param created The initial time
+	 * @param now The time to check against
+	 * @returns If >= 6 months have past between `created` & `now`, returns `true`; otherwise, `false`.
+	 * @todo MAKE UNIT TEST
+	 * @todo Make configurable
+	 */
+	public static isDatePastCommentStatute(created: Date, now = new Date()/* , {
+		months = 6,
+	} */) {
+		/* Debug.log(`isDatePastCommentStatute(created: "${created.toUTCString()}", now: "${now.toUTCString()}")`); */
+		if (created.getUTCFullYear() <= now.getUTCFullYear()) {
+			/* Debug.debug(`Created before this year ${now.getUTCFullYear()}`); */
+			const elapsedYears = now.getUTCFullYear() - created.getUTCFullYear();
+			/* Debug.debug(`elapsedYears: ${elapsedYears}`); */
+			if (elapsedYears >= 2) {
+				/* Debug.debug(`2 or more years between ${created.toUTCString()} & ${now.toUTCString()}`);
+				Debug.log(`returns true for isDatePastCommentStatute(created: "${created.toUTCString()}", now: "${now.toUTCString()}")`); */
+				return true;
+			} else if (elapsedYears === 0) {
+				/* Debug.debug(`Created this year ${now.getUTCFullYear()}`); */
+				if (created.getUTCMonth() <= now.getUTCMonth()) {
+					const elapsedMonths = now.getUTCMonth() - created.getUTCMonth();
+					if (elapsedMonths > 6 ||
+						(elapsedMonths === 6 && created.getUTCDate() <= now.getUTCDate())) {
+						/* Debug.log(`returns true for isDatePastCommentStatute(created: "${created.toUTCString()}", now: "${now.toUTCString()}")`); */
+						return true;
+					}/*  else Debug.debug(`Not greater than ${6} months nor equal to ${6} months at a later date (elapsedMonths: ${elapsedMonths}, created.getUTCDate(): ${created.getUTCDate()}, now.getUTCDate(): ${now.getUTCDate()}, created.getUTCFullYear(): ${created.getUTCFullYear()}`); */
+				}
+			} else {
+				const changed = new Date(created.toISOString());
+				// changed.setUTCDate(1);
+				// changed.setUTCMonth(changed.getUTCMonth() + 6);
+				changed.setUTCMonth(changed.getUTCMonth() + 6, 1);
+				// if (changed.getUTCFullYear() != now.getUTCFullYear() || 
+				if (changed.getUTCFullYear() < now.getUTCFullYear() || 
+					changed.getUTCMonth() < now.getUTCMonth() || 
+					(changed.getUTCMonth() === now.getUTCMonth() && created.getUTCDate() <= now.getUTCDate())) {
+					/* Debug.log(`TRUE; More than ${6} months between ${created.toUTCString()} & ${now.toUTCString()} (changed: ${changed.toUTCString()})`); */
+					return true;
+				}
+			}
+		}/*  else Debug.log(`FALSE; Created after this year (now.getUTCFullYear(): ${now.getUTCFullYear()}, created.getUTCFullYear(): ${created.getUTCFullYear()}`); */
+		/* Debug.log(`returns false for isDatePastCommentStatute(created: "${created.toUTCString()}", now: "${now.toUTCString()}")`); */
+		return false;
+	}
+
+	/**
+	 * 
+	 * @param date 
+	 * @param param1 
+	 * @todo FINISH
+	 * @todo TEST
+	 * @todo REPLACE
+	 */
+	public static advanceDate(
+		date: Date, {
+			// days = 0,
+			// weeks = 0,
+			months = 6,
+			// years = 0,
+			overflowMonth = false,
+		}) {
+		const r = new Date(date.toISOString());
+		if (months) {
+			const dateBackup = r.getDate();
+			if (dateBackup <= 28) {
+				r.setMonth(r.getMonth() + months);
+			} else {
+				let lastDate = 28;
+				r.setMonth(r.getMonth() + months, lastDate);
+				const t = new Date(r.toISOString());
+				while (t.getMonth() === r.getMonth() && lastDate < dateBackup) {
+					(overflowMonth ? r : t).setDate(++lastDate);
+				}
+				if (!overflowMonth && t.getMonth() !== r.getMonth()) {
+					r.setDate(lastDate - 1);
+				}
+			}
+		}
+		return r;
 	}
 }
 // interface StringDictionary<B> {

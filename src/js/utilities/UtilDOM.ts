@@ -59,6 +59,56 @@ export class UtilDOM {
         return $link;
     }
 
+	/**
+	 * 
+	 * @param param0 
+	 * @returns 
+	 * @copyright https://cssloaders.github.io/
+	 */
+	public static makeSpinnerJQuery({
+		size = "48px",
+		mainColor = "#FFF",
+		secondaryColor = "#FF3D00",
+		animationLength = "1s",
+		spinnerWidth = "5px",
+	}) {
+		return $(`<span class="spinner"></span>`).css({
+			"width": size,
+			"height": size,
+			"border": `${spinnerWidth} solid ${mainColor}`,
+			"border-bottom-color": secondaryColor,
+			"border-radius": "50%",
+			"display": "inline-block",
+			"box-sizing": "border-box",
+			"animation": `rotation ${animationLength} linear infinite`,
+		});
+	}
+
+	/**
+	 * 
+	 * @param param0 
+	 * @returns 
+	 * @copyright https://cssloaders.github.io/
+	 */
+	public static makeSpinnerDOM({
+		size = "48px",
+		mainColor = "#FFF",
+		secondaryColor = "#FF3D00",
+		animationLength = "1s",
+		spinnerWidth = "5px",
+	}) {
+		const s = document.createElement("span");
+		s.className = "spinner";
+		s.style.width = s.style.height = size;
+		s.style.border = `${spinnerWidth} solid ${mainColor}`;
+		s.style.borderBottomColor = secondaryColor;
+		s.style.borderRadius = "50%";
+		s.style.display = "inline-block";
+		s.style.boxSizing = "border-box";
+		s.style.animation = `rotation ${animationLength} linear infinite`;
+		return s;
+	}
+
 	// /**
 	//  * Build a DText input element with the same style, form, & function of the ones supplied by the server.
 	//  * @param textarea The main text entry element.
