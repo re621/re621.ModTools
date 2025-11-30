@@ -77,11 +77,29 @@ export default class Modal {
         this.registerTrigger(config.triggers);
     }
 
+	/* private static readonly defaultConfig = {
+		title: "Dialog",
+		autoOpen: false,
+		triggers: [],
+		triggerMulti: false,
+		content: $(""),
+		structure: null,
+		width: "auto",
+		height: "auto",
+		minWidth: 150,
+		minHeight: 150,
+		maxWidth: undefined,
+		maxHeight: undefined,
+		disabled: false,
+		position: { my: "center", at: "center" },
+	}; */
     /**
      * Parses the configuration and sets the default values for missing entries
      * @param config Configuration to parse
+	 * @todo Convert to using `Object.assign` with a default object instead.
      */
     private validateConfig(config: ModalConfig): ModalConfig {
+        // const result: ModalConfig = Object.assign({}, Modal.defaultConfig, config);
         const result: ModalConfig = {};
 
         result.title = typeof config.title === "undefined" ? "Dialog" : config.title;
@@ -193,7 +211,7 @@ export default class Modal {
 	}
 }
 
-interface ModalConfig {
+export interface ModalConfig {
     /** String displayed on top of the modal window */
     title?: string;
 
