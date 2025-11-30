@@ -24,12 +24,14 @@ export class UtilDOM {
             .prependTo("body");
     }
 
+	protected static readonly SETTINGS_TARGET: string = ".nav-tools";
     /**
      * Adds a button to the top-right of the navbar
      * @param config Button configuration
      * @param target Target element
      */
-    public static addSettingsButton(config: SettingsButton, target = "menu.extra"): JQuery<HTMLElement> {
+    public static addSettingsButton(config: SettingsButton, target: string | boolean = this.SETTINGS_TARGET, prepend = false): JQuery<HTMLElement> {
+		if (typeof target !== "string") { prepend = target; target = UtilDOM.SETTINGS_TARGET; }
         if (config.name === undefined) config.name = "T";
         if (config.href === undefined) config.href = "";
         if (config.title === undefined) config.title = "";
@@ -39,7 +41,7 @@ export class UtilDOM {
 
         if (config.attr === undefined) config.attr = {};
 
-        const $tab = $(`<li>`).appendTo(target);
+        const $tab = $(`<li>`)[prepend ? "prependTo" : "appendTo"](target);
         const $link = $("<a>")
             .html(config.name)
             .attr({
