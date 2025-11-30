@@ -41,4 +41,11 @@
 			""
 		],
 	},
+	"Truthy or Zero": {
+		"prefix": ["truthyOrZero"],
+		"description": "Check if a value is truthy or zero",
+		"body": [
+			"(${1:var} || ${1:var} === 0)",
+		],
+	},
 }
