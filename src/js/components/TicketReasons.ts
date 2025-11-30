@@ -169,7 +169,7 @@ export default class TicketReasons extends Component {
 				],
 				"Add Button...",
 				(e: FormData) => {
-					const temp = this.Settings.buttons;
+					const temp = [...this.Settings.buttons];
 					temp.push({
 						name: e.get("new-button-name").toString(),
 						text: e.get("new-button-text").toString(),
