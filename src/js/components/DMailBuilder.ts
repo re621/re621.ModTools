@@ -311,10 +311,10 @@ export default class DMailBuilder extends Component {
 					class: "response-button",
 					name: button.label,
 					text: button.text,
-					title: button.description,
+					title: button.description || `"${button.text}"`,
+					"data-description": button.description,
+					"data-index": i,
 				})
-				// .data("index", i)
-				.attr("data-index", i)
 				.text(button.label)
 				.appendTo(this.container);
 		}
@@ -386,8 +386,9 @@ export default class DMailBuilder extends Component {
 	 * @param event 
 	 */
 	private promptAndRemove(event: JQuery.ClickEvent<HTMLElement, undefined, any, HTMLButtonElement>) {
-		if (confirm(`Are you sure you want to delete this button?\n\n\tNAME: ${event.target.name}\n\tDESCRIPTION: ${event.target.title}\n\tTEXT: "${event.target.getAttribute("text")}"`)) {
-			this.Settings.buttons = BuilderItem.removeButtonAt([...this.Settings.buttons], Number(event.target.dataset["index"]));
+		const [button, index] = BuilderItem.retrieveAllButtonInfoFromUi(event.target);
+		if (confirm(`Are you sure you want to delete this button?\n\n\tLabel: ${button.label}\n\tDescription: ${button.description}\n\tText: "${button.text}"`)) {
+			this.Settings.buttons = BuilderItem.removeButtonAt([...this.Settings.buttons], Number(index));
 			this.buildButtons();
 		}
 	}
@@ -422,7 +423,7 @@ class BuilderItem implements IBuilderItem {
 	 * @param index 
 	 * @returns An ordered array of elements compatible for usage with @see DialogForm.getRequestedInput
 	 */
-	static buildInput({label = "", text = "", description = ""}, index?: number | false, maxIndex?: number): JQuery<HTMLElement>[] {
+	static buildInput({label = "", text = "", description = undefined}: {label?: string, text?: string, description?: string} | undefined, index?: number | false, maxIndex?: number): JQuery<HTMLElement>[] {
 		return [
 			$('<label for="button-label">Label</label>'),
 			$('<input id="button-label" name="button-label" required min=1 placeholder="The text that appears on the button." />').val(label || ""),
@@ -431,7 +432,7 @@ class BuilderItem implements IBuilderItem {
 			$('<textarea id="button-text" name="button-text" required min=1 placeholder="The text that is entered into the message when the button is clicked."></textarea>').val(text || ""),
 			$('<br />'),
 			$('<label for="button-description">Description</label>'),
-			$('<textarea id="button-description" name="button-description"></textarea>').val(description || ""),
+			$('<textarea id="button-description" name="button-description"></textarea>').val(description || text ? `"${text}"` : ""),
 			...(index || index === 0 ? [
 				$('<br />'),
 				...BuilderItem.buildIndexInput(index, maxIndex),
@@ -480,12 +481,18 @@ class BuilderItem implements IBuilderItem {
 	}
 
 	static constructButtonUi(button: IBuilderItem, index?: number): JQuery<HTMLButtonElement> {
-		return ((index || index === 0) ? $<HTMLButtonElement>("<button>").attr("data-index", index) : $<HTMLButtonElement>("<button>"))
+		return (
+			(index || index === 0) ?
+				$<HTMLButtonElement>("<button>").attr("data-index", index) :
+				(typeof button.index === "number" && Number.isFinite(button.index)) ?
+					$<HTMLButtonElement>("<button>").attr("data-index", button.index) :
+					$<HTMLButtonElement>("<button>"))
 				.attr({
 					class: "response-button",
 					name: button.label,
 					text: button.text,
-					title: button.description,
+					title: button.description || `"${button.text}"`,
+					"data-description": button.description,
 				})
 				.text(button.label);
 	}
@@ -494,11 +501,12 @@ class BuilderItem implements IBuilderItem {
 		return {
 			label: button.name,
 			text: button.getAttribute("text"),
-			description: button.title,
+			description: button.dataset.description,
+			// index: button.dataset.index,
 		};
 	}
 	static tryRetrieveAllButtonInfoFromUi(button: HTMLButtonElement): [IBuilderItem, number] | IBuilderItem {
-		const o = this.retrieveButtonInfoFromUi(button), i = button.dataset["index"];
+		const o = this.retrieveButtonInfoFromUi(button), i = button.dataset.index;
 		return ((typeof(i) === "string" && i.length <= 0) || !i) ? o : [o, Number(i)];
 	}
 	static retrieveAllButtonInfoFromUi(button: HTMLButtonElement, failSilently = true): [IBuilderItem, number] {
