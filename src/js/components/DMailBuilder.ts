@@ -157,6 +157,14 @@ export default class DMailBuilder extends Component {
 	public static get defaultButtons(): Array<IBuilderItem> {
 		return [
 			{
+				label: "Outreach",
+				text: `Thank you for reaching out.`,
+			},
+			{
+				label: "Attempt",
+				text: `Thank you for attempting to resolve this.`,
+			},
+			{
 				label: "Contesting Deletions",
 				text: [
 					`Our rules for contesting deletions are as follows:`,
@@ -165,6 +173,23 @@ export default class DMailBuilder extends Component {
 					`3. [b][i]Politely[/i] "contact an Admin":[/help/staff#list:~:text=Administrator%20Team][/b]: They will review the matter & make a decision. If they decline to reinstate the post, you may advance to the next step.`,
 					`4. [b][i]Politely[/i] "contact our Staff Lead":[/help/staff#list:~:text=Staff%20Lead][/b]: They will review the matter & make a decision. If they decline to reinstate the post, you may advance to the next step.`,
 					`5. [b][i]Politely[/i] "contact our Site Lead":[/help/staff#list:~:text=Site%20Lead][/b]: They will review the matter & make a decision. [b][u]If our Site Lead declines to reinstate the post, then that is the end of the matter[/u][/b].`,
+				].join("\n"),
+			},
+			{
+				label: "AI: Exceptions",
+				text: [
+					`We allow for [[ai_assisted|3 narrow exceptions]] to our ban on AI assisted/generated content:`,
+					`* [[ai_generated_audio|AI generated/assisted audio]]`,
+					`* [[ai_generated_backgrounds|AI generated/assisted backgrounds]]`,
+					`* [[ai_generated_reference|AI generated/assisted reference material]]`,
+				].join("\n"),
+			},
+			{
+				label: "AI: Flag",
+				text: [
+					`We do not tolerate public AI accusations outside of flags. If you genuinely think something uses some form of AI assistance/generation, then "flag it":[/help/flag_for_deletion] for "not meeting the Uploading Guidelines":[/help/uploading_guidelines#bad:~:text=AI%20Generated,Webm] & move on with your day; that actually brings it to our attention so we can investigate & resolve the matter. It's a lot more productive than throwing around accusations in the comments, & with 99% less drama, in-fighting, hurt feelings, & baseless reputational harm.`,
+					``,
+					`To be 100% clear, [b][i]the one and only place on this site to accuse posts of being AI is [u]in a flag[/u][/i][/b]. Not in the comments, forums, blips, user profiles, post/pool/set descriptions, or any other location.`,
 				].join("\n"),
 			},
 			{
@@ -178,6 +203,18 @@ export default class DMailBuilder extends Component {
 			{
 				label: "AI: How to spot",
 				text: `If learning to detect AI images is something of legitimate interest to you, we suggest you browse AI-oriented sites, collect samples from those sites, and note what makes them different from human-made art. We can't provide any further guidance to you, since our own AI investigation team keeps their methods secret in order to avoid giving artists hints on how to elude them.`,
+			},
+			{
+				label: "Takedown: No Third-party",
+				text: `Only artists, character owners, & commissioners may issue takedown requests for their material, & they must do so directly; we do not accept third party takedown requests.`,
+			},
+			{
+				label: "Takedown: Required",
+				text: `This requires a takedown request.`,
+			},
+			{
+				label: "Takedown: See here",
+				text: `See "here":[/static/takedown] for details about takedown requests.`,
 			},
 			{
 				label: "Translation tags",
