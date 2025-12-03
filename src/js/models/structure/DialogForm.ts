@@ -14,11 +14,14 @@ export class DialogForm extends Modal {
 
     private $form: JQuery<HTMLFormElement>;
 
+	private static _fixTitle(title: string | DialogConfig) { return (typeof(title) === "string") ? { title: title } : title;}
     constructor(elements: JQuery<HTMLElement>[], title?: string);
     constructor(elements: JQuery<HTMLElement>[], options?: DialogConfig);
-    constructor(elements: JQuery<HTMLElement>[], options?: string|DialogConfig);
-    constructor(elements: JQuery<HTMLElement>[], options: string|DialogConfig = {title: "DialogForm"}) {
-		if (typeof(options) === "string") options = {title: options};
+    constructor(
+		elements: JQuery<HTMLElement>[],
+		options: string | DialogConfig = { title: "DialogForm" },
+	) {
+		options = DialogForm._fixTitle(options);
         super(Object.assign({
             title: "DialogForm",
             minHeight: 50,
@@ -36,23 +39,42 @@ export class DialogForm extends Modal {
                 this.destroy();
                 resolve((event.originalEvent as FormDataEvent).formData);
             });
-			this.$form.on("close", (event) => {
-				event.preventDefault();
-				event.stopImmediatePropagation();
-                this.destroy();
-                reject("Canceled");
-			})
+			if ((options as DialogConfig).rejectOnClose) {
+				this.getElement().on("dialogclose", (options as DialogConfig).onClose ?? ((event) => {
+					event.preventDefault();
+					event.stopImmediatePropagation();
+					this.destroy();
+					reject("Canceled");
+				}));
+			}
         });
     }
 
-	public static getRequestedInput<T>(
+	public static getRequestedInput<T,U>(
 		elements: JQuery<HTMLElement>[],
-		title: string | DialogConfig = "DialogForm",
+		title: string | DialogConfig,
 		then?: { (e: FormData): T },
-	): Promise<FormData | T> {
-		return then
-			? (new DialogForm(elements, title)).promise.then(then)
-			: (new DialogForm(elements, title)).promise;
+		onError?: { (e: unknown): U | T },
+		onComplete?: { (): void },
+	): Promise<FormData | T | U>;
+	public static getRequestedInput<T,U>(
+		elements: JQuery<HTMLElement>[],
+		title: string | DialogConfig,
+		callbacks?: { (e: FormData): T } | { then?: { (e: FormData): T }, onError?: { (e: unknown): U }, onComplete?: { (): void } },
+	): Promise<FormData | T | U>;
+	public static getRequestedInput<T,U>(
+		elements: JQuery<HTMLElement>[],
+		title: string | DialogConfig,
+		then?: { (e: FormData): T } | { then?: { (e: FormData): T }, onError?: { (e: unknown): U }, onComplete?: { (): void } },
+		onError?: { (e: unknown): U | T },
+		onComplete?: { (): void },
+	): Promise<FormData | T | U> {
+		let r: Promise<FormData | T | U> = (new DialogForm(elements, DialogForm._fixTitle(title))).promise;
+		if (!("call" in then)) ({then, onError, onComplete} = then);
+		if (then) r = r.then(then);
+		if (onError) r = r.catch(onError);
+		if (onComplete) r = r.finally(onComplete);
+		return r;
 	}
 
 	/**
@@ -78,4 +100,8 @@ export class DialogForm extends Modal {
 
 interface DialogConfig extends ModalConfig {
 	defaultElements?: JQuery<HTMLElement>[];
+	// onClose?: JQueryUI.DialogEvent;
+	onClose?: JQuery.TypeEventHandler<HTMLElement, undefined, HTMLElement, HTMLElement, "dialogclose">;
+	/** Used to disable rejecting the promise when the form is closed with the dialog's `Close` button. */
+	rejectOnClose?: boolean;
 }

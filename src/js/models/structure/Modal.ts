@@ -181,6 +181,10 @@ export default class Modal {
         this.triggers = [];
     }
 
+	/**
+	 * 
+	 * @returns The modal element
+	 */
     public getElement(): JQuery<HTMLElement> { return this.$modal; }
 
 
