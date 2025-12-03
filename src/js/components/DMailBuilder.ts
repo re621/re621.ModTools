@@ -46,6 +46,10 @@ export class SelectionState {
  * Allows building personalized DMails from an assortment of smaller piecemeal values.
  * @todo Allow custom & dynamic template variable substitution (e.g. allow buttons to define template variables & have a pop-up that allows the user to enter them if they haven't already been defined on this DMail).
  * @todo Allow reordering via click & drag?
+ * @todo Allow switching elements via clicking the 2 elements?
+ * @todo Add button groups?
+ * @todo Refactor to use interface
+ * @todo Persist edit/remove/reorder mode until manually canceled by user
  */
 export default class DMailBuilder extends Component {
 	// #region Template Variable Stuff
@@ -79,16 +83,27 @@ export default class DMailBuilder extends Component {
 		return this.state === SelectionState.reorder;
 	}
 
-	private onSettingsButton(_$element: JQuery<HTMLElement>) {
+	/**
+	 * 
+	 * @returns 
+	 * @todo Destroy/reuse modal; currently piles up dead instances without removing them from the DOM.
+	 * @todo Prevent creating additional settings dialogs when one is currently open.
+	 */
+	private onSettingsButtonClick(/* _$element: JQuery<HTMLElement> */) {
 		DialogForm.getRequestedInput(
 			[
-				$(`<button type="submit" name="selectedAction" value="${SelectionState.none.index}">Add New Button...</button>`),
-				$(`<button type="submit" name="selectedAction" value="${SelectionState.edit.index}">Edit Button...</button>`),
-				$(`<button type="submit" name="selectedAction" value="${SelectionState.remove.index}">Remove Buttons...</button>`),
-				$(`<button type="submit" name="selectedAction" value="${SelectionState.reorder.index}">Reorder Buttons...</button>`),
+				$(`<button type="submit" name="selectedAction" value="${SelectionState.none.index}">New Button</button>`),
+				$(`<button type="submit" name="selectedAction" value="${SelectionState.edit.index}">Edit Button</button>`),
+				$(`<button type="submit" name="selectedAction" value="${SelectionState.remove.index}">Remove Button</button>`),
+				$(`<button type="submit" name="selectedAction" value="${SelectionState.reorder.index}">Reorder Button</button>`),
 				$(`<button type="submit" name="selectedAction" value="resetButtons">Reset Buttons</button>`),
+				$(`<button type="submit" name="selectedAction" value="exportButtons">Export Buttons</button>`),
+				$(`<button type="submit" name="selectedAction" value="importButtons">Import Buttons</button>`),
 				$(`<button type="submit" name="selectedAction" value="-1">Cancel</button>`),
-			],
+			].reduce(
+				(a, e) => { e.appendTo(a[0]); return a; },
+				[$<HTMLDivElement>("<div>").addClass("re6-mod-tools-button-container")],
+			),
 			{
 				title: "DMail Builder Settings",
 				defaultElements: [],
@@ -109,6 +124,12 @@ export default class DMailBuilder extends Component {
 						switch (e.get("selectedAction")) {
 							case "resetButtons":
 								this.promptAndReset();
+								break;
+							case "importButtons":
+								this.makeImportButtonDialog();
+								break;
+							case "exportButtons":
+								this.makeExportDialog();
 								break;
 						
 							default:
@@ -243,11 +264,11 @@ export default class DMailBuilder extends Component {
 	protected create(): Promise<void> {
 		Debug.log("Creating DMail Builder...");
 		UtilDOM.addStyle(`
-			form.new_dmail .dmail_body .responses {
+			.re6-mod-tools-button-container {
 				display: flex;
 				flex-wrap: wrap;
 			}
-			form.new_dmail .dmail_body .responses button {
+			.re6-mod-tools-button-container > button {
 				margin: 0px .25rem;
 				flex: none;
 			}
@@ -257,10 +278,10 @@ export default class DMailBuilder extends Component {
 		UtilDOM.addSettingsButton({
 			id: "dmail-responses-settings",
 			name: "Responses Settings",
-			onClick: (e) => this.onSettingsButton(e),
+			onClick: (/* e */) => this.onSettingsButtonClick(/* e */),
 		}, true);
 		this.container = $<HTMLDivElement>("<div>")
-			.addClass("responses")
+			.addClass("responses re6-mod-tools-button-container")
 			.appendTo(wrapper)
 			.on("click", "button", (e) => this.onResponseClick(e));
 
@@ -303,34 +324,11 @@ export default class DMailBuilder extends Component {
 	private buildButtons() {
 		this.container.html("");
 
-		// for (const button of this.Settings.buttons) {
 		for (let i = 0; i < this.Settings.buttons.length; i++) {
-			const button = this.Settings.buttons[i];
-			$("<button>")
-				.attr({
-					class: "response-button",
-					name: button.label,
-					text: button.text,
-					title: button.description || `"${button.text}"`,
-					"data-description": button.description,
-					"data-index": i,
-				})
-				.text(button.label)
+			BuilderItem
+				.constructButtonUi(this.Settings.buttons[i], i)
 				.appendTo(this.container);
 		}
-	}
-
-	/**
-	 * 
-	 * @param input 
-	 * @todo Filter out duplicates
-	 */
-	private bulkImport(input: string) {
-		const buttons = JSON.parse(input);
-		const t = this.Settings.buttons
-		t.concat(buttons);
-		this.Settings.buttons = t;
-		this.buildButtons();
 	}
 
 	// #region Make Dialogs
@@ -339,9 +337,10 @@ export default class DMailBuilder extends Component {
 			BuilderItem.buildInput({}, false, this.Settings.buttons.length),
 			"Add Button",
 			(e: FormData) => {
-				const temp = [...this.Settings.buttons];
-				temp.push(BuilderItem.parseInput(e));
-				this.Settings.buttons = temp;
+				// const temp = [...this.Settings.buttons];
+				// temp.push(BuilderItem.parseInput(e));
+				// this.Settings.buttons = temp;
+				this.Settings.buttons = this.Settings.buttons.concat([BuilderItem.parseInput(e)]);
 				this.buildButtons();
 			},
 		);
@@ -353,7 +352,9 @@ export default class DMailBuilder extends Component {
 			BuilderItem.buildInput(button, false, this.Settings.buttons.length - 1),
 			{ title: `Edit "${button.label}" Button`, rejectOnClose: true },
 			(e: FormData) => {
-				const temp = this.Settings.buttons;
+				// NOTE: The below worked, but I don't know why it did when adding with a simple `.push` seemingly didn't, so I'm forcing it to make a new object.
+				// const temp = this.Settings.buttons;
+				const temp = [...this.Settings.buttons];
 				temp[index] = BuilderItem.parseInput(e);
 				this.Settings.buttons = temp;
 				this.buildButtons();
@@ -379,6 +380,21 @@ export default class DMailBuilder extends Component {
 			() => this.clearState(),
 		);
 	}
+
+	private makeImportButtonDialog() {
+		DialogForm.getRequestedInput(
+			[
+				$('<label for="json-string">Buttons to import (in form provided by exporter):</label>'),
+				$('<textarea id="json-string" name="json-string" required min=1></textarea>'),
+			],
+			"Import Buttons...",
+			(e: FormData) => this.promptAndImport(e.get("json-string").toString()),
+		);
+	}
+
+	private makeExportDialog() {
+		alert(`The following is the string representation of your buttons; this can be used to import them.\n\n${JSON.stringify(this.Settings.buttons, undefined, 4)}`);
+	}
 	// #endregion Make Dialogs
 
 	/**
@@ -388,7 +404,9 @@ export default class DMailBuilder extends Component {
 	private promptAndRemove(event: JQuery.ClickEvent<HTMLElement, undefined, any, HTMLButtonElement>) {
 		const [button, index] = BuilderItem.retrieveAllButtonInfoFromUi(event.target);
 		if (confirm(`Are you sure you want to delete this button?\n\n\tLabel: ${button.label}\n\tDescription: ${button.description}\n\tText: "${button.text}"`)) {
-			this.Settings.buttons = BuilderItem.removeButtonAt([...this.Settings.buttons], Number(index));
+			const temp = [...this.Settings.buttons];
+			temp.splice(index, 1);
+			this.Settings.buttons = temp;
 			this.buildButtons();
 		}
 	}
@@ -400,6 +418,14 @@ export default class DMailBuilder extends Component {
 	private promptAndReset() {
 		if (confirm("Are you sure you want to reset the buttons to the defaults?\n\nThis will permanently remove your custom buttons.")) {
 			this.Settings.buttons = DMailBuilder.defaultButtons;
+			this.buildButtons();
+		}
+	}
+
+	private promptAndImport(jsonString: string) {
+		const t = [...this.Settings.buttons], buttons: BuilderItem[] = (JSON.parse(jsonString) as BuilderItem[]).filter(e => t.find(e2 => BuilderItem.doMatch(e, e2)));
+		if (confirm(`Add the following buttons?\n\n${buttons.map((e) => `Label: ${e.label}\nDescription: ${e.description}, Text: ${e.text}`).join("\n")}`)) {
+			this.Settings.buttons = t.concat(buttons);
 			this.buildButtons();
 		}
 	}
@@ -472,23 +498,35 @@ class BuilderItem implements IBuilderItem {
 		};
 	}
 
-	static filterButtonMatch(collection: IBuilderItem[], {label, text, description}: {label: string, text: string, description?: string}) {
-		return collection.filter((e) => e.name !== label || e.text !== text || e.description !== description);
+	/**
+	 * Removes the given `IBuilderItem` from the given array.
+	 * @param collection 
+	 * @param param1 The `IBuilderItem` fields to filter on
+	 * @returns The given `collection` with all elements matching all of the given properties removed.
+	 */
+	static filterButtonMatch(collection: IBuilderItem[], {label, text, description}: IBuilderItem) {
+		return collection.filter((e) => !BuilderItem.doMatch(e, {label, text, description}));
 	}
 
-	static removeButtonAt(collection: IBuilderItem[], index: number): IBuilderItem[] {
-		return collection.splice(index, 1);
+	/**
+	 * Checks if 2 `IBuilderItem`s are the same.
+	 * @param button1 
+	 * @param button2 
+	 * @returns True if the 2 represent the same item, false otherwise.
+	 */
+	static doMatch(button1: IBuilderItem, button2: IBuilderItem) {
+		return button1.label === button2.label && button1.text === button2.text && button1.description === button2.description;
 	}
 
-	static constructButtonUi(button: IBuilderItem, index?: number): JQuery<HTMLButtonElement> {
+	static constructButtonUi(button: IBuilderItem, index?: number, options?: {classes?: string[]}): JQuery<HTMLButtonElement> {
 		return (
-			(index || index === 0) ?
+			(typeof index === "number") ?
 				$<HTMLButtonElement>("<button>").attr("data-index", index) :
-				(typeof button.index === "number" && Number.isFinite(button.index)) ?
+				(typeof button.index === "number") ?
 					$<HTMLButtonElement>("<button>").attr("data-index", button.index) :
 					$<HTMLButtonElement>("<button>"))
 				.attr({
-					class: "response-button",
+					class: `re6-mod-tools-input-builder-button ${options?.classes?.length ? ` ${options.classes.join(" ")}`: ""}`,
 					name: button.label,
 					text: button.text,
 					title: button.description || `"${button.text}"`,
@@ -497,6 +535,7 @@ class BuilderItem implements IBuilderItem {
 				.text(button.label);
 	}
 
+	// #region HTMLButtonElement -> IBuilderItem
 	static retrieveButtonInfoFromUi(button: HTMLButtonElement): IBuilderItem {
 		return {
 			label: button.name,
@@ -517,4 +556,5 @@ class BuilderItem implements IBuilderItem {
 			return [this.retrieveButtonInfoFromUi(button), Number(i)];
 		throw new Error(`Index not found ("${i}" retrieved)`);
 	}
+	// #endregion HTMLButtonElement -> IBuilderItem
 }
