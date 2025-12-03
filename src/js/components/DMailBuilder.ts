@@ -470,7 +470,7 @@ class BuilderItem implements IBuilderItem {
 			$('<textarea id="button-text" name="button-text" required min=1 placeholder="The text that is entered into the message when the button is clicked."></textarea>').val(text || ""),
 			$('<br />'),
 			$('<label for="button-description">Description (Shown on hover)</label>'),
-			$('<textarea id="button-description" name="button-description"></textarea>').val(description || (text ? `"${text}"` : "")),
+			$(`<textarea id="button-description" name="button-description"${text ? ` placeholder='"${text}"'` : ""}></textarea>`).val(description || ""),
 			...(index || index === 0 ? [
 				$('<br />'),
 				...BuilderItem.buildIndexInput(index, maxIndex),
