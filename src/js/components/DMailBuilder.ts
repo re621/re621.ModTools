@@ -309,10 +309,18 @@ export default class DMailBuilder extends Component {
 			default:
 				Debug.log("Invalid State!?!?");
 			// eslint-disable-next-line no-fallthrough
-			case SelectionState.none:
+			case SelectionState.none: {
+				// TODO: Template variables
+				const priorLength = this.input.val().toString().length,
+					textLength = button.attr("text").length;
 				this.input.val(`${this.input.val()}${button.attr("text")}`);
+				// If the user can't hover, then auto-select the added text so they can easily delete it.
+				if (!matchMedia("(hover: hover)").matches) {
+					this.input[0].setSelectionRange(priorLength, priorLength + textLength, "forward");
+				}
 				this.input[0].focus();
 				break;
+			}
 		}
 
 		event.stopImmediatePropagation();
