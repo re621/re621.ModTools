@@ -342,7 +342,9 @@ export default class DMailBuilder extends Component {
 	// #region Make Dialogs
 	private makeAddButtonDialog() {
 		DialogForm.getRequestedInput(
-			BuilderItem.buildInput({}, false, this.Settings.buttons.length),
+			BuilderItem.addReactiveDescriptionPlaceholder(
+				BuilderItem.buildInput({}, false, this.Settings.buttons.length),
+			),
 			"Add Button",
 			(e: FormData) => {
 				// const temp = [...this.Settings.buttons];
@@ -357,7 +359,9 @@ export default class DMailBuilder extends Component {
 	private makeEditButtonDialog(index: number) {
 		const button = this.Settings.buttons[index];
 		DialogForm.getRequestedInput(
-			BuilderItem.buildInput(button, false, this.Settings.buttons.length - 1),
+			BuilderItem.addReactiveDescriptionPlaceholder(
+				BuilderItem.buildInput(button, false, this.Settings.buttons.length - 1),
+			),
 			{ title: `Edit "${button.label}" Button`, rejectOnClose: true },
 			(e: FormData) => {
 				// NOTE: The below worked, but I don't know why it did when adding with a simple `.push` seemingly didn't, so I'm forcing it to make a new object.
@@ -465,13 +469,26 @@ class BuilderItem implements IBuilderItem {
 			$('<label for="button-text">Text (whitespace matters)</label>'),
 			$('<textarea id="button-text" name="button-text" required min=1 placeholder="The text that is entered into the message when the button is clicked."></textarea>').val(text || ""),
 			$('<br />'),
-			$('<label for="button-description">Description</label>'),
-			$('<textarea id="button-description" name="button-description"></textarea>').val(description || text ? `"${text}"` : ""),
+			$('<label for="button-description">Description (Shown on hover)</label>'),
+			$('<textarea id="button-description" name="button-description"></textarea>').val(description || (text ? `"${text}"` : "")),
 			...(index || index === 0 ? [
 				$('<br />'),
 				...BuilderItem.buildIndexInput(index, maxIndex),
 			] : [])
 		];
+	}
+	static addReactiveDescriptionPlaceholder(builtInput: JQuery<HTMLElement>[]) {
+		const text = builtInput[4], desc = builtInput[7];
+		if (text[0] instanceof HTMLTextAreaElement && desc[0] instanceof HTMLTextAreaElement)
+			text[0].addEventListener(
+				"change",
+				(e: InputEvent) => desc.attr("placeholder", `"${(e.target as HTMLTextAreaElement).value}"`),
+			);
+		console.assert(
+			text[0] instanceof HTMLTextAreaElement && desc[0] instanceof HTMLTextAreaElement,
+			"Didn't make description placeholder reactive, not textarea elements.",
+		);
+		return builtInput;
 	}
 	static buildIndexInput(index?: number, maxIndex?: number): JQuery<HTMLElement>[] {
 		return [
