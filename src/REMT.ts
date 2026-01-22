@@ -16,6 +16,7 @@ import Util from "./js/utilities/Util";
 import DMailToStaffNote from "./js/components/DMailToStaffNote";
 import OldCommentTicket from "./js/components/OldCommentTicket";
 import DMailBuilder from "./js/components/DMailBuilder";
+import ForumBuilder from "./js/components/ForumBuilder";
 
 export default class REMT {
 
@@ -33,6 +34,7 @@ export default class REMT {
 		DMailToStaffNote,
 		OldCommentTicket,
 		DMailBuilder,
+		ForumBuilder,
     ];
 
     public async run(): Promise<void> {
@@ -116,4 +118,5 @@ interface ComponentListAnnotated extends ComponentList {
     DMailToStaffNote?: DMailToStaffNote,
     OldCommentTicket?: OldCommentTicket,
     DMailBuilder?: DMailBuilder,
+    ForumBuilder?: ForumBuilder,
 }

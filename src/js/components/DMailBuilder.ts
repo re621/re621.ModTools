@@ -3,7 +3,7 @@ import Debug from "../models/Debug";
 import { DialogForm } from "../models/structure/DialogForm";
 import { UtilDOM } from "../utilities/UtilDOM";
 import Component, { JSONObject } from "./Component";
-import { SelectionState } from "./InputBuilderComponent";
+import { GenericItem, GenericItemData, SelectionState } from "./InputBuilderComponent";
 
 /**
  * Allows building personalized DMails from an assortment of smaller piecemeal values.
@@ -138,7 +138,7 @@ export default class DMailBuilder extends Component {
 		Debug.log("Constructing DMail Builder...");
 	}
 
-	public static get defaultButtons(): Array<IBuilderItem> {
+	public static get defaultButtons(): Array<GenericItemData> {
 		return [
 			{
 				label: "Outreach",
@@ -219,7 +219,7 @@ export default class DMailBuilder extends Component {
 		];
 	}
 
-	public Settings: {enabled: boolean, buttons: Array<IBuilderItem>} = {
+	public Settings: {enabled: boolean, buttons: Array<GenericItemData>} = {
 		enabled: true,
 		buttons: DMailBuilder.defaultButtons,
 	};
@@ -296,8 +296,8 @@ export default class DMailBuilder extends Component {
 		this.container.html("");
 
 		for (let i = 0; i < this.Settings.buttons.length; i++) {
-			BuilderItem
-				.constructButtonUi(this.Settings.buttons[i], i)
+			GenericItem
+				.buildUi(this.Settings.buttons[i], i)
 				.appendTo(this.container);
 		}
 	}
@@ -305,15 +305,15 @@ export default class DMailBuilder extends Component {
 	// #region Make Dialogs
 	private makeAddButtonDialog() {
 		DialogForm.getRequestedInput(
-			BuilderItem.addReactiveDescriptionPlaceholder(
-				BuilderItem.buildInput({}, false, this.Settings.buttons.length),
+			GenericItem.addReactiveDescriptionPlaceholder(
+				GenericItem.buildInput({}, false, this.Settings.buttons.length),
 			),
 			"Add Button",
 			(e: FormData) => {
 				// const temp = [...this.Settings.buttons];
 				// temp.push(BuilderItem.parseInput(e));
 				// this.Settings.buttons = temp;
-				this.Settings.buttons = this.Settings.buttons.concat([BuilderItem.parseInput(e)]);
+				this.Settings.buttons = this.Settings.buttons.concat([GenericItem.parseInput(e)]);
 				this.buildButtons();
 			},
 		);
@@ -322,15 +322,15 @@ export default class DMailBuilder extends Component {
 	private makeEditButtonDialog(index: number) {
 		const button = this.Settings.buttons[index];
 		DialogForm.getRequestedInput(
-			BuilderItem.addReactiveDescriptionPlaceholder(
-				BuilderItem.buildInput(button, false, this.Settings.buttons.length - 1),
+			GenericItem.addReactiveDescriptionPlaceholder(
+				GenericItem.buildInput(button, false, this.Settings.buttons.length - 1),
 			),
 			{ title: `Edit "${button.label}" Button`, rejectOnClose: true },
 			(e: FormData) => {
 				// NOTE: The below worked, but I don't know why it did when adding with a simple `.push` seemingly didn't, so I'm forcing it to make a new object.
 				// const temp = this.Settings.buttons;
 				const temp = [...this.Settings.buttons];
-				temp[index] = BuilderItem.parseInput(e);
+				temp[index] = GenericItem.parseInput(e);
 				this.Settings.buttons = temp;
 				this.buildButtons();
 			},
@@ -341,7 +341,7 @@ export default class DMailBuilder extends Component {
 	private makeReorderButtonDialog(index: number) {
 		const button = this.Settings.buttons[index];
 		DialogForm.getRequestedInput(
-			BuilderItem.buildIndexInput(index, this.Settings.buttons.length - 1),
+			GenericItem.buildIndexInput(index, this.Settings.buttons.length - 1),
 			{ title: `Reorder "${button.label}"`, rejectOnClose: true },
 			(e: FormData) => {
 				const newIndex = Number(e.get("button-index"));
@@ -377,7 +377,7 @@ export default class DMailBuilder extends Component {
 	 * @param event 
 	 */
 	private promptAndRemove(event: JQuery.ClickEvent<HTMLElement, undefined, any, HTMLButtonElement>) {
-		const [button, index] = BuilderItem.retrieveAllButtonInfoFromUi(event.target);
+		const [button, index] = GenericItem.retrieveAllButtonInfoFromUi(event.target);
 		if (confirm(`Are you sure you want to delete this button?\n\n\tLabel: ${button.label}\n\tDescription: ${button.description}\n\tText: "${button.text}"`)) {
 			const temp = [...this.Settings.buttons];
 			temp.splice(index, 1);
@@ -398,151 +398,11 @@ export default class DMailBuilder extends Component {
 	}
 
 	private promptAndImport(jsonString: string) {
-		const t = [...this.Settings.buttons], buttons: BuilderItem[] = (JSON.parse(jsonString) as BuilderItem[]).filter(e => t.find(e2 => BuilderItem.doMatch(e, e2)));
+		// const t = [...this.Settings.buttons], buttons: BuilderItem[] = (JSON.parse(jsonString) as BuilderItem[]).filter(e => t.find(e2 => BuilderItem.doMatch(e, e2)));
+		const t = [...this.Settings.buttons], buttons: GenericItemData[] = (JSON.parse(jsonString) as GenericItemData[]).filter(e => t.find(e2 => GenericItem.doMatch(e, e2)));
 		if (confirm(`Add the following buttons?\n\n${buttons.map((e) => `Label: ${e.label}\nDescription: ${e.description}, Text: ${e.text}`).join("\n")}`)) {
 			this.Settings.buttons = t.concat(buttons);
 			this.buildButtons();
 		}
 	}
-}
-
-interface IBuilderItem extends JSONObject {
-	label: string;
-	text: string;
-	description?: string;
-}
-
-class BuilderItem implements IBuilderItem {
-	[ prop: string ]: JSONObject | import("./Component").PrimitiveType | import("./Component").PrimitiveType[] | JSONObject[];
-	label: string;
-	text: string;
-	description?: string;
-	/**
-	 * 
-	 * @param maxIndex The upper bound (inclusive) for the @see IBuilderItem.index field
-	 * @param param0 The starting values for the fields of @see IBuilderItem
-	 * @param index 
-	 * @returns An ordered array of elements compatible for usage with @see DialogForm.getRequestedInput
-	 */
-	static buildInput({label = "", text = "", description = undefined}: {label?: string, text?: string, description?: string} | undefined, index?: number | false, maxIndex?: number): JQuery<HTMLElement>[] {
-		return [
-			$('<label for="button-label">Label</label>'),
-			$('<input id="button-label" name="button-label" required min=1 placeholder="The text that appears on the button." />').val(label || ""),
-			$('<br />'),
-			$('<label for="button-text">Text (whitespace matters)</label>'),
-			$('<textarea id="button-text" name="button-text" required min=1 placeholder="The text that is entered into the message when the button is clicked."></textarea>').val(text || ""),
-			$('<br />'),
-			$('<label for="button-description">Description (Shown on hover)</label>'),
-			$(`<textarea id="button-description" name="button-description"${text ? ` placeholder='"${text}"'` : ""}></textarea>`).val(description || ""),
-			...(index || index === 0 ? [
-				$('<br />'),
-				...BuilderItem.buildIndexInput(index, maxIndex),
-			] : [])
-		];
-	}
-	static addReactiveDescriptionPlaceholder(builtInput: JQuery<HTMLElement>[]) {
-		const text = builtInput[4], desc = builtInput[7];
-		if (text[0] instanceof HTMLTextAreaElement && desc[0] instanceof HTMLTextAreaElement)
-			text[0].addEventListener(
-				"change",
-				(e: InputEvent) => desc.attr("placeholder", `"${(e.target as HTMLTextAreaElement).value}"`),
-			);
-		console.assert(
-			text[0] instanceof HTMLTextAreaElement && desc[0] instanceof HTMLTextAreaElement,
-			"Didn't make description placeholder reactive, not textarea elements.",
-		);
-		return builtInput;
-	}
-	static buildIndexInput(index?: number, maxIndex?: number): JQuery<HTMLElement>[] {
-		return [
-			$('<label for="button-index">Position in listing (First button is at index 0, etc.)</label>'),
-			$(`<input type="number" id="button-index" name="button-index" min=0 ${maxIndex ? `max=${maxIndex} ` : ""}value=${index || 0}/>`),
-		];
-	}
-	/**
-	 * Parses the form generated by @see BuilderItem.buildInput into a @see IBuilderItem
-	 * @param e The data returned by the form generated by @see BuilderItem.buildInput
-	 * @returns The @see IBuilderItem specified by the given data.
-	 */
-	static parseInput(e: FormData, includeIndex = false): IBuilderItem {
-		return {
-			label: e.get("button-label").toString(),
-			text: e.get("button-text").toString(),
-			description: e.get("button-description").toString(),
-			index: includeIndex ? Number(e.get("button-index")) : undefined,
-		};
-	}
-
-	/**
-	 * Parses the form generated by @see BuilderItem.buildInput into a @see IBuilderItem
-	 * @param e The data returned by the form generated by @see BuilderItem.buildInput
-	 * @returns The @see IBuilderItem specified by the given data.
-	 */
-	static parseInputSlim(e: FormData): IBuilderItem {
-		return {
-			label: e.get("button-label").toString(),
-			text: e.get("button-text").toString(),
-			description: e.get("button-description").toString(),
-		};
-	}
-
-	/**
-	 * Removes the given `IBuilderItem` from the given array.
-	 * @param collection 
-	 * @param param1 The `IBuilderItem` fields to filter on
-	 * @returns The given `collection` with all elements matching all of the given properties removed.
-	 */
-	static filterButtonMatch(collection: IBuilderItem[], {label, text, description}: IBuilderItem) {
-		return collection.filter((e) => !BuilderItem.doMatch(e, {label, text, description}));
-	}
-
-	/**
-	 * Checks if 2 `IBuilderItem`s are the same.
-	 * @param button1 
-	 * @param button2 
-	 * @returns True if the 2 represent the same item, false otherwise.
-	 */
-	static doMatch(button1: IBuilderItem, button2: IBuilderItem) {
-		return button1.label === button2.label && button1.text === button2.text && button1.description === button2.description;
-	}
-
-	static constructButtonUi(button: IBuilderItem, index?: number, options?: {classes?: string[]}): JQuery<HTMLButtonElement> {
-		return (
-			(typeof index === "number") ?
-				$<HTMLButtonElement>("<button>").attr("data-index", index) :
-				(typeof button.index === "number") ?
-					$<HTMLButtonElement>("<button>").attr("data-index", button.index) :
-					$<HTMLButtonElement>("<button>"))
-				.attr({
-					class: `re6-mod-tools-input-builder-button ${options?.classes?.length ? ` ${options.classes.join(" ")}`: ""}`,
-					name: button.label,
-					text: button.text,
-					title: button.description || `"${button.text}"`,
-					"data-description": button.description,
-				})
-				.text(button.label);
-	}
-
-	// #region HTMLButtonElement -> IBuilderItem
-	static retrieveButtonInfoFromUi(button: HTMLButtonElement): IBuilderItem {
-		return {
-			label: button.name,
-			text: button.getAttribute("text"),
-			description: button.dataset.description,
-			// index: button.dataset.index,
-		};
-	}
-	static tryRetrieveAllButtonInfoFromUi(button: HTMLButtonElement): [IBuilderItem, number] | IBuilderItem {
-		const o = this.retrieveButtonInfoFromUi(button), i = button.dataset.index;
-		return ((typeof(i) === "string" && i.length <= 0) || !i) ? o : [o, Number(i)];
-	}
-	static retrieveAllButtonInfoFromUi(button: HTMLButtonElement, failSilently = true): [IBuilderItem, number] {
-		const i = button.dataset["index"];
-		if (failSilently ||
-			((typeof(i) === "string" && i.length > 0) ||
-			(typeof(i) === "number" && Number.isFinite(i))))
-			return [this.retrieveButtonInfoFromUi(button), Number(i)];
-		throw new Error(`Index not found ("${i}" retrieved)`);
-	}
-	// #endregion HTMLButtonElement -> IBuilderItem
 }

@@ -144,7 +144,8 @@ export const PageDefinition = {
         any: /^\/forum_topics.*$/,
         list: /^\/forum_topics\/?$/,
         view: /^\/forum_topics\/\d+\/?$/,
-        post: /^\/posts\/\d+\/?$/,
+        post: /^\/forum_posts\/\d+\/?$/,
+		view_or_post: /^\/forum_(?:topic|post)s\/\d+\/?$/,
     },
     comments: {
         list: /^\/comments\/?$/,

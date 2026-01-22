@@ -55,7 +55,7 @@ export class UtilDOM {
 
         if (config.attr === undefined) config.attr = {};
 
-        const $tab = $(`<li>`)[prepend ? "prependTo" : "appendTo"](target);
+        const $tab = $(`<li class="nav-remt-${config.id}">`)[prepend ? "prependTo" : "appendTo"](target);
         const $link = $("<a>")
             .html(config.name)
             .attr({

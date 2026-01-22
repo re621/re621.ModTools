@@ -345,7 +345,7 @@ export type JSONObject = {
     [prop: string]: PrimitiveType | PrimitiveType[] | JSONObject | JSONObject[];
 }
 
-interface Settings extends JSONObject {
+export interface Settings extends JSONObject {
     enabled: boolean;
 }
 
