@@ -3,44 +3,7 @@ import Debug from "../models/Debug";
 import { DialogForm } from "../models/structure/DialogForm";
 import { UtilDOM } from "../utilities/UtilDOM";
 import Component, { JSONObject } from "./Component";
-
-/** A pseudo-enum used to determine what special action is performed when selecting a button. */
-export class SelectionState {
-	private constructor(public readonly index: number, public readonly label: string) {}
-	public static readonly none = new SelectionState(0, "none");
-	public static readonly edit = new SelectionState(1, "edit");
-	public static readonly remove = new SelectionState(2, "remove");
-	public static readonly reorder = new SelectionState(3, "reorder");
-	public static from(v: number | string): SelectionState {
-		switch (v) {
-			case this.none.index:
-			case this.none.label:
-			case this.none.index.toString():
-				return this.none;
-			case this.edit.index:
-			case this.edit.label:
-			case this.edit.index.toString():
-				return this.edit;
-			case this.remove.index:
-			case this.remove.label:
-			case this.remove.index.toString():
-				return this.remove;
-			case this.reorder.index:
-			case this.reorder.label:
-			case this.reorder.index.toString():
-				return this.reorder;
-			default:
-				throw new Error(`Invalid input: ${v} doesn't correspond to a SelectionState.`);
-		}
-	}
-	public static tryFrom(v: number | string): SelectionState | undefined {
-		try {
-			return this.from(v);
-		} catch (error) {
-			return undefined;
-		}
-	}
-}
+import { SelectionState } from "./InputBuilderComponent";
 
 /**
  * Allows building personalized DMails from an assortment of smaller piecemeal values.
