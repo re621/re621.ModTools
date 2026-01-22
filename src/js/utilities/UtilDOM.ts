@@ -28,7 +28,21 @@ export class UtilDOM {
     /**
      * Adds a button to the top-right of the navbar
      * @param config Button configuration
-     * @param target Target element
+     * @param {string} [target=UtilDOM.SETTINGS_TARGET] Target element
+     * @param {boolean} [prepend=false] Prepend to `target`, or append?
+     */
+	public static addSettingsButton(config: SettingsButton, target: string, prepend?: boolean): JQuery<HTMLElement>;
+    /**
+     * Adds a button to the top-right of the navbar
+     * @param config Button configuration
+     * @param {boolean} [prepend=false] Prepend to `SETTINGS_TARGET`, or append?
+     */
+	public static addSettingsButton(config: SettingsButton, prepend?: boolean): JQuery<HTMLElement>;
+    /**
+     * Adds a button to the top-right of the navbar
+     * @param config Button configuration
+     * @param {string | boolean} [target=UtilDOM.SETTINGS_TARGET] Target element
+     * @param prepend Prepend to `target`, or append?
      */
     public static addSettingsButton(config: SettingsButton, target: string | boolean = this.SETTINGS_TARGET, prepend = false): JQuery<HTMLElement> {
 		if (typeof target !== "string") { prepend = target; target = UtilDOM.SETTINGS_TARGET; }
