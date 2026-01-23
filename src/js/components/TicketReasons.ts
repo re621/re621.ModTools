@@ -1,4 +1,5 @@
 import { PageDefinition } from "../models/data/Page";
+import User from "../models/data/User";
 import { DialogForm } from "../models/structure/DialogForm";
 import Component from "./Component";
 
@@ -23,12 +24,14 @@ export default class TicketReasons extends Component {
 	/** @returns {boolean} The resultant state. */
 	private toggleState(): boolean { return this.inRemovalState = !this.inRemovalState; }
 
+	private isEnabled = true;
 	public constructor() {
 		super({
 			constraint: PageDefinition.tickets.view,
 			waitForDOM: "textarea[name='ticket[response]']",
 			dependencies: ["TicketData"],
 		});
+		this.isEnabled = User.isModerator || User.isAdmin;
 	}
 
 	static readonly flagText = "Thank you for the report. However, when a post is not suited for our site, a [i]\"flag\":[/help/flag_for_deletion][/i] is the correct remedy, as the moderators who handle reports can't delete posts (that's our janitors' job). [i]Reports[/i] are for when the [i]conduct[/i] relating to the post is disallowed (e.g. tag warring, removal of valid sources, uploaded with not enough tags, etc.), not for when the post's [i]content[/i] itself is disallowed.\n\n"
@@ -58,6 +61,7 @@ export default class TicketReasons extends Component {
 	};
 
 	protected create(): Promise<void> {
+		if (!this.isEnabled) return;
 		this.input = $("textarea[name='ticket[response]']");
 
 		const wrapper = this.input.parents("td");
