@@ -18,13 +18,26 @@ export default class Component {
     private waitForFocus: boolean;                  // Wait for the window to come into focus before loading
     private dependencies: string[];                 // List of components names that need to be enabled
 
-    // Component settings
-    // The Settings object defines default values and is used to access them via dynamic setters and getters
-    // The SettingsCache object stores the current values of the settings
+	/**
+	 * Component settings
+	 * 
+	 * Defines default values and is used to access them via dynamic setters and getters,
+	 * which are assigned over the values provided by child classes.
+	 * The original values are stored in `SettingsDefaults`.
+	 * 
+	 * The `SettingsCache` object stores the current values of the settings.
+	 */
     public Settings: Settings = {
         enabled: true,
     };
+	/** 
+	 * A persistent store of the default values of `Settings` prior to being
+	 * overwritten with dynamic setters and getters.
+	 */
     private SettingsDefaults: Settings;
+	/**
+	 * The current values of `Settings`; used to minimize reading from storage.
+	 */
     private SettingsCache: Settings;
 
     public Keybinds: KeybindDefinition[] = [];
@@ -332,7 +345,7 @@ export type JSONObject = {
     [prop: string]: PrimitiveType | PrimitiveType[] | JSONObject | JSONObject[];
 }
 
-interface Settings extends JSONObject {
+export interface Settings extends JSONObject {
     enabled: boolean;
 }
 

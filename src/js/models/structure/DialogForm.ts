@@ -1,5 +1,6 @@
 import Modal, { ModalConfig } from "./Modal";
 
+type PromiseCallbacks<T, Err> = { then?: { (e: FormData): T }, onError?: { (e: unknown): Err }, onComplete?: { (): void } }
 /**
  * Creates a draggable window creating a form with the given elements that resolves a promise with the contents of the input elements in a `FormData` object on completion.
  */
@@ -14,6 +15,7 @@ export class DialogForm extends Modal {
 
     private $form: JQuery<HTMLFormElement>;
 
+	/** Normalizes parameters by converting a string parameter for the title to a @see DialogConfig compliant object/preserving the object. */
 	private static _fixTitle(title: string | DialogConfig) { return (typeof(title) === "string") ? { title: title } : title;}
     constructor(elements: JQuery<HTMLElement>[], title?: string);
     constructor(elements: JQuery<HTMLElement>[], options?: DialogConfig);
@@ -50,26 +52,26 @@ export class DialogForm extends Modal {
         });
     }
 
-	public static getRequestedInput<T,U>(
+	public static getRequestedInput<T, Err>(
 		elements: JQuery<HTMLElement>[],
 		title: string | DialogConfig,
 		then?: { (e: FormData): T },
-		onError?: { (e: unknown): U | T },
+		onError?: { (e: unknown): Err | T },
 		onComplete?: { (): void },
-	): Promise<FormData | T | U>;
-	public static getRequestedInput<T,U>(
+	): Promise<FormData | T | Err>;
+	public static getRequestedInput<T, Err>(
 		elements: JQuery<HTMLElement>[],
 		title: string | DialogConfig,
-		callbacks?: { (e: FormData): T } | { then?: { (e: FormData): T }, onError?: { (e: unknown): U }, onComplete?: { (): void } },
-	): Promise<FormData | T | U>;
-	public static getRequestedInput<T,U>(
+		callbacks?: PromiseCallbacks<T, Err>,
+	): Promise<FormData | T | Err>;
+	public static getRequestedInput<T, Err>(
 		elements: JQuery<HTMLElement>[],
 		title: string | DialogConfig,
-		then?: { (e: FormData): T } | { then?: { (e: FormData): T }, onError?: { (e: unknown): U }, onComplete?: { (): void } },
-		onError?: { (e: unknown): U | T },
+		then?: { (e: FormData): T } | PromiseCallbacks<T, Err>,
+		onError?: { (e: unknown): Err | T },
 		onComplete?: { (): void },
-	): Promise<FormData | T | U> {
-		let r: Promise<FormData | T | U> = (new DialogForm(elements, DialogForm._fixTitle(title))).promise;
+	): Promise<FormData | T | Err> {
+		let r: Promise<FormData | T | Err> = (new DialogForm(elements, DialogForm._fixTitle(title))).promise;
 		if (!("call" in then)) ({then, onError, onComplete} = then);
 		if (then) r = r.then(then);
 		if (onError) r = r.catch(onError);

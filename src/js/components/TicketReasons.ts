@@ -33,7 +33,7 @@ export default class TicketReasons extends Component {
 
 	static readonly flagText = "Thank you for the report. However, when a post is not suited for our site, a [i]\"flag\":[/help/flag_for_deletion][/i] is the correct remedy, as the moderators who handle reports can't delete posts (that's our janitors' job). [i]Reports[/i] are for when the [i]conduct[/i] relating to the post is disallowed (e.g. tag warring, removal of valid sources, uploaded with not enough tags, etc.), not for when the post's [i]content[/i] itself is disallowed.\n\n"
 	static readonly flagTextEnd = ", but for future reference, you can flag posts by selecting `Flag` instead of `Report` in the sidebar. If you have trouble remembering, selecting the appropriate reason on either page will redirect you to the correct mechanism if the current one is incorrect."
-	private static createDefaultSettingsButtons() {
+	private static get defaultButtons() {
 		return [
 			{ name: "Handled", text: "This ticket has been handled, thank you!" },
 			{ name: "Reviewed", text: "This ticket has been reviewed, thank you!" },
@@ -45,7 +45,7 @@ export default class TicketReasons extends Component {
 			{ name: "Already (Rec)", text: "Thank you for your report, but this user has already received a record for this matter." },
 			{ name: "Already (Ban)", text: "Thank you for your report, but this user is already banned." },
 			{ name: "Blacklist", text: "Thank you for your report, but this post's content does not violate our \"\":[/help/uploading_guidelines].\nIf you find the contents of the post objectionable, we'd ask you to add the relevant tags (or the post's id itself) to your \"blacklist\":[/help/blacklist]." },
-			{ name: "Takedown", text: "Thank you for your report, but this matter needs to be handled via a takedown request.\nArtists and character owners may request a takedown \"here\":/static/takedown.\nWe do not accept third party takedowns." },
+			{ name: "Takedown", text: "Thank you for your report, but this matter needs to be handled via a takedown request.\nArtists, character owners, & commissioners may request a takedown \"here\":/static/takedown.\nWe do not accept third party takedowns." },
 			{ name: "DMed", text: "Thank you for your report, we've discussed the matter with them." },
 			{ name: "Flag (Del)", text: `${TicketReasons.flagText}The post has already been deleted by our janitors${TicketReasons.flagTextEnd}` },
 			{ name: "Flag (Flag)", text: `${TicketReasons.flagText}The post has already been flagged${TicketReasons.flagTextEnd}` },
@@ -53,7 +53,7 @@ export default class TicketReasons extends Component {
 	}
 	public Settings = {
 		enabled: true,
-		buttons: TicketReasons.createDefaultSettingsButtons(),
+		buttons: TicketReasons.defaultButtons,
 		greeting: "Hi %reporterName%,\n\n",
 	};
 
@@ -198,7 +198,7 @@ export default class TicketReasons extends Component {
 		});
 		this.resetButton.on("click", () => {
 			if (confirm("Are you sure you want to reset the buttons to the defaults?\n\nThis will permanently remove your custom buttons.")) {
-				this.Settings.buttons = TicketReasons.createDefaultSettingsButtons();
+				this.Settings.buttons = TicketReasons.defaultButtons;
 				this.buildButtons();
 			}
 
