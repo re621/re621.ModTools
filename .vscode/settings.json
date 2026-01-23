@@ -93,5 +93,7 @@
 	],
 	"deepscan.enable": true,
 	"eslint.format.enable": true,
-	"eslint.lintTask.enable": true
+	"eslint.lintTask.enable": true,
+	"iridium.npm.packageManager": "bun",
+	"npm.packageManager": "bun"
 }
