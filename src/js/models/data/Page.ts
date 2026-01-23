@@ -141,11 +141,36 @@ export const PageDefinition = {
         settings: /^\/users\/\.+\/edit\/?$/,
     },
     forums: {
+        any: /^\/forum_(?:topic|post)s.*$/,
+        list: /^\/forum_(?:topic|post)s\/?$/,
+        view: /^\/forum_(?:topic|post)s\/\d+\/?$/,
+        view_or_post: /^\/forum_(?:topic|post)s\/\d+\/?$/,
+        topics: {
+            any: /^\/forum_topics.*$/,
+            list: /^\/forum_topics\/?$/,
+            view: /^\/forum_topics\/\d+\/?$/,
+            new: /^\/forum_topics\/new/,
+        },
+        posts: {
+            any: /^\/forum_posts.*$/,
+            list: /^\/forum_posts\/?$/,
+            view: /^\/forum_posts\/\d+\/?$/,
+            new: /^\/forum_posts\/new/,
+            search: /^\/forum_posts(?:\?commit=Search|(?:\/|\?)search)/,
+        }
+    },
+    forum_topics: {
         any: /^\/forum_topics.*$/,
         list: /^\/forum_topics\/?$/,
         view: /^\/forum_topics\/\d+\/?$/,
-        post: /^\/forum_posts\/\d+\/?$/,
-		view_or_post: /^\/forum_(?:topic|post)s\/\d+\/?$/,
+        new: /^\/forum_topics\/new/,
+    },
+    forum_posts: {
+        any: /^\/forum_posts.*$/,
+        list: /^\/forum_posts\/?$/,
+        view: /^\/forum_posts\/\d+\/?$/,
+        new: /^\/forum_posts\/new/,
+        search: /^\/forum_posts(?:\?commit=Search|(?:\/|\?)search)/,
     },
     comments: {
         list: /^\/comments\/?$/,

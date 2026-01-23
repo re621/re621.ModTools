@@ -5,6 +5,7 @@ import Component from "./Component";
 import { GenericBuilderComponent, GenericItem, GenericItemData, IComponentBuilder } from "./InputBuilderComponent";
 
 export default class ForumBuilder extends Component implements IComponentBuilder<GenericItemData> {
+	private readonly builders: GenericBuilderComponent[] = [];
 	private builder: GenericBuilderComponent;
 	public Settings: {enabled: boolean, buttons: Array<GenericItemData>} = {
 		enabled: true,
@@ -13,10 +14,11 @@ export default class ForumBuilder extends Component implements IComponentBuilder
 	public constructor() {
 		super({
 			constraint: PageDefinition.forums.view_or_post,
-			waitForDOM: ".dtext_formatter",
+			// waitForDOM: ".dtext_formatter > textarea[name='forum_post[body]']:focus",
+			waitForDOM: ".new_forum_post .dtext_formatter",
 		});
 		Debug.log(`Constructing Forum Builder? ${Page.matches(PageDefinition.forums.view_or_post)}`);
-		console.log(`Constructing Forum Builder? ${Page.matches(PageDefinition.forums.view_or_post)}`);
+		// console.log(`Constructing Forum Builder? ${Page.matches(PageDefinition.forums.view_or_post)}`);
 	}
 	get defaultButtons(): GenericItemData[] {
 		return [
@@ -61,7 +63,7 @@ export default class ForumBuilder extends Component implements IComponentBuilder
 
 	protected create(): Promise<void> {
 		Debug.log("Creating Forum Builder...");
-		console.log("Creating Forum Builder...");
+		// console.log("Creating Forum Builder...");
 		UtilDOM.addStyle(`
 			.re6-mod-tools-button-container {
 				display: flex;
@@ -72,13 +74,27 @@ export default class ForumBuilder extends Component implements IComponentBuilder
 				flex: none;
 			}
 		`);
+		// $(".forum_post_body").each((i, e) => {
+		// 	this.builders.push(new GenericBuilderComponent(
+		// 		this,
+		// 		$<HTMLDivElement>("<div>")
+		// 			.addClass("responses re6-mod-tools-button-container")
+		// 			.appendTo($(".forum_post_body:has(textarea[name='forum_post[body]']:focus)")),
+		// 			// .appendTo($("form.new_forum_post .forum_post_body")),
+		// 		$("textarea[name='forum_post[body]']:focus"),
+		// 		GenericItem.defaultEmptyInstance,
+		// 		GenericItem.instanceFactory,
+		// 		"Forum Responses Settings",
+		// 	));
+		// })
 		this.builder = new GenericBuilderComponent(
 			this,
 			$<HTMLDivElement>("<div>")
 				.addClass("responses re6-mod-tools-button-container")
-				.appendTo($(".forum_post_body")),
-				// .appendTo($("form.new_forum_post .forum_post_body")),
-			$("textarea[name='forum_post[body]']"),
+				// .appendTo($(".forum_post_body:has(textarea[name='forum_post[body]']:focus)")),
+				.appendTo($("form.new_forum_post .forum_post_body")),
+			// $("form.new_forum_post textarea[name='forum_post[body]']:focus"),
+			$("form.new_forum_post textarea[name='forum_post[body]']"),
 			GenericItem.defaultEmptyInstance,
 			GenericItem.instanceFactory,
 			"Forum Responses Settings"

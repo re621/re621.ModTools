@@ -5,7 +5,11 @@ import { DialogForm } from "../models/structure/DialogForm";
 import { UtilDOM } from "../utilities/UtilDOM";
 import Component, { JSONObject, Settings } from "./Component";
 
-/** A pseudo-enum used to determine what special action is performed when selecting a button. */
+/**
+ * A pseudo-enum used to determine what special action is performed when selecting a button.
+ * 
+ * @todo Make sister enum for selectable actions in the settings popup.
+ */
 export class SelectionState {
 	private constructor(public readonly index: number, public readonly label: string) {}
 	/** Index: 0 */
@@ -161,14 +165,16 @@ export abstract class IInputBuilder<T extends IInputBuilderData> {
 	abstract isEqualTo(other: T): boolean;
 }
 
-export interface IInputBuilderFull<T extends IInputBuilderIndexedData> extends IInputBuilder<T> {
-	buildFullUI(): JQuery<HTMLButtonElement>;
-	buildFullInput(maxIndex?: number): JQuery<HTMLElement>[];
-	buildIndexInput(maxIndex?: number): JQuery<HTMLElement>[];
+export abstract class IInputBuilderFull<T extends IInputBuilderIndexedData> extends IInputBuilder<T> {
+	abstract buildFullUI(): JQuery<HTMLButtonElement>;
+	abstract buildFullInput(maxIndex?: number): JQuery<HTMLElement>[];
+	abstract buildIndexInput(maxIndex?: number): JQuery<HTMLElement>[];
 }
 
 // #region Component
+/** Just for typing */
 interface IComponentBuilderSettings<T extends IInputBuilderData> extends Settings { buttons: T[] }
+
 /**
  * The `Component` that defers the builder management to `InputBuilderComponent`.
  * 
@@ -182,12 +188,38 @@ export interface IComponentBuilder<T extends IInputBuilderData> extends Componen
 
 export type EmptyIInputBuilderDataFactory<T extends IInputBuilderData> = () => T;
 export type IInputBuilderFactory<T extends IInputBuilderData, U extends IInputBuilder<T>> = (data: T) => U;
-/** Simplifies the process of creating a system like `TicketReasons` & `DMailBuilder`. */
+
+/** 
+ * Simplifies the process of creating a system like `TicketReasons` & `DMailBuilder`.
+ * 
+ * @todo Add template support
+ * @todo Allow reordering while editing.
+ */
 export abstract class InputBuilderComponent<T extends IInputBuilderData, U extends IInputBuilder<T>> {
 	protected readonly settingsButton: JQuery<HTMLElement>;
+	public readonly buttonsChangedEvent: VoidFunction[] = [];
+
+	/** Shorthand for `this.parentObj.Settings.buttons`. */
+	protected get buttons(): T[] { return this.parentObj.Settings.buttons; }
+
 	/**
 	 * 
-	 * @param parentObj The actual `Component`.
+	 * @param cb The callback to wrap the access & assignment operations in.
+	 * @param param1 
+	 * @param {boolean} [param1.giveCopied=true] Send a shallow copy of the array to the callback?
+	 * @param {boolean} [param1.rerenderButtons=true] Call @see InputBuilderComponent.buildButtons after?
+	 * @param {boolean} [param1.fireEvent=true] Execute @see InputBuilderComponent.buttonsChangedEvent callbacks after?
+	 */
+	protected modifyButtons(cb: { (buttons: T[]): T[] }, param1: { giveCopied?: boolean, rerenderButtons?: boolean, fireEvent?: boolean } = { giveCopied: true, rerenderButtons: true, fireEvent: true }) {
+		const { giveCopied, rerenderButtons, fireEvent } = param1;
+		this.parentObj.Settings.buttons = cb(giveCopied ? [...this.parentObj.Settings.buttons] : this.parentObj.Settings.buttons);
+		if (rerenderButtons) this.buildButtons();
+		if (fireEvent) this.buttonsChangedEvent.forEach(e => e());
+	}
+
+	/**
+	 * 
+	 * @param parentObj The actual @see Component . Solely used for accessing & assigning to @see Component.Settings
 	 * @param container The element that contains the input buttons.
 	 * @param input The main text entry box.
 	 * @param defaultDataFactory Function that creates the default new, empty button instance.
@@ -204,14 +236,19 @@ export abstract class InputBuilderComponent<T extends IInputBuilderData, U exten
 		protected readonly settingsLabel = "Builder Settings",
 		protected readonly settingsId = settingsLabel.toLowerCase().replace(/(\s+)|[^-a-z]+/g, (_, g1) => g1 ? "-" : ""),
 	) {
-		container.on("click", "button", (e) => this.onResponseClick(e));
 		this.settingsButton = UtilDOM.addSettingsButton({
 			id: settingsId,
-			name: settingsId,
+			name: settingsLabel,
 			onClick: e => this.onSettingsButton(e),
 		}, true);
+		if (input.length < 1) {
+			Debug.log("No input selected; canceling proper initialization.");
+			return;
+		}
+		container.on("click", "button", (e) => this.onResponseClick(e));
 		this.buildButtons();
 	}
+
 	// #region States
 	protected state = SelectionState.none;
 	public get inRemovalState() { return this.state === SelectionState.remove; }
@@ -225,6 +262,7 @@ export abstract class InputBuilderComponent<T extends IInputBuilderData, U exten
 	 * @param _$element The settings button.
 	 * @returns false to stop propagation & prevent default.
 	 */
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	protected onSettingsButton(_$element: JQuery<HTMLElement> = this.settingsButton): false {
 		DialogForm.getRequestedInput(
 			[
@@ -232,7 +270,9 @@ export abstract class InputBuilderComponent<T extends IInputBuilderData, U exten
 				$(`<button type="submit" name="selectedAction" value="${SelectionState.edit.index}">Edit Button...</button>`),
 				$(`<button type="submit" name="selectedAction" value="${SelectionState.remove.index}">Remove Buttons...</button>`),
 				$(`<button type="submit" name="selectedAction" value="${SelectionState.reorder.index}">Reorder Buttons...</button>`),
-				$(`<button type="submit" name="selectedAction" value="reset">Reset Buttons...</button>`),
+				$(`<button type="submit" name="selectedAction" value="resetButtons">Reset Buttons</button>`),
+				$(`<button type="submit" name="selectedAction" value="exportButtons">Export Buttons</button>`),
+				$(`<button type="submit" name="selectedAction" value="importButtons">Import Buttons</button>`),
 				$(`<button type="submit" name="selectedAction" value="-1">Cancel</button>`),
 			],
 			this.settingsLabel,
@@ -249,8 +289,14 @@ export abstract class InputBuilderComponent<T extends IInputBuilderData, U exten
 						break;
 					default:
 						switch (e.get("selectedAction")) {
-							case "reset":
+							case "resetButtons":
 								this.promptAndReset();
+								break;
+							case "importButtons":
+								this.makeImportButtonDialog();
+								break;
+							case "exportButtons":
+								this.makeExportDialog();
 								break;
 						
 							default:
@@ -291,65 +337,65 @@ export abstract class InputBuilderComponent<T extends IInputBuilderData, U exten
 	protected makeAddButtonDialog() {
 		const button = this.instanceFactory(this.defaultDataFactory());
 		DialogForm.getRequestedInput(
-			// button.buildInput({}, false, this.parentObj.Settings.buttons.length),
 			button.buildInput(),
-			button.dialogTitleSettings.addDialogTitle, // button.addDialogTitle,
+			button.dialogTitleSettings.addDialogTitle,
 			(e: FormData) => {
-				const temp = [...this.parentObj.Settings.buttons];
-				temp.push(button.updateFromFormData(e));
-				this.parentObj.Settings.buttons = temp;
-				this.buildButtons();
+				this.modifyButtons(temp => {
+					temp.push(button.updateFromFormData(e));
+					return temp;
+				});
 			},
 		);
 	}
 
 	protected makeEditButtonDialog(index: number) {
-		const button = this.instanceFactory(this.parentObj.Settings.buttons[index]);
+		const button = this.instanceFactory(this.buttons[index]);
 		DialogForm.getRequestedInput(
-			// BuilderItem.buildInput(button, false, this.parentObj.Settings.buttons.length - 1),
 			button.buildInput(),
-			button.dialogTitleSettings.editDialogTitle, // button.editDialogTitle,
+			button.dialogTitleSettings.editDialogTitle,
 			(e: FormData) => {
-				const temp = [...this.parentObj.Settings.buttons];
-				temp[index] = button.updateFromFormData(e);
-				this.parentObj.Settings.buttons = temp;
-				this.buildButtons();
+				this.modifyButtons(temp => {
+					temp[index] = button.updateFromFormData(e);
+					return temp;
+				});
 			},
 		);
 	}
 
 	protected makeReorderButtonDialog(index: number) {
-		const button = this.instanceFactory(this.parentObj.Settings.buttons[index]);
+		const button = this.instanceFactory(this.buttons[index]);
 		DialogForm.getRequestedInput(
-			button.buildIndexInput(this.parentObj.Settings.buttons.length - 1, index),
-			button.dialogTitleSettings.reorderDialogTitle, // button.reorderDialogTitle,
+			button.buildIndexInput(this.buttons.length - 1, index),
+			button.dialogTitleSettings.reorderDialogTitle,
 			(e: FormData) => {
 				const newIndex = Number(e.get("button-index"));
-				const temp = [...this.parentObj.Settings.buttons];
 				if (newIndex === index) return;
-				let d = temp.splice(newIndex, 0, button.updateFromFormData(e));
-				console.assert(d.length === 0);
-				d = temp.splice(index + (newIndex < index ? 1 : 0), 1);
-				console.assert(d.length === 1);
-				this.parentObj.Settings.buttons = temp;
-				this.buildButtons();
+				this.modifyButtons(temp => {
+					/* temp.splice(newIndex, 0, button.updateFromFormData(e));
+					temp.splice(index + (newIndex < index ? 1 : 0), 1);
+					return temp; */
+					temp[index] = button.updateFromFormData(e);
+					return InputBuilderComponent.changeElementPosition(temp, index, newIndex);
+				});
 			},
 		);
 	}
-	// #endregion Make Dialogs
 
-	/** Empties the `container` & fills it with the full UI for `parentObj.Settings.buttons`. */
-	protected buildButtons() {
-		this.container.html("");
-
-		for (let i = 0; i < this.parentObj.Settings.buttons.length; i++) {
-			const button = this.parentObj.Settings.buttons[i];
-			this
-				.instanceFactory(button)
-				.buildFullUi(button.index !== undefined ? button.index : i)
-				.appendTo(this.container);
-		}
+	private makeImportButtonDialog() {
+		DialogForm.getRequestedInput(
+			[
+				$('<label for="json-string">Buttons to import (in form provided by exporter):</label>'),
+				$('<textarea id="json-string" name="json-string" required min=1></textarea>'),
+			],
+			"Import Buttons...",
+			(e: FormData) => this.promptAndImport(e.get("json-string").toString()),
+		);
 	}
+
+	private makeExportDialog() {
+		alert(`The following is the string representation of your buttons; this can be used to import them.\n\n${JSON.stringify(this.buttons, undefined, 4)}`);
+	}
+	// #endregion Make Dialogs
 
 	private onResponseClick(event: JQuery.ClickEvent<HTMLElement, undefined, any, HTMLButtonElement>) {
 		const button = $(event.currentTarget);
@@ -369,11 +415,12 @@ export abstract class InputBuilderComponent<T extends IInputBuilderData, U exten
 				Debug.log("InputBuilderComponent: Invalid State!?!?");
 			// eslint-disable-next-line no-fallthrough
 			case SelectionState.none: {
-				// TODO: Template variables
-				const priorLength = this.input.val().toString().length,
+				/** @todo Template variables */
+				const priorLength = this.input.val()?.toString()?.length || 0,
 					textLength = button.attr("text").length;
 				this.input.val(`${this.input.val()}${button.attr("text")}`);
 				// If the user can't hover, then auto-select the added text so they can easily delete it.
+				/** @todo Make this a setting you can toggle on desktop. */
 				if (!matchMedia("(hover: hover)").matches) {
 					this.input[0].setSelectionRange(priorLength, priorLength + textLength, "forward");
 				}
@@ -394,8 +441,7 @@ export abstract class InputBuilderComponent<T extends IInputBuilderData, U exten
 	 */
 	private promptAndReset() {
 		if (confirm("Are you sure you want to reset the buttons to the defaults?\n\nThis will permanently remove your custom buttons.")) {
-			this.parentObj.Settings.buttons = [...this.parentObj.defaultButtons];
-			this.buildButtons();
+			this.modifyButtons(buttons => buttons);
 		}
 	}
 
@@ -407,21 +453,47 @@ export abstract class InputBuilderComponent<T extends IInputBuilderData, U exten
 	protected promptAndRemove(event: JQuery.ClickEvent<HTMLElement, undefined, any, HTMLButtonElement>) {
 		const [button, index] = GenericItem.retrieveAllButtonInfoFromUi(event.target);
 		if (confirm(`Are you sure you want to delete this button?\n\n\tLabel: ${button.label}\n\tDescription: ${button.description}\n\tText: "${button.text}"`)) {
-			const temp = [...this.parentObj.Settings.buttons];
-			temp.splice(index, 1);
-			this.parentObj.Settings.buttons = temp;
-			this.buildButtons();
+			this.modifyButtons(temp => {
+				temp.splice(index, 1);
+				return temp;
+			});
 		}
 	}
 
+	/**
+	 * Deserializes the given buttons & prompts the user to add the given buttons to the collection, filtering pre-existing buttons.
+	 * 
+	 * @todo Filter duplicates within the input itself.
+	 */
 	private promptAndImport(jsonString: string) {
-		// const t = [...this.parentObj.Settings.buttons], buttons: BuilderItem[] = (JSON.parse(jsonString) as BuilderItem[]).filter(e => t.find(e2 => BuilderItem.doMatch(e, e2)));
-		const t = [...this.parentObj.Settings.buttons], buttons: T[] = (JSON.parse(jsonString) as T[]).filter(e => t.find(e2 => this.instanceFactory(e).isEqualTo(e2)));
+		const t = [...this.buttons],
+			buttons: T[] = (JSON.parse(jsonString) as T[]).filter(e => !t.find(e2 => this.instanceFactory(e).isEqualTo(e2)));
 		if (confirm(`Add the following buttons?\n\n${buttons.map((e) => `Label: ${e.label}\nDescription: ${e.description}, Text: ${e.text}`).join("\n")}`)) {
 			this.parentObj.Settings.buttons = t.concat(buttons);
 			this.buildButtons();
 		}
 	}
+
+	// #region Minor Utility Functions
+	/** Empties the `container` & fills it with the full UI for `parentObj.Settings.buttons`. */
+	protected buildButtons() {
+		this.container.html("");
+
+		for (let i = 0; i < this.buttons.length; i++) {
+			const button = this.buttons[i];
+			this
+				.instanceFactory(button)
+				.buildFullUi(button.index !== undefined ? button.index : i)
+				.appendTo(this.container);
+		}
+	}
+
+	public static changeElementPosition<A>(array: A[], oldIndex: number, newIndex: number) {
+		array.splice(newIndex, 0, array[oldIndex]);
+		array.splice(oldIndex + (newIndex < oldIndex ? 1 : 0), 1);
+		return array;
+	}
+	// #endregion Minor Utility Functions
 }
 // #endregion Component
 
@@ -608,8 +680,6 @@ export class GenericItem extends IInputBuilder<GenericItemData> /* implements IB
 	// #endregion HTMLButtonElement -> IBuilderItem
 }
 
-export class GenericBuilderComponent extends InputBuilderComponent<GenericItemData, GenericItem> {
-	
-}
+export class GenericBuilderComponent extends InputBuilderComponent<GenericItemData, GenericItem> {}
 // #endregion Generic Button Impl.
 

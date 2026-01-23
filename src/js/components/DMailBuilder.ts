@@ -13,6 +13,7 @@ import { GenericItem, GenericItemData, SelectionState } from "./InputBuilderComp
  * @todo Add button groups?
  * @todo Refactor to use interface
  * @todo Persist edit/remove/reorder mode until manually canceled by user
+ * @todo Convert to use InputBuilderComponent
  */
 export default class DMailBuilder extends Component {
 	// #region Template Variable Stuff
@@ -274,7 +275,7 @@ export default class DMailBuilder extends Component {
 			// eslint-disable-next-line no-fallthrough
 			case SelectionState.none: {
 				// TODO: Template variables
-				const priorLength = this.input.val().toString().length,
+				const priorLength = this.input.val()?.toString()?.length || 0,
 					textLength = button.attr("text").length;
 				this.input.val(`${this.input.val()}${button.attr("text")}`);
 				// If the user can't hover, then auto-select the added text so they can easily delete it.
@@ -398,8 +399,8 @@ export default class DMailBuilder extends Component {
 	}
 
 	private promptAndImport(jsonString: string) {
-		// const t = [...this.Settings.buttons], buttons: BuilderItem[] = (JSON.parse(jsonString) as BuilderItem[]).filter(e => t.find(e2 => BuilderItem.doMatch(e, e2)));
-		const t = [...this.Settings.buttons], buttons: GenericItemData[] = (JSON.parse(jsonString) as GenericItemData[]).filter(e => t.find(e2 => GenericItem.doMatch(e, e2)));
+		const t = [...this.Settings.buttons],
+			buttons: GenericItemData[] = (JSON.parse(jsonString) as GenericItemData[]).filter(e => !t.find(e2 => GenericItem.doMatch(e, e2)));
 		if (confirm(`Add the following buttons?\n\n${buttons.map((e) => `Label: ${e.label}\nDescription: ${e.description}, Text: ${e.text}`).join("\n")}`)) {
 			this.Settings.buttons = t.concat(buttons);
 			this.buildButtons();
