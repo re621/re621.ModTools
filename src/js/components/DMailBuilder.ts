@@ -3,7 +3,7 @@ import Debug from "../models/Debug";
 import { DialogForm } from "../models/structure/DialogForm";
 import { UtilDOM } from "../utilities/UtilDOM";
 import Component, { JSONObject } from "./Component";
-import { GenericItem, GenericItemData, SelectionState } from "./InputBuilderComponent";
+import { GenericItem, GenericItemData, InputBuilderComponent, SelectionState } from "./InputBuilderComponent";
 
 /**
  * Allows building personalized DMails from an assortment of smaller piecemeal values.
@@ -227,22 +227,13 @@ export default class DMailBuilder extends Component {
 
 	protected create(): Promise<void> {
 		Debug.log("Creating DMail Builder...");
-		UtilDOM.addStyle(`
-			.re6-mod-tools-button-container {
-				display: flex;
-				flex-wrap: wrap;
-			}
-			.re6-mod-tools-button-container > button {
-				margin: 0px .25rem;
-				flex: none;
-			}
-		`);
+		UtilDOM.addStyle(InputBuilderComponent.defaultStyle);
 		this.input = $("textarea[name='dmail[body]']");
 		const wrapper = $("form.new_dmail .dmail_body");
 		UtilDOM.addSettingsButton({
 			id: "dmail-responses-settings",
 			name: "Responses Settings",
-			onClick: (/* e */) => this.onSettingsButtonClick(/* e */),
+			onClick: () => this.onSettingsButtonClick(),
 		}, true);
 		this.container = $<HTMLDivElement>("<div>")
 			.addClass("responses re6-mod-tools-button-container")
@@ -311,9 +302,6 @@ export default class DMailBuilder extends Component {
 			),
 			"Add Button",
 			(e: FormData) => {
-				// const temp = [...this.Settings.buttons];
-				// temp.push(BuilderItem.parseInput(e));
-				// this.Settings.buttons = temp;
 				this.Settings.buttons = this.Settings.buttons.concat([GenericItem.parseInput(e)]);
 				this.buildButtons();
 			},
@@ -328,8 +316,6 @@ export default class DMailBuilder extends Component {
 			),
 			{ title: `Edit "${button.label}" Button`, rejectOnClose: true },
 			(e: FormData) => {
-				// NOTE: The below worked, but I don't know why it did when adding with a simple `.push` seemingly didn't, so I'm forcing it to make a new object.
-				// const temp = this.Settings.buttons;
 				const temp = [...this.Settings.buttons];
 				temp[index] = GenericItem.parseInput(e);
 				this.Settings.buttons = temp;

@@ -1,5 +1,10 @@
 {
+	"typeAcquisition": {
+		"enable": true,
+		"include": ["jquery"]
+	},
     "compilerOptions": {
+        "rootDir": "./src",
         "outDir": "./dist/",
         "noImplicitAny": false,
         "module": "es6",

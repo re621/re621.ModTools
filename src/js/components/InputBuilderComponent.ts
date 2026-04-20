@@ -196,6 +196,16 @@ export type IInputBuilderFactory<T extends IInputBuilderData, U extends IInputBu
  * @todo Allow reordering while editing.
  */
 export abstract class InputBuilderComponent<T extends IInputBuilderData, U extends IInputBuilder<T>> {
+	public static readonly defaultStyle = `
+		.re6-mod-tools-button-container {
+			display: flex;
+			flex-wrap: wrap;
+		}
+		.re6-mod-tools-button-container > button {
+			margin: 0px .25rem;
+			flex: none;
+		}
+	`;
 	protected readonly settingsButton: JQuery<HTMLElement>;
 	public readonly buttonsChangedEvent: VoidFunction[] = [];
 
@@ -235,7 +245,9 @@ export abstract class InputBuilderComponent<T extends IInputBuilderData, U exten
 		protected readonly instanceFactory: IInputBuilderFactory<T, U>,
 		protected readonly settingsLabel = "Builder Settings",
 		protected readonly settingsId = settingsLabel.toLowerCase().replace(/(\s+)|[^-a-z]+/g, (_, g1) => g1 ? "-" : ""),
+		public readonly style = InputBuilderComponent.defaultStyle,
 	) {
+		UtilDOM.addStyle(style);
 		this.settingsButton = UtilDOM.addSettingsButton({
 			id: settingsId,
 			name: settingsLabel,
