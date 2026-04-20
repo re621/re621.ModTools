@@ -31,9 +31,18 @@ export default class DMailBuilder extends Component {
 	}
 	// #endregion Template Variable Stuff
 
-	private container: JQuery<HTMLDivElement>;
+	private _container?: JQuery<HTMLDivElement>;
+	private get container(): JQuery<HTMLDivElement> {
+		if (!this._container) throw Error("DMailBuilder.container is not yet defined");
+		return this._container;
+	}
 	/** The main text entry box. */
-	private input: JQuery<HTMLTextAreaElement>;
+	private _input?: JQuery<HTMLTextAreaElement>;
+	/** The main text entry box. */
+	private get input(): JQuery<HTMLTextAreaElement> {
+		if (!this._input) throw Error("DMailBuilder.input is not yet defined");
+		return this._input;
+	}
 
 	// #region States
 	private state = SelectionState.none;
@@ -74,7 +83,7 @@ export default class DMailBuilder extends Component {
 			},
 			(e: FormData) => {
 				Debug.log(`Return from DMail Builder Settings w/ value of ${e.get("selectedAction")}`);
-				const v = SelectionState.tryFrom(e.get("selectedAction").toString());
+				const v = SelectionState.tryFrom(e.get("selectedAction")?.toString() || "");
 				switch (v) {
 					case SelectionState.none: // Add
 						this.makeAddButtonDialog();
@@ -178,7 +187,7 @@ export default class DMailBuilder extends Component {
 				].join("\n"),
 			},
 			{
-				label: "AI: Too Early",
+				label: "AI: Too Early", /* cspell:disable-next-line */
 				text: `The earliest appearance of this exact image file makes the use of AI image materials extremely unlikely; OpenAI's first release of DALL-E was January 2021, and open-source furry-oriented models did not appear until December (with a few of the longest-enduring models not existing until 2023.) An additional thing to keep in mind about these early resources is that they produced lower-quality results, as people hadn't gotten to fine-tuning them yet, nor developing techniques for both image generation & how to best hide their giveaways.`,
 			},
 			{
@@ -228,14 +237,14 @@ export default class DMailBuilder extends Component {
 	protected create(): Promise<void> {
 		Debug.log("Creating DMail Builder...");
 		UtilDOM.addStyle(InputBuilderComponent.defaultStyle);
-		this.input = $("textarea[name='dmail[body]']");
+		this._input = $("textarea[name='dmail[body]']");
 		const wrapper = $("form.new_dmail .dmail_body");
 		UtilDOM.addSettingsButton({
 			id: "dmail-responses-settings",
 			name: "Responses Settings",
 			onClick: () => this.onSettingsButtonClick(),
 		}, true);
-		this.container = $<HTMLDivElement>("<div>")
+		this._container = $<HTMLDivElement>("<div>")
 			.addClass("responses re6-mod-tools-button-container")
 			.appendTo(wrapper)
 			.on("click", "button", (e) => this.onResponseClick(e));
@@ -244,7 +253,7 @@ export default class DMailBuilder extends Component {
 
 		this.buildButtons();
 
-		return;
+		return Promise.resolve();
 	}
 
 	private onResponseClick(event: JQuery.ClickEvent<HTMLElement, undefined, any, HTMLButtonElement>) {
@@ -267,7 +276,7 @@ export default class DMailBuilder extends Component {
 			case SelectionState.none: {
 				// TODO: Template variables
 				const priorLength = this.input.val()?.toString()?.length || 0,
-					textLength = button.attr("text").length;
+					textLength = button.attr("text")?.length || 0;
 				this.input.val(`${this.input.val()}${button.attr("text")}`);
 				// If the user can't hover, then auto-select the added text so they can easily delete it.
 				if (!matchMedia("(hover: hover)").matches) {
@@ -350,7 +359,7 @@ export default class DMailBuilder extends Component {
 				$('<textarea id="json-string" name="json-string" required min=1></textarea>'),
 			],
 			"Import Buttons...",
-			(e: FormData) => this.promptAndImport(e.get("json-string").toString()),
+			(e: FormData) => this.promptAndImport(e.get("json-string")?.toString() || "[]"),
 		);
 	}
 
@@ -386,8 +395,11 @@ export default class DMailBuilder extends Component {
 
 	private promptAndImport(jsonString: string) {
 		const t = [...this.Settings.buttons],
-			buttons: GenericItemData[] = (JSON.parse(jsonString) as GenericItemData[]).filter(e => !t.find(e2 => GenericItem.doMatch(e, e2)));
-		if (confirm(`Add the following buttons?\n\n${buttons.map((e) => `Label: ${e.label}\nDescription: ${e.description}, Text: ${e.text}`).join("\n")}`)) {
+			buttons: GenericItemData[] = (JSON.parse(jsonString) as GenericItemData[]).filter(e => !t.find(e2 => GenericItem.doMatch(e, e2))),
+			prompt = buttons.length > 0 ?
+			`Add the following buttons?\n\n${buttons.map((e) => `Label: ${e.label}\nDescription: ${e.description}, Text: ${e.text}`).join("\n")}`:
+			`There are no new buttons to be added; should we go through the motions anyways?`;
+		if (confirm(prompt)) {
 			this.Settings.buttons = t.concat(buttons);
 			this.buildButtons();
 		}

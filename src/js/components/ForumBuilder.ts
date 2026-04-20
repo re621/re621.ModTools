@@ -8,7 +8,11 @@ import { GenericBuilderComponent, GenericItem, GenericItemData, IComponentBuilde
  */
 export default class ForumBuilder extends Component implements IComponentBuilder<GenericItemData> {
 	private readonly builders: GenericBuilderComponent[] = [];
-	private builder: GenericBuilderComponent;
+	private _builder?: GenericBuilderComponent;
+	private get builder(): GenericBuilderComponent {
+		if (!this._builder) throw Error("ForumBuilder.builder is not yet defined");
+		return this._builder;
+	}
 	public Settings: {enabled: boolean, buttons: Array<GenericItemData>} = {
 		enabled: true,
 		buttons: this.defaultButtons,
@@ -31,7 +35,7 @@ export default class ForumBuilder extends Component implements IComponentBuilder
 
 	protected create(): Promise<void> {
 		Debug.log("Creating Forum Builder...");
-		this.builder = new GenericBuilderComponent(
+		this._builder = new GenericBuilderComponent(
 			this,
 			$<HTMLDivElement>("<div>")
 				.addClass("responses re6-mod-tools-button-container")
@@ -41,6 +45,6 @@ export default class ForumBuilder extends Component implements IComponentBuilder
 			GenericItem.instanceFactory,
 			"Forum Responses Settings"
 		);
-		return;
+		return Promise.resolve();
 	}
 }

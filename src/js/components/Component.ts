@@ -34,7 +34,15 @@ export default class Component {
 	 * A persistent store of the default values of `Settings` prior to being
 	 * overwritten with dynamic setters and getters.
 	 */
-    private SettingsDefaults: Settings;
+	private _SettingsDefaults?: Settings;
+	/** 
+	 * A persistent store of the default values of `Settings` prior to being
+	 * overwritten with dynamic setters and getters.
+	 */
+	private get SettingsDefaults(): Settings {
+		if (!this._SettingsDefaults) throw Error("Component.SettingsDefaults is not yet defined.");
+		return this._SettingsDefaults;
+	}
 	/**
 	 * The current values of `Settings`; used to minimize reading from storage.
 	 */
@@ -66,7 +74,7 @@ export default class Component {
 
     /** Loads the settings from storage, and sets up listeners to sync them across tabs */
     public async bootstrapSettings(settings?: Settings): Promise<void> {
-        this.SettingsDefaults = { enabled: true };
+        this._SettingsDefaults = { enabled: true };
 
         // Load in the saved settings values
         for (const [key, defaultValue] of Object.entries(settings || this.Settings)) {

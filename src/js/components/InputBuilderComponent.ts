@@ -289,7 +289,7 @@ export abstract class InputBuilderComponent<T extends IInputBuilderData, U exten
 			],
 			this.settingsLabel,
 			(e: FormData) => {
-				const v = SelectionState.tryFrom(e.get("selectedAction").toString());
+				const v = SelectionState.tryFrom(e.get("selectedAction")?.toString() || "");
 				switch (v) {
 					case SelectionState.none: // Add
 						this.makeAddButtonDialog();
@@ -400,7 +400,7 @@ export abstract class InputBuilderComponent<T extends IInputBuilderData, U exten
 				$('<textarea id="json-string" name="json-string" required min=1></textarea>'),
 			],
 			"Import Buttons...",
-			(e: FormData) => this.promptAndImport(e.get("json-string").toString()),
+			(e: FormData) => this.promptAndImport(e.get("json-string")?.toString() || ""),
 		);
 	}
 
@@ -429,7 +429,7 @@ export abstract class InputBuilderComponent<T extends IInputBuilderData, U exten
 			case SelectionState.none: {
 				/** @todo Template variables */
 				const priorLength = this.input.val()?.toString()?.length || 0,
-					textLength = button.attr("text").length;
+					textLength = button.attr("text")?.length || 0;
 				this.input.val(`${this.input.val()}${button.attr("text")}`);
 				// If the user can't hover, then auto-select the added text so they can easily delete it.
 				/** @todo Make this a setting you can toggle on desktop. */
