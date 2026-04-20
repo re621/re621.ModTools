@@ -272,7 +272,7 @@ export class UtilDOM {
 	 * @todo Turn into a web component for consistent interop.
 	 */
 	public static buildDTextInput(textarea: HTMLTextAreaElement, options?: DTextInputOptions): HTMLDivElement | HTMLElement[] {
-			return Danbooru.DTextFormatter.buildFromTextarea(textarea);
+			return Danbooru.DTextFormatter?.buildFromTextarea(textarea);
 		const root = document.createElement("div");
 		root.className = "dtext-formatter"
 		root.dataset.editing = "true"

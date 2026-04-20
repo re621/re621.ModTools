@@ -221,7 +221,7 @@ export default class DMailToStaffNote extends Component {
 		form.appendChild(authToken);
 		form.appendChild(staff_note_bodyLabel);
 		form.appendChild(staff_note_body);
-		Danbooru.DTextFormatter.buildFromTextarea($(staff_note_body));
+		if (Danbooru.DTextFormatter?.buildFromTextarea) Danbooru.DTextFormatter.buildFromTextarea($(staff_note_body));
 		form.appendChild(submit);
 		return;
 	}
