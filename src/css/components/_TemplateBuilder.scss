@@ -2,6 +2,11 @@
 .template-builder-dialog {
     &.ui-dialog {
         border: 1px solid var(--color-section);
+        /* Override modal.scss's `min-width: max-content` so we can shrink below content width. */
+        min-width: 0 !important;
+        max-width: calc(100vw - 1rem) !important;
+        max-height: calc(100vh - 2rem);
+        box-sizing: border-box;
     }
 
     &.ui-dialog,
@@ -12,6 +17,11 @@
     }
 
     .ui-dialog-titlebar { border: 0; }
+
+    /* Modal.scss sets `min-width: fit-content` on the content area; override so it can shrink. */
+    .ui-dialog-content {
+        min-width: 0 !important;
+    }
 
     .ui-dialog-titlebar-close {
         background: transparent;
@@ -59,6 +69,12 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+
+    /* Without these, flex children would refuse to shrink below their intrinsic content widths. */
+    &__chips, &__form, &__field { min-width: 0; max-width: 100%; }
 
     &__chips {
         display: flex;

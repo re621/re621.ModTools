@@ -146,7 +146,7 @@ export class TemplateBuilder {
 		this.$modal = this.themedDialog(root, {
 			title: this.config.label,
 			width: 880,
-			height: 580,
+			height: "auto",
 			resizable: true,
 			close: () => this.disposeModal(),
 		});
