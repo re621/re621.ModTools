@@ -1,5 +1,9 @@
 /* The dialog wrapper. Targeted via `dialogClass` on jQuery UI. */
 .template-builder-dialog {
+    &.ui-dialog {
+        border: 1px solid var(--color-section);
+    }
+
     &.ui-dialog,
     .ui-dialog-content,
     .ui-dialog-titlebar {
@@ -25,6 +29,8 @@
     gap: 0.5rem;
     align-items: center;
     padding: 0.5rem 0;
+    /* Match the DText formatter's max-width so the row wraps at the same width as the field. */
+    max-width: 50rem;
 }
 
 .template-builder-chip {
@@ -83,9 +89,7 @@
         padding: 0.45rem 0.55rem;
     }
 
-    &__kebab {
-        margin-left: auto;
-    }
+    &__spacer { flex: 1 1 auto; }
 
     &__title-row {
         display: flex;

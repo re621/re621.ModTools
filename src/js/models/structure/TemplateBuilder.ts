@@ -8,9 +8,7 @@ export interface TemplateData extends JSONObject {
 }
 
 export interface TemplateBuilderConfig {
-	/** Element to which the row of template buttons is appended. */
-	hostElement: Element;
-	/** The textarea that gets templates inserted into it. */
+	/** The textarea that gets templates inserted into it. The row of template chips is placed immediately above it (or above its DText wrapper, when present). */
 	targetField: HTMLTextAreaElement;
 	/** Title shown on the manager modal. */
 	label: string;
@@ -22,11 +20,38 @@ export interface TemplateBuilderConfig {
 	defaults?: TemplateData[];
 	/** Optional transform applied at insert time (e.g. greeting / variable expansion). */
 	transform?: (template: TemplateData) => string;
+	/** Extra entries appended to the manager's kebab menu (per-host actions). */
+	extraMenuItems?: Array<{ icon: IconName; label: string; onClick: () => void }>;
+	/** A non-deletable, non-draggable chip pinned next to the kebab. Edits a separate value (e.g. a greeting). */
+	pinnedChip?: {
+		title: string;
+		getBody: () => string;
+		setBody: (body: string) => void;
+		/** Restored alongside the templates list when the user resets to defaults. */
+		defaultBody?: string;
+	};
 }
+
+/** Sentinel value for `selectedIndex` indicating the pinned chip is selected. */
+const PINNED_INDEX = -2;
 
 interface PageGlobals {
 	E621?: { DTextFormatter?: { buildFromTextarea($textarea: JQuery<HTMLTextAreaElement>): unknown } };
 	$?: typeof $;
+}
+
+/** Opens a jQuery UI dialog with the project's themed styling and Lucide close icon. */
+export function makeThemedDialog(content: HTMLElement, options: JQueryUI.DialogOptions): JQuery<HTMLElement> {
+	const $dialog = $(content).dialog({
+		appendTo: "#modal-container",
+		dialogClass: "template-builder-dialog",
+		modal: true,
+		resizable: false,
+		...options,
+	});
+	const closeBtn = ($dialog.dialog("widget") as JQuery<HTMLElement>).find(".ui-dialog-titlebar-close")[0];
+	if (closeBtn) closeBtn.replaceChildren(makeIcon("close"));
+	return $dialog;
 }
 
 export class TemplateBuilder {
@@ -37,6 +62,7 @@ export class TemplateBuilder {
 	private formAreaEl?: HTMLElement;
 	private titleInputEl?: HTMLInputElement;
 	private bodyTextareaEl?: HTMLTextAreaElement;
+	private deleteBtnEl?: HTMLElement;
 	private selectedIndex = -1;
 	private dragSourceIndex = -1;
 	/** A new template the user is authoring; not committed until they type something. */
@@ -49,7 +75,9 @@ export class TemplateBuilder {
 		const row = document.createElement("div");
 		row.className = "template-builder-row";
 		this.rowEl = row;
-		this.config.hostElement.appendChild(row);
+		// Place the row above the textarea, or above its DText wrapper when there is one.
+		const anchor = this.config.targetField.closest(".dtext-formatter") ?? this.config.targetField;
+		anchor.before(row);
 		this.renderRow();
 	}
 
@@ -140,6 +168,7 @@ export class TemplateBuilder {
 		this.formAreaEl = undefined;
 		this.titleInputEl = undefined;
 		this.bodyTextareaEl = undefined;
+		this.deleteBtnEl = undefined;
 	}
 
 	private refreshChips(): void {
@@ -169,6 +198,25 @@ export class TemplateBuilder {
 		addChip.addEventListener("click", () => this.addTemplate());
 		this.chipsAreaEl.appendChild(addChip);
 
+		const spacer = document.createElement("div");
+		spacer.className = "template-builder-manager__spacer";
+		this.chipsAreaEl.appendChild(spacer);
+
+		if (this.config.pinnedChip) {
+			const pinned = document.createElement("button");
+			pinned.type = "button";
+			pinned.className = "template-builder-manager__chip template-builder-manager__chip--pinned template-builder-manager__pinned";
+			if (this.selectedIndex === PINNED_INDEX) pinned.classList.add("template-builder-manager__chip--selected");
+			pinned.textContent = this.config.pinnedChip.title;
+			pinned.addEventListener("click", () => {
+				this.discardEmptyPending(PINNED_INDEX);
+				this.selectedIndex = PINNED_INDEX;
+				this.refreshChips();
+				this.refreshForm();
+			});
+			this.chipsAreaEl.appendChild(pinned);
+		}
+
 		const kebabBtn = this.iconButton("kebab", "More actions", (e) => this.openKebabMenu(e.currentTarget as HTMLElement));
 		kebabBtn.classList.add("template-builder-manager__kebab");
 		this.chipsAreaEl.appendChild(kebabBtn);
@@ -179,7 +227,11 @@ export class TemplateBuilder {
 		const templates = this.config.getTemplates();
 		const pendingIndex = this.pending ? templates.length : -1;
 		const totalChips = templates.length + (this.pending ? 1 : 0);
-		const selected = this.selectedIndex === pendingIndex ? this.pending : templates[this.selectedIndex];
+		const pinned = this.selectedIndex === PINNED_INDEX ? this.config.pinnedChip : undefined;
+		const isPinned = !!pinned;
+		const selected: TemplateData | undefined = pinned
+			? { title: pinned.title, body: pinned.getBody() }
+			: this.selectedIndex === pendingIndex ? this.pending : templates[this.selectedIndex];
 
 		if (selected) {
 			if (!this.titleInputEl || !this.bodyTextareaEl) {
@@ -192,7 +244,9 @@ export class TemplateBuilder {
 			bodyTextarea.closest(".dtext-formatter")
 				?.querySelector<HTMLElement>('.dtext-formatter-tab[action="write"]')?.click();
 			titleInput.value = selected.title;
+			titleInput.readOnly = isPinned;
 			bodyTextarea.value = selected.body;
+			if (this.deleteBtnEl) this.deleteBtnEl.style.visibility = isPinned ? "hidden" : "";
 			// Refresh DText preview by triggering its namespaced jQuery event.
 			const pageWindow = XM.Window as unknown as PageGlobals;
 			pageWindow.$?.(bodyTextarea).trigger("input.dtext_formatter");
@@ -280,10 +334,12 @@ export class TemplateBuilder {
 		titleInput.type = "text";
 		this.titleInputEl = titleInput;
 		titleInput.addEventListener("input", () => {
+			if (this.selectedIndex === PINNED_INDEX) return;
 			this.updateTemplate(this.selectedIndex, { title: titleInput.value });
 		});
 		const deleteBtn = this.iconButton("trash", "Delete template", () => this.deleteSelected());
 		deleteBtn.classList.add("template-builder-icon-button--danger");
+		this.deleteBtnEl = deleteBtn;
 		titleRow.append(titleInput, deleteBtn);
 
 		titleField.append(titleLabel, titleRow);
@@ -297,6 +353,10 @@ export class TemplateBuilder {
 		bodyTextarea.rows = 8;
 		this.bodyTextareaEl = bodyTextarea;
 		bodyTextarea.addEventListener("input", () => {
+			if (this.selectedIndex === PINNED_INDEX) {
+				this.config.pinnedChip?.setBody(bodyTextarea.value);
+				return;
+			}
 			this.updateTemplate(this.selectedIndex, { body: bodyTextarea.value });
 		});
 		bodyField.append(bodyLabel, bodyTextarea);
@@ -409,6 +469,8 @@ export class TemplateBuilder {
 		const ok = await this.confirm("Reset all templates to defaults?", "Reset", { danger: true });
 		if (!ok) return;
 		this.config.setTemplates([...(this.config.defaults ?? [])]);
+		const pinned = this.config.pinnedChip;
+		if (pinned && pinned.defaultBody !== undefined) pinned.setBody(pinned.defaultBody);
 		this.selectedIndex = -1;
 		this.pending = undefined;
 		this.renderRow();
@@ -495,6 +557,7 @@ export class TemplateBuilder {
 			{ icon: "reset", label: "Reset to defaults", onClick: () => this.reset() },
 			{ icon: "copy", label: "Export to file", onClick: () => this.exportToFile() },
 			{ icon: "paste", label: "Import from file", onClick: () => this.importFromFile() },
+			...(this.config.extraMenuItems ?? []),
 		];
 
 		for (const item of items) {
@@ -576,17 +639,7 @@ export class TemplateBuilder {
 	}
 
 	private themedDialog(root: HTMLElement, options: JQueryUI.DialogOptions): JQuery<HTMLElement> {
-		const $dialog = $(root).dialog({
-			appendTo: "#modal-container",
-			dialogClass: "template-builder-dialog",
-			modal: true,
-			resizable: false,
-			...options,
-		});
-		// Replace jQuery UI's broken sprite close icon with our SVG.
-		const closeBtn = ($dialog.dialog("widget") as JQuery<HTMLElement>).find(".ui-dialog-titlebar-close")[0];
-		if (closeBtn) closeBtn.replaceChildren(makeIcon("close"));
-		return $dialog;
+		return makeThemedDialog(root, options);
 	}
 
 	private toast(message: string): void {

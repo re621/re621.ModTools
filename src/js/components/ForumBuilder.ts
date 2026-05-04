@@ -3,9 +3,9 @@ import { TemplateBuilder, TemplateData } from "../models/structure/TemplateBuild
 import Component from "./Component";
 
 export default class ForumBuilder extends Component {
-	public Settings: { enabled: boolean; templates: TemplateData[] } = {
+	public Settings: { enabled: boolean; buttons: TemplateData[] } = {
 		enabled: true,
-		templates: [],
+		buttons: [],
 	};
 
 	private builder?: TemplateBuilder;
@@ -18,16 +18,14 @@ export default class ForumBuilder extends Component {
 	}
 
 	protected create(): Promise<void> {
-		const host = document.querySelector("form.new_forum_post .forum_post_body");
 		const target = document.querySelector<HTMLTextAreaElement>("form.new_forum_post textarea[name='forum_post[body]']");
-		if (!(host instanceof HTMLElement) || !target) return Promise.resolve();
+		if (!target) return Promise.resolve();
 
 		this.builder = new TemplateBuilder({
-			hostElement: host,
 			targetField: target,
 			label: "Forum templates",
-			getTemplates: () => this.Settings.templates,
-			setTemplates: (next) => { this.Settings.templates = next; },
+			getTemplates: () => this.Settings.buttons,
+			setTemplates: (next) => { this.Settings.buttons = next; },
 		});
 		this.builder.mount();
 		return Promise.resolve();

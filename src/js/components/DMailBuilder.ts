@@ -1,166 +1,42 @@
 import { PageDefinition } from "../models/data/Page";
-import Debug from "../models/Debug";
-import { DialogForm } from "../models/structure/DialogForm";
-import { UtilDOM } from "../utilities/UtilDOM";
-import Component, { JSONObject } from "./Component";
-import { GenericItem, GenericItemData, InputBuilderComponent, SelectionState } from "./InputBuilderComponent";
+import { TemplateBuilder, TemplateData } from "../models/structure/TemplateBuilder";
+import Component from "./Component";
 
-/**
- * Allows building personalized DMails from an assortment of smaller piecemeal values.
- * @todo Allow custom & dynamic template variable substitution (e.g. allow buttons to define template variables & have a pop-up that allows the user to enter them if they haven't already been defined on this DMail).
- * @todo Allow reordering via click & drag?
- * @todo Allow switching elements via clicking the 2 elements?
- * @todo Add button groups?
- * @todo Refactor to use interface
- * @todo Persist edit/remove/reorder mode until manually canceled by user
- * @todo Convert to use InputBuilderComponent
- */
+interface StoredButton extends TemplateData {
+	/** Legacy field kept for backward compatibility with stored data. */
+	label?: string;
+	/** Legacy field kept for backward compatibility with stored data. */
+	text?: string;
+}
+
 export default class DMailBuilder extends Component {
-	// #region Template Variable Stuff
-	private static readonly queryParametersToTemplateVariables: JSONObject = {
-		"dmail[to_id]": "recipientId",
-		"dmail[to_name]": "recipientName",
-		"dmail[title]": "initialTitle",
-		"dmail[body]": "initialBody",
-		"respond_to_id": "repliedDMailId",
+	public Settings: { enabled: boolean; buttons: StoredButton[] } = {
+		enabled: true,
+		buttons: DMailBuilder.defaultTemplates,
 	};
-	private readonly templateVariables: JSONObject = {};
 
-	private retrieveTemplateVariables() {
-		throw new Error("Method not implemented.");
-	}
-	// #endregion Template Variable Stuff
-
-	private _container?: JQuery<HTMLDivElement>;
-	private get container(): JQuery<HTMLDivElement> {
-		if (!this._container) throw Error("DMailBuilder.container is not yet defined");
-		return this._container;
-	}
-	/** The main text entry box. */
-	private _input?: JQuery<HTMLTextAreaElement>;
-	/** The main text entry box. */
-	private get input(): JQuery<HTMLTextAreaElement> {
-		if (!this._input) throw Error("DMailBuilder.input is not yet defined");
-		return this._input;
-	}
-
-	// #region States
-	private state = SelectionState.none;
-	public get inRemovalState() {
-		return this.state === SelectionState.remove;
-	}
-	public get inEditState() {
-		return this.state === SelectionState.edit;
-	}
-	public get inReorderState() {
-		return this.state === SelectionState.reorder;
-	}
-
-	/**
-	 * 
-	 * @returns 
-	 * @todo Destroy/reuse modal; currently piles up dead instances without removing them from the DOM.
-	 * @todo Prevent creating additional settings dialogs when one is currently open.
-	 */
-	private onSettingsButtonClick(/* _$element: JQuery<HTMLElement> */) {
-		DialogForm.getRequestedInput(
-			[
-				$(`<button type="submit" name="selectedAction" value="${SelectionState.none.index}">New Button</button>`),
-				$(`<button type="submit" name="selectedAction" value="${SelectionState.edit.index}">Edit Button</button>`),
-				$(`<button type="submit" name="selectedAction" value="${SelectionState.remove.index}">Remove Button</button>`),
-				$(`<button type="submit" name="selectedAction" value="${SelectionState.reorder.index}">Reorder Button</button>`),
-				$(`<button type="submit" name="selectedAction" value="resetButtons">Reset Buttons</button>`),
-				$(`<button type="submit" name="selectedAction" value="exportButtons">Export Buttons</button>`),
-				$(`<button type="submit" name="selectedAction" value="importButtons">Import Buttons</button>`),
-				$(`<button type="submit" name="selectedAction" value="-1">Cancel</button>`),
-			].reduce(
-				(a, e) => { e.appendTo(a[0]); return a; },
-				[$<HTMLDivElement>("<div>").addClass("re6-mod-tools-button-container")],
-			),
-			{
-				title: "DMail Builder Settings",
-				defaultElements: [],
-			},
-			(e: FormData) => {
-				Debug.log(`Return from DMail Builder Settings w/ value of ${e.get("selectedAction")}`);
-				const v = SelectionState.tryFrom(e.get("selectedAction")?.toString() || "");
-				switch (v) {
-					case SelectionState.none: // Add
-						this.makeAddButtonDialog();
-						break;
-					case SelectionState.edit:
-					case SelectionState.remove:
-					case SelectionState.reorder:
-						this.selectButtonMode(v);
-						break;
-					default:
-						switch (e.get("selectedAction")) {
-							case "resetButtons":
-								this.promptAndReset();
-								break;
-							case "importButtons":
-								this.makeImportButtonDialog();
-								break;
-							case "exportButtons":
-								this.makeExportDialog();
-								break;
-						
-							default:
-								break;
-						}
-						break;
-				}
-			},
-			() => this.clearState(),
-		);
-
-		// Stop propagation & prevent default.
-		return false;
-	}
-
-	private cancelButton?: JQuery<HTMLButtonElement>;
-	private selectButtonMode(mode: SelectionState) {
-		this.state = mode;
-		alert(`Select the button to ${mode.label}, or select "CANCEL" to cancel the operation.`);
-		this.cancelButton = $<HTMLButtonElement>("<button>")
-			.text("CANCEL");
-		this.cancelButton.on("click", (e) => {
-				e.preventDefault();
-				e.stopImmediatePropagation();
-				this.clearState();
-				return false;
-			})
-			.appendTo(this.container);
-	}
-
-	private clearState() {
-		this.state = SelectionState.none;
-		this.cancelButton?.remove();
-		this.buildButtons();
-	}
-	// #endregion States
+	private builder?: TemplateBuilder;
 
 	public constructor() {
 		super({
 			constraint: PageDefinition.dmails.new,
 			waitForDOM: "form.new_dmail .dtext_formatter",
 		});
-		Debug.log("Constructing DMail Builder...");
 	}
 
-	public static get defaultButtons(): Array<GenericItemData> {
+	public static get defaultTemplates(): TemplateData[] {
 		return [
 			{
-				label: "Outreach",
-				text: `Thank you for reaching out.`,
+				title: "Outreach",
+				body: "Thank you for reaching out.",
 			},
 			{
-				label: "Attempt",
-				text: `Thank you for attempting to resolve this.`,
+				title: "Attempt",
+				body: "Thank you for attempting to resolve this.",
 			},
 			{
-				label: "Contesting Deletions",
-				text: [
+				title: "Contesting Deletions",
+				body: [
 					`Our rules for contesting deletions are as follows:`,
 					`1. [b][i]Politely[/i] contact the janitor who deleted the post[/b]: If they are no longer staff, have requested to not be contacted regarding deletions (e.g. "Mairo":[/users/38571]), or decline to reinstate the post, you may advance to the next step.`,
 					`2. [b][i]Politely[/i] "contact our Janitor Lead":[/help/staff#list:~:text=Janitor%20Lead][/b]: They will review the matter & make a decision. If they decline to reinstate the post, you may advance to the next step.`,
@@ -170,8 +46,8 @@ export default class DMailBuilder extends Component {
 				].join("\n"),
 			},
 			{
-				label: "AI: Exceptions",
-				text: [
+				title: "AI: Exceptions",
+				body: [
 					`We allow for [[ai_assisted|3 narrow exceptions]] to our ban on AI assisted/generated content:`,
 					`* [[ai_generated_audio|AI generated/assisted audio]]`,
 					`* [[ai_generated_backgrounds|AI generated/assisted backgrounds]]`,
@@ -179,40 +55,40 @@ export default class DMailBuilder extends Component {
 				].join("\n"),
 			},
 			{
-				label: "AI: Flag",
-				text: [
+				title: "AI: Flag",
+				body: [
 					`We do not tolerate public AI accusations outside of flags. If you genuinely think something uses some form of AI assistance/generation, then "flag it":[/help/flag_for_deletion] for "not meeting the Uploading Guidelines":[/help/uploading_guidelines#bad:~:text=AI%20Generated,Webm] & move on with your day; that actually brings it to our attention so we can investigate & resolve the matter. It's a lot more productive than throwing around accusations in the comments, & with 99% less drama, in-fighting, hurt feelings, & baseless reputational harm.`,
 					``,
 					`To be 100% clear, [b][i]the one and only place on this site to accuse posts of being AI is [u]in a flag[/u][/i][/b]. Not in the comments, forums, blips, user profiles, post/pool/set descriptions, or any other location.`,
 				].join("\n"),
 			},
 			{
-				label: "AI: Too Early", /* cspell:disable-next-line */
-				text: `The earliest appearance of this exact image file makes the use of AI image materials extremely unlikely; OpenAI's first release of DALL-E was January 2021, and open-source furry-oriented models did not appear until December (with a few of the longest-enduring models not existing until 2023.) An additional thing to keep in mind about these early resources is that they produced lower-quality results, as people hadn't gotten to fine-tuning them yet, nor developing techniques for both image generation & how to best hide their giveaways.`,
+				title: "AI: Too Early", /* cspell:disable-next-line */
+				body: `The earliest appearance of this exact image file makes the use of AI image materials extremely unlikely; OpenAI's first release of DALL-E was January 2021, and open-source furry-oriented models did not appear until December (with a few of the longest-enduring models not existing until 2023.) An additional thing to keep in mind about these early resources is that they produced lower-quality results, as people hadn't gotten to fine-tuning them yet, nor developing techniques for both image generation & how to best hide their giveaways.`,
 			},
 			{
-				label: "AI: Detectors",
-				text: `AI detection services (especially those that analyze the content itself instead of a file's metadata) are not particular reliable. The most cynical answer would be that these services may pretend to be able to detect AI-generated text and media in order to sell you a product, but a simpler answer is that the nature of human-made images is extremely broad, and so is the nature of how people use AI image generation; some prompt using text and then post their AI images as-is, some use their own art to inform an AI-generated image, and others still will simply trace AI-generated images to mask the most obvious details.`,
+				title: "AI: Detectors",
+				body: `AI detection services (especially those that analyze the content itself instead of a file's metadata) are not particular reliable. The most cynical answer would be that these services may pretend to be able to detect AI-generated text and media in order to sell you a product, but a simpler answer is that the nature of human-made images is extremely broad, and so is the nature of how people use AI image generation; some prompt using text and then post their AI images as-is, some use their own art to inform an AI-generated image, and others still will simply trace AI-generated images to mask the most obvious details.`,
 			},
 			{
-				label: "AI: How to spot",
-				text: `If learning to detect AI images is something of legitimate interest to you, we suggest you browse AI-oriented sites, collect samples from those sites, and note what makes them different from human-made art. We can't provide any further guidance to you, since our own AI investigation team keeps their methods secret in order to avoid giving artists hints on how to elude them.`,
+				title: "AI: How to spot",
+				body: `If learning to detect AI images is something of legitimate interest to you, we suggest you browse AI-oriented sites, collect samples from those sites, and note what makes them different from human-made art. We can't provide any further guidance to you, since our own AI investigation team keeps their methods secret in order to avoid giving artists hints on how to elude them.`,
 			},
 			{
-				label: "Takedown: No Third-party",
-				text: `Only artists, character owners, & commissioners may issue takedown requests for their material, & they must do so directly; we do not accept third party takedown requests.`,
+				title: "Takedown: No Third-party",
+				body: `Only artists, character owners, & commissioners may issue takedown requests for their material, & they must do so directly; we do not accept third party takedown requests.`,
 			},
 			{
-				label: "Takedown: Required",
-				text: `This requires a takedown request.`,
+				title: "Takedown: Required",
+				body: `This requires a takedown request.`,
 			},
 			{
-				label: "Takedown: See here",
-				text: `See "here":[/static/takedown] for details about takedown requests.`,
+				title: "Takedown: See here",
+				body: `See "here":[/static/takedown] for details about takedown requests.`,
 			},
 			{
-				label: "Translation tags",
-				text: [
+				title: "Translation tags",
+				body: [
 					`For all posts with non-English text, they are in 1 of 3 states of translation:`,
 					`* [[translation_request]] - The post [b]has some non-English text[/b] that [b]does not have "notes":[/help/notes][/b] translating it into English.`,
 					`* [[partially_translated]] - The post [b]has non-English text[/b] & [b]has "notes":[/help/notes][/b] translating [b][i]some[/i] of it, but not [i]all[/i] of it,[/b] into English.`,
@@ -229,179 +105,25 @@ export default class DMailBuilder extends Component {
 		];
 	}
 
-	public Settings: {enabled: boolean, buttons: Array<GenericItemData>} = {
-		enabled: true,
-		buttons: DMailBuilder.defaultButtons,
-	};
-
 	protected create(): Promise<void> {
-		Debug.log("Creating DMail Builder...");
-		UtilDOM.addStyle(InputBuilderComponent.defaultStyle);
-		this._input = $("textarea[name='dmail[body]']");
-		const wrapper = $("form.new_dmail .dmail_body");
-		UtilDOM.addSettingsButton({
-			id: "dmail-responses-settings",
-			name: "Responses Settings",
-			onClick: () => this.onSettingsButtonClick(),
-		}, true);
-		this._container = $<HTMLDivElement>("<div>")
-			.addClass("responses re6-mod-tools-button-container")
-			.appendTo(wrapper)
-			.on("click", "button", (e) => this.onResponseClick(e));
+		const target = document.querySelector<HTMLTextAreaElement>("form.new_dmail textarea[name='dmail[body]']");
+		if (!target) return Promise.resolve();
 
-		// TODO: Find template variables
-
-		this.buildButtons();
-
+		this.builder = new TemplateBuilder({
+			targetField: target,
+			label: "DMail templates",
+			defaults: DMailBuilder.defaultTemplates,
+			getTemplates: () => this.Settings.buttons.map((b) => ({
+				title: b.title ?? b.label ?? "",
+				body: b.body ?? b.text ?? "",
+			})),
+			setTemplates: (next) => { this.Settings.buttons = next; },
+		});
+		this.builder.mount();
 		return Promise.resolve();
 	}
 
-	private onResponseClick(event: JQuery.ClickEvent<HTMLElement, undefined, any, HTMLButtonElement>) {
-		const button = $(event.currentTarget);
-		const priorState = this.state;
-		this.state = SelectionState.none;
-		switch (priorState) {
-			case SelectionState.remove:
-				this.promptAndRemove(event);
-				break;
-			case SelectionState.edit:
-				this.makeEditButtonDialog(Number(event.target.dataset["index"]));
-				break;
-			case SelectionState.reorder:
-				this.makeReorderButtonDialog(Number(event.target.dataset["index"]));
-				break;
-			default:
-				Debug.log("Invalid State!?!?");
-			// eslint-disable-next-line no-fallthrough
-			case SelectionState.none: {
-				// TODO: Template variables
-				const priorLength = this.input.val()?.toString()?.length || 0,
-					textLength = button.attr("text")?.length || 0;
-				this.input.val(`${this.input.val()}${button.attr("text")}`);
-				// If the user can't hover, then auto-select the added text so they can easily delete it.
-				if (!matchMedia("(hover: hover)").matches) {
-					this.input[0].setSelectionRange(priorLength, priorLength + textLength, "forward");
-				}
-				this.input[0].focus();
-				break;
-			}
-		}
-
-		event.stopImmediatePropagation();
-		event.preventDefault();
-		// Stop propagation & prevent default.
-		return false;
-	}
-
-	private buildButtons() {
-		this.container.html("");
-
-		for (let i = 0; i < this.Settings.buttons.length; i++) {
-			GenericItem
-				.buildUi(this.Settings.buttons[i], i)
-				.appendTo(this.container);
-		}
-	}
-
-	// #region Make Dialogs
-	private makeAddButtonDialog() {
-		DialogForm.getRequestedInput(
-			GenericItem.addReactiveDescriptionPlaceholder(
-				GenericItem.buildInput({}, false, this.Settings.buttons.length),
-			),
-			"Add Button",
-			(e: FormData) => {
-				this.Settings.buttons = this.Settings.buttons.concat([GenericItem.parseInput(e)]);
-				this.buildButtons();
-			},
-		);
-	}
-
-	private makeEditButtonDialog(index: number) {
-		const button = this.Settings.buttons[index];
-		DialogForm.getRequestedInput(
-			GenericItem.addReactiveDescriptionPlaceholder(
-				GenericItem.buildInput(button, false, this.Settings.buttons.length - 1),
-			),
-			{ title: `Edit "${button.label}" Button`, rejectOnClose: true },
-			(e: FormData) => {
-				const temp = [...this.Settings.buttons];
-				temp[index] = GenericItem.parseInput(e);
-				this.Settings.buttons = temp;
-				this.buildButtons();
-			},
-			() => this.clearState(),
-		);
-	}
-
-	private makeReorderButtonDialog(index: number) {
-		const button = this.Settings.buttons[index];
-		DialogForm.getRequestedInput(
-			GenericItem.buildIndexInput(index, this.Settings.buttons.length - 1),
-			{ title: `Reorder "${button.label}"`, rejectOnClose: true },
-			(e: FormData) => {
-				const newIndex = Number(e.get("button-index"));
-				if (newIndex === index) return;
-				const temp = [...this.Settings.buttons];
-				temp[index] = temp[newIndex];
-				temp[newIndex] = button;
-				this.Settings.buttons = temp;
-				this.buildButtons();
-			},
-			() => this.clearState(),
-		);
-	}
-
-	private makeImportButtonDialog() {
-		DialogForm.getRequestedInput(
-			[
-				$('<label for="json-string">Buttons to import (in form provided by exporter):</label>'),
-				$('<textarea id="json-string" name="json-string" required min=1></textarea>'),
-			],
-			"Import Buttons...",
-			(e: FormData) => this.promptAndImport(e.get("json-string")?.toString() || "[]"),
-		);
-	}
-
-	private makeExportDialog() {
-		alert(`The following is the string representation of your buttons; this can be used to import them.\n\n${JSON.stringify(this.Settings.buttons, undefined, 4)}`);
-	}
-	// #endregion Make Dialogs
-
-	/**
-	 * Prompts for confirmation & removes the button if given.
-	 * @param event 
-	 */
-	private promptAndRemove(event: JQuery.ClickEvent<HTMLElement, undefined, any, HTMLButtonElement>) {
-		const [button, index] = GenericItem.retrieveAllButtonInfoFromUi(event.target);
-		if (confirm(`Are you sure you want to delete this button?\n\n\tLabel: ${button.label}\n\tDescription: ${button.description}\n\tText: "${button.text}"`)) {
-			const temp = [...this.Settings.buttons];
-			temp.splice(index, 1);
-			this.Settings.buttons = temp;
-			this.buildButtons();
-		}
-	}
-
-	/**
-	 * Prompts for confirmation & resets to the default buttons if given.
-	 * @param event 
-	 */
-	private promptAndReset() {
-		if (confirm("Are you sure you want to reset the buttons to the defaults?\n\nThis will permanently remove your custom buttons.")) {
-			this.Settings.buttons = DMailBuilder.defaultButtons;
-			this.buildButtons();
-		}
-	}
-
-	private promptAndImport(jsonString: string) {
-		const t = [...this.Settings.buttons],
-			buttons: GenericItemData[] = (JSON.parse(jsonString) as GenericItemData[]).filter(e => !t.find(e2 => GenericItem.doMatch(e, e2))),
-			prompt = buttons.length > 0 ?
-			`Add the following buttons?\n\n${buttons.map((e) => `Label: ${e.label}\nDescription: ${e.description}, Text: ${e.text}`).join("\n")}`:
-			`There are no new buttons to be added; should we go through the motions anyways?`;
-		if (confirm(prompt)) {
-			this.Settings.buttons = t.concat(buttons);
-			this.buildButtons();
-		}
+	protected async destroy(): Promise<void> {
+		this.builder?.destroy();
 	}
 }
