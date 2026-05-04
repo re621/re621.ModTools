@@ -14,7 +14,7 @@ import PageObserver from "./js/models/structure/PageObserver";
 import ErrorHandler from "./js/utilities/ErrorHandler";
 import Util from "./js/utilities/Util";
 import DMailToStaffNote from "./js/components/DMailToStaffNote";
-import CommentAge from "./js/components/CommentAge";
+import ReportedContentAge from "./js/components/ReportedContentAge";
 import DMailBuilder from "./js/components/DMailBuilder";
 import ForumBuilder from "./js/components/ForumBuilder";
 
@@ -32,7 +32,7 @@ export default class REMT {
         LinkGrabber,
 		
 		DMailToStaffNote,
-		CommentAge,
+		ReportedContentAge,
 		DMailBuilder,
 		ForumBuilder,
     ];
@@ -116,7 +116,7 @@ interface ComponentListAnnotated extends ComponentList {
     LinkGrabber?: LinkGrabber,
 
     DMailToStaffNote?: DMailToStaffNote,
-    CommentAge?: CommentAge,
+    ReportedContentAge?: ReportedContentAge,
     DMailBuilder?: DMailBuilder,
     ForumBuilder?: ForumBuilder,
 }
