@@ -58,6 +58,8 @@ export default class ReportedContentAge extends Component {
 		time.replaceChildren(document.createTextNode(UtilTime.ago(created)));
 		time.dateTime = data["created_at"];
 		time.title = created.toString();
+		// IDEA: Add icon when past statute to show the actionable time range.
+		// `Actionable from ${created} - ${Util.advanceDate(created, {})})`
 
 		valueCell.classList.add(
 			Util.isDatePastCommentStatute(created) ? "reported-content-age-past" : "reported-content-age-within",
