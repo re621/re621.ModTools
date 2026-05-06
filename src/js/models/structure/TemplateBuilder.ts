@@ -240,9 +240,12 @@ export class TemplateBuilder {
 			const titleInput = this.titleInputEl;
 			const bodyTextarea = this.bodyTextareaEl;
 			if (!titleInput || !bodyTextarea) return;
-			// Reset DText tab to Write in case the previous template was left on Preview.
-			bodyTextarea.closest(".dtext-formatter")
-				?.querySelector<HTMLElement>('.dtext-formatter-tab[action="write"]')?.click();
+			// Reset DText tab to Write if the previous template was left on Preview.
+			// Skip the click if already on Write, since the state setter syncs heights from preview,
+			// which is hidden in Write mode and would collapse any user resize to 0.
+			const wrapper = bodyTextarea.closest<HTMLElement>(".dtext-formatter");
+			if (wrapper?.getAttribute("data-state") === "preview")
+				wrapper.querySelector<HTMLElement>('.dtext-formatter-tab[action="write"]')?.click();
 			titleInput.value = selected.title;
 			titleInput.readOnly = isPinned;
 			bodyTextarea.value = selected.body;
