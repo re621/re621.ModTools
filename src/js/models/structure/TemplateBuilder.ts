@@ -22,6 +22,8 @@ export interface TemplateBuilderConfig {
 	defaults?: TemplateData[];
 	/** Optional transform applied at insert time (e.g. greeting / variable expansion). */
 	transform?: (template: TemplateData) => string;
+	/** How clicking a chip integrates the template body into the target field. Defaults to "append". */
+	insertMode?: "replace" | "append";
 	/** Extra entries appended to the manager's kebab menu (per-host actions). */
 	extraMenuItems?: Array<{ icon: IconName; label: string; onClick: () => void }>;
 	/** A non-deletable, non-draggable chip pinned next to the kebab. Edits a separate value (e.g. a greeting). */
@@ -99,7 +101,25 @@ export class TemplateBuilder {
 		const text = this.config.transform ? this.config.transform(template) : template.body;
 		if (!text) return;
 		const target = this.config.targetField;
-		target.value = text;
+		const mode = this.config.insertMode ?? "append";
+		// Track the inserted range so we can select it after.
+		let start: number;
+		let end: number;
+		if (mode === "replace") {
+			target.value = text;
+			start = 0;
+			end = text.length;
+		} else {
+			// If there's a selection, replace it. Otherwise append at end.
+			const selStart = target.selectionStart;
+			const selEnd = target.selectionEnd;
+			const hasSelection = selStart !== null && selEnd !== null && selStart !== selEnd;
+			start = hasSelection ? selStart : target.value.length;
+			const tail = hasSelection ? target.value.substring(selEnd) : "";
+			target.value = target.value.substring(0, start) + text + tail;
+			end = start + text.length;
+		}
+		target.setSelectionRange(start, end);
 		target.dispatchEvent(new Event("input", { bubbles: true }));
 		target.focus();
 	}

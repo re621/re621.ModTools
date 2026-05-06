@@ -70,6 +70,7 @@ export default class TicketReasons extends Component {
 		this.builder = new TemplateBuilder({
 			targetField: target,
 			label: "Ticket reply templates",
+			insertMode: "replace",
 			defaults: TicketReasons.defaultTemplates,
 			getTemplates: () => this.Settings.buttons.map((b) => ({
 				title: b.title ?? b.name ?? "",
