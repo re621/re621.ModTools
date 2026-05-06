@@ -1,6 +1,8 @@
 import { JSONObject } from "../../components/Component";
 import XM from "../api/XM";
 import { IconName, makeIcon } from "../../utilities/UtilIcons";
+import { Confirm } from "./Confirm";
+import Modal from "./Modal";
 
 export interface TemplateData extends JSONObject {
 	title: string;
@@ -40,24 +42,10 @@ interface PageGlobals {
 	$?: typeof $;
 }
 
-/** Opens a jQuery UI dialog with the project's themed styling and Lucide close icon. */
-export function makeThemedDialog(content: HTMLElement, options: JQueryUI.DialogOptions): JQuery<HTMLElement> {
-	const $dialog = $(content).dialog({
-		appendTo: "#modal-container",
-		dialogClass: "template-builder-dialog",
-		modal: true,
-		resizable: false,
-		...options,
-	});
-	const closeBtn = ($dialog.dialog("widget") as JQuery<HTMLElement>).find(".ui-dialog-titlebar-close")[0];
-	if (closeBtn) closeBtn.replaceChildren(makeIcon("close"));
-	return $dialog;
-}
-
 export class TemplateBuilder {
 	private rowEl?: HTMLElement;
 	private modalEl?: HTMLElement;
-	private $modal?: JQuery<HTMLElement>;
+	private modal?: Modal;
 	private chipsAreaEl?: HTMLElement;
 	private formAreaEl?: HTMLElement;
 	private titleInputEl?: HTMLInputElement;
@@ -143,26 +131,27 @@ export class TemplateBuilder {
 		this.titleInputEl = undefined;
 		this.bodyTextareaEl = undefined;
 
-		this.$modal = this.themedDialog(root, {
+		this.modal = new Modal({
 			title: this.config.label,
+			content: $(root),
+			autoOpen: true,
 			width: 880,
 			height: "auto",
-			resizable: true,
-			close: () => this.disposeModal(),
 		});
+		this.modal.getElement().on("dialogclose", () => this.disposeModal());
 
 		this.refreshChips();
 		this.refreshForm();
 	}
 
 	private closeManager(): void {
-		if (this.$modal) this.$modal.dialog("close");
+		this.modal?.close();
 	}
 
 	private disposeModal(): void {
-		if (!this.$modal) return;
-		this.$modal.dialog("destroy");
-		this.$modal = undefined;
+		if (!this.modal) return;
+		this.modal.destroy();
+		this.modal = undefined;
 		this.modalEl = undefined;
 		this.chipsAreaEl = undefined;
 		this.formAreaEl = undefined;
@@ -455,7 +444,7 @@ export class TemplateBuilder {
 
 		const t = templates[this.selectedIndex];
 		if (!t) return;
-		const ok = await this.confirm(`Delete "${t.title || "(untitled)"}"?`, "Delete", { danger: true });
+		const ok = await Confirm.ask(`Delete "${t.title || "(untitled)"}"?`, { confirmLabel: "Delete", danger: true });
 		if (!ok) return;
 		const next = templates.filter((_, i) => i !== this.selectedIndex);
 		this.selectedIndex = -1;
@@ -466,7 +455,7 @@ export class TemplateBuilder {
 	}
 
 	private async reset(): Promise<void> {
-		const ok = await this.confirm("Reset all templates to defaults?", "Reset", { danger: true });
+		const ok = await Confirm.ask("Reset all templates to defaults?", { confirmLabel: "Reset", danger: true });
 		if (!ok) return;
 		this.config.setTemplates([...(this.config.defaults ?? [])]);
 		const pinned = this.config.pinnedChip;
@@ -577,7 +566,12 @@ export class TemplateBuilder {
 		document.body.appendChild(menu);
 		const rect = anchor.getBoundingClientRect();
 		menu.style.top = `${rect.bottom + window.scrollY + 4}px`;
-		menu.style.left = `${rect.left + window.scrollX - menu.offsetWidth + rect.width}px`;
+		// Right-align the menu's right edge with the anchor; clamp so the menu can't run off either edge of the viewport.
+		const margin = 4;
+		const idealLeft = rect.right + window.scrollX - menu.offsetWidth;
+		const minLeft = window.scrollX + margin;
+		const maxLeft = window.scrollX + window.innerWidth - menu.offsetWidth - margin;
+		menu.style.left = `${Math.max(minLeft, Math.min(idealLeft, maxLeft))}px`;
 
 		const onOutside = (e: MouseEvent) => {
 			if (!menu.contains(e.target as Node)) closeMenu();
@@ -594,52 +588,6 @@ export class TemplateBuilder {
 			document.addEventListener("mousedown", onOutside);
 			document.addEventListener("keydown", onEscape);
 		}, 0);
-	}
-
-	private confirm(message: string, confirmLabel = "OK", opts: { danger?: boolean } = {}): Promise<boolean> {
-		return new Promise((resolve) => {
-			const root = document.createElement("div");
-			root.className = "template-builder-confirm";
-
-			const msg = document.createElement("div");
-			msg.textContent = message;
-			root.appendChild(msg);
-
-			const buttons = document.createElement("div");
-			buttons.className = "template-builder-confirm__buttons";
-
-			let closed = false;
-			const cancelBtn = document.createElement("button");
-			cancelBtn.type = "button";
-			cancelBtn.textContent = "Cancel";
-			cancelBtn.addEventListener("click", () => done(false));
-
-			const okBtn = document.createElement("button");
-			okBtn.type = "button";
-			okBtn.textContent = confirmLabel;
-			if (opts.danger) okBtn.classList.add("template-builder-confirm__danger");
-			okBtn.addEventListener("click", () => done(true));
-
-			buttons.append(cancelBtn, okBtn);
-			root.appendChild(buttons);
-
-			const $dialog = this.themedDialog(root, {
-				title: "Confirm",
-				width: "auto",
-				close: () => done(false),
-			});
-
-			function done(value: boolean) {
-				if (closed) return;
-				closed = true;
-				$dialog.dialog("destroy");
-				resolve(value);
-			}
-		});
-	}
-
-	private themedDialog(root: HTMLElement, options: JQueryUI.DialogOptions): JQuery<HTMLElement> {
-		return makeThemedDialog(root, options);
 	}
 
 	private toast(message: string): void {

@@ -1,4 +1,5 @@
 import Util from "../../utilities/Util";
+import { makeIcon } from "../../utilities/UtilIcons";
 import PreparedStructure from "./PreparedStructure";
 
 export default class Modal {
@@ -39,6 +40,7 @@ export default class Modal {
             .dialog({
                 autoOpen: config.autoOpen,
                 appendTo: "#modal-container",
+                dialogClass: config.dialogClass,
 
                 resizable: false,
 
@@ -66,6 +68,9 @@ export default class Modal {
 
         const ui = this.$modal.closest('.ui-dialog');
         ui.draggable('option', 'containment', '#modal-container');
+
+        const closeBtn = ui.find(".ui-dialog-titlebar-close")[0];
+        if (closeBtn) closeBtn.replaceChildren(makeIcon("close"));
 
         // Replace the modal structure on window open, if necessary
         if (config.structure)
@@ -118,6 +123,7 @@ export default class Modal {
         result.maxHeight = typeof config.minHeight === "undefined" ? undefined : config.maxHeight;
 
         result.disabled = typeof config.disabled === "undefined" ? false : config.disabled;
+        result.dialogClass = typeof config.dialogClass === "undefined" ? "" : config.dialogClass;
         if (typeof config.position === "undefined") result.position = { my: "center", at: "center" };
         else
             result.position = {
@@ -244,6 +250,8 @@ export interface ModalConfig {
 
     /** If true, triggers are disabled */
     disabled?: boolean;
+    /** Extra CSS class added to the `.ui-dialog` wrapper. */
+    dialogClass?: string;
     /** Initial position of the modal window */
     position?: {
         at: string;
