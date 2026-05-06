@@ -1,5 +1,5 @@
 import { JSONObject } from "../../components/Component";
-import XM from "../api/XM";
+import Danbooru from "../api/Danbooru";
 import { IconName, makeIcon } from "../../utilities/UtilIcons";
 import { Confirm } from "./Confirm";
 import Modal from "./Modal";
@@ -36,11 +36,6 @@ export interface TemplateBuilderConfig {
 
 /** Sentinel value for `selectedIndex` indicating the pinned chip is selected. */
 const PINNED_INDEX = -2;
-
-interface PageGlobals {
-	E621?: { DTextFormatter?: { buildFromTextarea($textarea: JQuery<HTMLTextAreaElement>): unknown } };
-	$?: typeof $;
-}
 
 export class TemplateBuilder {
 	private rowEl?: HTMLElement;
@@ -237,8 +232,7 @@ export class TemplateBuilder {
 			bodyTextarea.value = selected.body;
 			if (this.deleteBtnEl) this.deleteBtnEl.style.visibility = isPinned ? "hidden" : "";
 			// Refresh DText preview by triggering its namespaced jQuery event.
-			const pageWindow = XM.Window as unknown as PageGlobals;
-			pageWindow.$?.(bodyTextarea).trigger("input.dtext_formatter");
+			Danbooru.jQuery?.(bodyTextarea).trigger("input.dtext_formatter");
 		} else {
 			this.titleInputEl = undefined;
 			this.bodyTextareaEl = undefined;
@@ -357,11 +351,8 @@ export class TemplateBuilder {
 	}
 
 	private attachDText(textarea: HTMLTextAreaElement): void {
-		// DTextFormatter lives on the page window, not the userscript sandbox.
-		// Must use the page's jQuery instance too, otherwise it doesn't recognize the element.
-		const pageWindow = XM.Window as unknown as PageGlobals;
-		const formatter = pageWindow.E621?.DTextFormatter;
-		const page$ = pageWindow.$;
+		const formatter = Danbooru.DTextFormatter;
+		const page$ = Danbooru.jQuery;
 		if (!formatter || !page$) return;
 		// Marker class makes the formatter dispatch a native `input` event after its buttons
 		// modify the textarea. Without it, only a namespaced jQuery event fires and our listener misses it.
@@ -478,7 +469,7 @@ export class TemplateBuilder {
 		a.click();
 		a.remove();
 		URL.revokeObjectURL(url);
-		this.toast("Saved templates.json");
+		Danbooru.notice("Saved templates.json");
 	}
 
 	private importFromFile(): void {
@@ -498,11 +489,11 @@ export class TemplateBuilder {
 		try {
 			parsed = JSON.parse(text);
 		} catch {
-			this.toast("Invalid JSON file");
+			Danbooru.error("Invalid JSON file");
 			return;
 		}
 		if (!Array.isArray(parsed)) {
-			this.toast("Expected an array of templates");
+			Danbooru.error("Expected an array of templates");
 			return;
 		}
 
@@ -521,7 +512,7 @@ export class TemplateBuilder {
 		this.renderRow();
 		this.refreshChips();
 		this.refreshForm();
-		this.toast(`Imported ${additions.length} template${additions.length === 1 ? "" : "s"}`);
+		Danbooru.notice(`Imported ${additions.length} template${additions.length === 1 ? "" : "s"}`);
 	}
 
 	// #endregion
@@ -588,18 +579,6 @@ export class TemplateBuilder {
 			document.addEventListener("mousedown", onOutside);
 			document.addEventListener("keydown", onEscape);
 		}, 0);
-	}
-
-	private toast(message: string): void {
-		const el = document.createElement("div");
-		el.className = "template-builder-toast";
-		el.textContent = message;
-		document.body.appendChild(el);
-		requestAnimationFrame(() => el.classList.add("template-builder-toast--show"));
-		setTimeout(() => {
-			el.classList.remove("template-builder-toast--show");
-			setTimeout(() => el.remove(), 300);
-		}, 1800);
 	}
 
 	// #endregion
