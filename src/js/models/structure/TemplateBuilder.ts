@@ -102,7 +102,6 @@ export class TemplateBuilder {
 		if (!text) return;
 		const target = this.config.targetField;
 		const mode = this.config.insertMode ?? "append";
-		// Track the inserted range so we can select it after.
 		let start: number;
 		let end: number;
 		if (mode === "replace") {
@@ -110,16 +109,13 @@ export class TemplateBuilder {
 			start = 0;
 			end = text.length;
 		} else {
-			// If there's a selection, replace it. Otherwise append at end.
-			const selStart = target.selectionStart;
-			const selEnd = target.selectionEnd;
-			const hasSelection = selStart !== null && selEnd !== null && selStart !== selEnd;
-			start = hasSelection ? selStart : target.value.length;
-			const tail = hasSelection ? target.value.substring(selEnd) : "";
-			target.value = target.value.substring(0, start) + text + tail;
+			start = target.value.length;
+			target.value += text;
 			end = start + text.length;
 		}
-		target.setSelectionRange(start, end);
+		// On touch (no-hover) devices, select the inserted range so it can be wiped with a single keystroke.
+		if (!matchMedia("(hover: hover)").matches)
+			target.setSelectionRange(start, end);
 		target.dispatchEvent(new Event("input", { bubbles: true }));
 		target.focus();
 	}
