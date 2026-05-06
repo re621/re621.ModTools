@@ -76,8 +76,13 @@ export default class TicketReasons extends Component {
 				body: b.body ?? b.text ?? "",
 			})),
 			setTemplates: (next) => { this.Settings.buttons = next; },
-			transform: (template) => `${this.Settings.greeting}${template.body}`
-				.replace(/%reporterName%/g, this.reporterName),
+			transform: (template) => {
+				const greeting = this.Settings.greeting;
+				const text = greeting.includes("%body%")
+					? greeting.replace("%body%", template.body)
+					: `${greeting}${template.body}`;
+				return text.replace(/%reporterName%/g, this.reporterName);
+			},
 			pinnedChip: {
 				title: "Greeting",
 				getBody: () => this.Settings.greeting,
