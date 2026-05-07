@@ -22,8 +22,8 @@ export interface TemplateBuilderConfig {
 	defaults?: TemplateData[];
 	/** Optional transform applied at insert time (e.g. greeting / variable expansion). */
 	transform?: (template: TemplateData) => string;
-	/** How clicking a chip integrates the template body into the target field. Defaults to "append". */
-	insertMode?: "replace" | "append";
+	/** How clicking a chip integrates the template body into the target field. Defaults to "insert". */
+	insertMode?: "replace" | "insert";
 	/** Extra entries appended to the manager's kebab menu (per-host actions). */
 	extraMenuItems?: Array<{ icon: IconName; label: string; onClick: () => void }>;
 	/** A non-deletable, non-draggable chip pinned next to the kebab. Edits a separate value (e.g. a greeting). */
@@ -101,7 +101,7 @@ export class TemplateBuilder {
 		const text = this.config.transform ? this.config.transform(template) : template.body;
 		if (!text) return;
 		const target = this.config.targetField;
-		const mode = this.config.insertMode ?? "append";
+		const mode = this.config.insertMode ?? "insert";
 		let start: number;
 		let end: number;
 		if (mode === "replace") {
@@ -109,10 +109,12 @@ export class TemplateBuilder {
 			start = 0;
 			end = text.length;
 		} else {
-			start = target.value.length;
-			target.value += text;
+			start = target.selectionStart;
+			target.value = `${target.value.substring(0, target.selectionStart)}${text}${target.value.substring(target.selectionEnd)}`;
 			end = start + text.length;
+			target.selectionStart = target.selectionEnd = end;
 		}
+		/** @todo Make this a setting you can toggle on desktop. */
 		// On touch (no-hover) devices, select the inserted range so it can be wiped with a single keystroke.
 		if (!matchMedia("(hover: hover)").matches)
 			target.setSelectionRange(start, end);
