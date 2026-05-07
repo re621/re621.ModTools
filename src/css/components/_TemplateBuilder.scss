@@ -1,38 +1,3 @@
-/* The dialog wrapper. Targeted via `dialogClass` on jQuery UI. */
-.template-builder-dialog {
-    &.ui-dialog {
-        border: 1px solid var(--color-section);
-        /* Override modal.scss's `min-width: max-content` so we can shrink below content width. */
-        min-width: 0 !important;
-        max-width: calc(100vw - 1rem) !important;
-        max-height: calc(100vh - 2rem);
-        box-sizing: border-box;
-    }
-
-    &.ui-dialog,
-    .ui-dialog-content,
-    .ui-dialog-titlebar {
-        background: var(--color-foreground);
-        color: var(--color-text);
-    }
-
-    .ui-dialog-titlebar { border: 0; }
-
-    /* Modal.scss sets `min-width: fit-content` on the content area; override so it can shrink. */
-    .ui-dialog-content {
-        min-width: 0 !important;
-    }
-
-    .ui-dialog-titlebar-close {
-        background: transparent;
-        border: 0;
-        color: var(--color-text);
-        font-size: 1.25rem;
-        width: 2rem;
-        height: 2rem;
-    }
-}
-
 .template-builder-row {
     display: flex;
     flex-wrap: wrap;
@@ -119,7 +84,6 @@
         padding: 0 0.5rem;
         opacity: 0.7;
         font-style: italic;
-        flex: 1;
         line-height: 1;
     }
 
@@ -214,63 +178,3 @@
     }
 }
 
-.template-builder-confirm {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    padding: 0.5rem;
-
-    &__buttons {
-        display: flex;
-        gap: 0.5rem;
-        justify-content: flex-end;
-    }
-
-    button {
-        padding: 0.4rem 0.85rem;
-        font: inherit;
-        border-radius: 3px;
-        border: 1px solid var(--color-section-lighten-5);
-        background: var(--color-section);
-        color: var(--color-text);
-        cursor: pointer;
-
-        &:hover { background: var(--color-section-lighten-5); }
-
-        &.template-builder-confirm__danger {
-            background: #883333;
-            color: #fff;
-            border-color: transparent;
-
-            &:hover { background: #aa3a3a; }
-        }
-    }
-
-    textarea {
-        font: inherit;
-        padding: 0.4rem 0.5rem;
-        background: var(--color-section-darken-5);
-        border: 1px solid var(--color-section-lighten-5);
-        border-radius: 3px;
-        color: var(--color-text);
-    }
-}
-
-.template-builder-toast {
-    position: fixed;
-    bottom: 1.5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 9999;
-    padding: 0.6rem 1rem;
-    background: var(--color-foreground);
-    color: var(--color-text);
-    border: 1px solid var(--color-section-lighten-5);
-    border-radius: 3px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-
-    &--show { opacity: 1; }
-}
