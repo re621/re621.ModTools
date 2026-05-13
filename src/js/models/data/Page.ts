@@ -180,6 +180,10 @@ export const PageDefinition = {
         list: /^\/tickets\/?$/,
         view: /^\/tickets\/\d+\/?$/,
     },
+    appeals: {
+        list: /^\/appeals\/?$/,
+        view: /^\/appeals\/\d+\/?$/,
+    },
     blips: {
         list: /^\/blips\/?/,
         view: /^\/blips\/\d+\/?$/,
