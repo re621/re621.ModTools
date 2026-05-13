@@ -6,6 +6,7 @@ import LinkGrabber from "./js/components/LinkGrabber";
 import RecordBuilder from "./js/components/RecordBuilder";
 import TicketData from "./js/components/TicketData";
 import TicketReasons from "./js/components/TicketReasons";
+import AppealReasons from "./js/components/AppealReasons";
 import Page, { IgnoredPages } from "./js/models/data/Page";
 import Script from "./js/models/data/Script";
 import User from "./js/models/data/User";
@@ -28,6 +29,8 @@ export default class REMT {
 
         TicketData,
         TicketReasons,
+
+        AppealReasons,
 
         LinkGrabber,
 		
@@ -112,6 +115,8 @@ interface ComponentListAnnotated extends ComponentList {
 
     TicketData?: TicketData,
     TicketReasons?: TicketReasons,
+
+    AppealReasons?: AppealReasons,
 
     LinkGrabber?: LinkGrabber,
 
