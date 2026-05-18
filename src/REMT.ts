@@ -17,6 +17,7 @@ import DMailToStaffNote from "./js/components/DMailToStaffNote";
 import ReportedContentAge from "./js/components/ReportedContentAge";
 import DMailBuilder from "./js/components/DMailBuilder";
 import ForumBuilder from "./js/components/ForumBuilder";
+import { initRemtLib } from "./RemtLib";
 
 export default class REMT {
 
@@ -106,6 +107,7 @@ export default class REMT {
 
 }
 new REMT().run();
+initRemtLib();
 
 interface ComponentListAnnotated extends ComponentList {
     RecordBuilder?: RecordBuilder,

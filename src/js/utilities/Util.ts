@@ -1,4 +1,5 @@
 // import Debug from "../models/Debug";
+import ErrorHandler from "./ErrorHandler";
 import { UtilDOM } from "./UtilDOM";
 import { UtilEvents } from "./UtilEvents";
 import UtilID from "./UtilID";
@@ -12,16 +13,18 @@ import { UtilTime } from "./UtilTime";
  */
 export default class Util {
 
-    public static DOM = UtilDOM;
-    public static Events = UtilEvents;
-    public static ID = UtilID;
-    public static Math = UtilMath;
-    public static Network = UtilNetwork;
-    public static Time = UtilTime;
-    public static Size = UtilSize;
+    public static readonly DOM = UtilDOM;
+    public static readonly Events = UtilEvents;
+    public static readonly ID = UtilID;
+    public static readonly Math = UtilMath;
+    public static readonly Network = UtilNetwork;
+    public static readonly Time = UtilTime;
+    public static readonly Size = UtilSize;
 
-    public static LS = window.localStorage;
-    public static SS = window.sessionStorage;
+    public static readonly LS = window.localStorage;
+    public static readonly SS = window.sessionStorage;
+
+	public static readonly ErrorHandler = ErrorHandler;
 
     /**
      * Downloads the provided object as a JSON file

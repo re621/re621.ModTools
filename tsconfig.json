@@ -4,11 +4,15 @@
 		"include": ["jquery"]
 	},
     "compilerOptions": {
+		// Use the next 3 comments to generate type information.
+		// "composite": true,
         "rootDir": "./src",
         "outDir": "./dist/",
         "noImplicitAny": false,
-        "module": "es6",
+        "module": "es6", // "module": "nodenext",
         "target": "es6",
-        "moduleResolution": "node"
+        "moduleResolution": "node", // "moduleResolution": "nodenext",
+		// "rewriteRelativeImportExtensions": true,
+		// "allowImportingTsExtensions": true,
     }
 }

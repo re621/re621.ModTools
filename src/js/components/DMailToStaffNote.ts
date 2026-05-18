@@ -13,7 +13,7 @@ export default class DMailToStaffNote extends Component {
 		["ticketId", (v) => {
 			if (!this.dmailJson || !(this.dmailJson["body"])) return v; // `%${v}%`;
 			const b: string = this.dmailJson["body"].toString();
-			return DMailToStaffNote.TICKET_MATCHER.test(b) ? DMailToStaffNote.TICKET_MATCHER.exec(b)[1].toString() : v; // `%${v}%`;
+			return DMailToStaffNote.TICKET_MATCHER.test(b) ? (DMailToStaffNote.TICKET_MATCHER.exec(b) ?? ["", ""])[1].toString() : v; // `%${v}%`;
 		}],
 	]);
 	private dmailJson: any | undefined;
@@ -46,8 +46,8 @@ export default class DMailToStaffNote extends Component {
 			],
 			"Settings",
 			(e: FormData) => {
-				this.Settings.header = e.get("setting-header").toString();
-				this.Settings.footer = e.get("setting-footer").toString();
+				this.Settings.header = e.get("setting-header")?.toString() ?? "";
+				this.Settings.footer = e.get("setting-footer")?.toString() ?? "";
 				// TODO: Update text boxes
 			},
 		);
