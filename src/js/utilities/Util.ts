@@ -2,6 +2,7 @@
 import ErrorHandler from "./ErrorHandler";
 import { UtilDOM } from "./UtilDOM";
 import { UtilEvents } from "./UtilEvents";
+import { makeIcon } from "./UtilIcons";
 import UtilID from "./UtilID";
 import { UtilMath } from "./UtilMath";
 import { UtilNetwork } from "./UtilNetwork";
@@ -24,7 +25,9 @@ export default class Util {
     public static readonly LS = window.localStorage;
     public static readonly SS = window.sessionStorage;
 
-	public static readonly ErrorHandler = ErrorHandler;
+    public static readonly ErrorHandler = ErrorHandler;
+
+    public static readonly makeIcon = makeIcon;
 
     /**
      * Downloads the provided object as a JSON file

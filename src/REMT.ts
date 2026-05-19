@@ -17,14 +17,15 @@ import DMailToStaffNote from "./js/components/DMailToStaffNote";
 import ReportedContentAge from "./js/components/ReportedContentAge";
 import DMailBuilder from "./js/components/DMailBuilder";
 import ForumBuilder from "./js/components/ForumBuilder";
-import { initRemtLib } from "./RemtLib";
+import { buildRemtLib, initRemtLib } from "./RemtLib";
 
 export default class REMT {
 
     public static Registry: ComponentListAnnotated = {};
     public static API: ZestyAPI;
+    public static readonly Library = buildRemtLib();
 
-    private loadOrder = [
+    private static loadOrder = [
         RecordBuilder,
 
         TicketData,
@@ -32,13 +33,13 @@ export default class REMT {
 
         LinkGrabber,
 		
-		DMailToStaffNote,
-		ReportedContentAge,
-		DMailBuilder,
-		ForumBuilder,
+        DMailToStaffNote,
+        ReportedContentAge,
+        DMailBuilder,
+        ForumBuilder,
     ];
 
-    public async run(): Promise<void> {
+    public static async run(loadOrder = REMT.loadOrder): Promise<void> {
 
         if (Page.matches(IgnoredPages)) return;
 
@@ -89,7 +90,7 @@ export default class REMT {
         await Promise.all([headLoaded, bodyLoaded]);
 
         // Bootstrap settings (synchronous)
-        for (const module of this.loadOrder) {
+        for (const module of loadOrder) {
             const instance = new module();
             REMT.Registry[instance.getName()] = instance;
             await instance.bootstrapSettings();
@@ -106,8 +107,8 @@ export default class REMT {
     }
 
 }
-new REMT().run();
-initRemtLib();
+REMT.run();
+initRemtLib(REMT);
 
 interface ComponentListAnnotated extends ComponentList {
     RecordBuilder?: RecordBuilder,
