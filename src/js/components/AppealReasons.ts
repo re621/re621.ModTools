@@ -3,9 +3,6 @@ import User from "../models/data/User";
 import { TemplateBuilder, TemplateData } from "../models/structure/TemplateBuilder";
 import Component from "./Component";
 
-interface StoredButton extends TemplateData {
-}
-
 const DEFAULT_GREETING = "Hi %reporterName%,\n\n";
 
 export default class AppealReasons extends Component {
@@ -31,7 +28,7 @@ export default class AppealReasons extends Component {
 		];
 	}
 
-	public Settings: { enabled: boolean; buttons: StoredButton[]; greeting: string } = {
+	public Settings: { enabled: boolean; buttons: TemplateData[]; greeting: string } = {
 		enabled: true,
 		buttons: AppealReasons.defaultTemplates,
 		greeting: DEFAULT_GREETING,
