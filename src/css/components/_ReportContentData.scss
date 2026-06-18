@@ -1,10 +1,4 @@
 .reported-content-age {
-    &-past {
-        color: rgb(255, 64, 64);
-    }
-    &-within {
-        color: rgb(64, 255, 64);
-    }
     &-loading span {
         display: inline-block;
         animation: reported-content-age-bounce 1.2s infinite ease-in-out;
