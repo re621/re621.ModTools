@@ -14,9 +14,9 @@ interface ResourceType {
 }
 
 const RESOURCE_TYPES: ResourceType[] = [
-	{ rowLabel: "Reported Comment", urlPrefix: "/comments/", ageLabel: "Comment Age" },
-	{ rowLabel: "Reported Blip", urlPrefix: "/blips/", ageLabel: "Blip Age" },
-	{ rowLabel: "Reported Forum Post", urlPrefix: "/forum_posts/", ageLabel: "Forum Post Age" },
+  { rowLabel: "Reported Comment", urlPrefix: "/comments/", ageLabel: "Comment Age" },
+  { rowLabel: "Reported Blip", urlPrefix: "/blips/", ageLabel: "Blip Age" },
+  { rowLabel: "Reported Forum Post", urlPrefix: "/forum_posts/", ageLabel: "Forum Post Age" },
 ];
 
 type CommentJson = {
@@ -58,48 +58,48 @@ const commentKeys = [
 ];
 
 export default class ReportContentData extends Component {
-	private static readonly tableSelector = "body.c-tickets.a-show.resp > div#page > div#c-tickets > div#a-show > div.section > table";
+  private static readonly tableSelector = "body.c-tickets.a-show.resp > div#page > div#c-tickets > div#a-show > div.section > table";
 
-	public constructor() {
-		const linkSelectors = RESOURCE_TYPES
-			.map((r) => `${ReportContentData.tableSelector} tr td:nth-child(2) a:first-child[href^="${r.urlPrefix}"]`)
-			.join(", ");
-		super({
-			constraint: PageDefinition.tickets.view,
-			waitForDOM: linkSelectors,
-		});
-	}
+  public constructor() {
+    super({
+      constraint: PageDefinition.tickets.view,
+      waitForDOM: RESOURCE_TYPES
+        .map((r) => `${ReportContentData.tableSelector} tr td:nth-child(2) a:first-child[href^="${r.urlPrefix}"]`)
+        .join(", "),
+    });
+  }
 
   public Settings = {
     enabled: true,
     loadMessage: false,
   };
 
-	protected async create(): Promise<void> {
+  protected async create(): Promise<void> {
     Util.DOM.addSettingsButton({
       id: "ReportContentDataSettings",
+      name: "Mod Tools Settings",
       onClick: () => this.onSettingsButton(),
-    })
-		const found = ReportContentData.findReportedRow();
-		if (!found) return;
-		const { row, type } = found;
+    });
+    const found = ReportContentData.findReportedRow();
+    if (!found) return;
+    const { row, type } = found;
 
-		const link = row.children[1].querySelector<HTMLAnchorElement>(`a[href^="${type.urlPrefix}"]`);
-		if (!link) return;
+    const link = row.children[1].querySelector<HTMLAnchorElement>(`a[href^="${type.urlPrefix}"]`);
+    if (!link) return;
 
-		const ageRow = ReportContentData.findAgeRow(type);
+    const ageRow = ReportContentData.findAgeRow(type);
     if (!ageRow) return;
 
-		const valueCell = ageRow.children[1] as HTMLElement;
-		const info = html`<a class="reported-content-age-loading"><span>.</span><span>.</span><span>.</span></a>` as HTMLAnchorElement;
-		valueCell.appendChild(info);
+    const valueCell = ageRow.children[1] as HTMLElement;
+    const info = html`<a class="reported-content-age-loading"><span>.</span><span>.</span><span>.</span></a>` as HTMLAnchorElement;
+    valueCell.appendChild(info);
 
-		// TODO: Replace w/ ZestyAPI when it gets generic resource fetching.
-		const response = await fetch(new URL(link.href).pathname + ".json");
-		const data = await response.json() as CommentJson;
-		const created = new Date(data["created_at"]);
+    // TODO: Replace w/ ZestyAPI when it gets generic resource fetching.
+    const response = await fetch(new URL(link.href).pathname + ".json");
+    const data = await response.json() as CommentJson;
+    const created = new Date(data["created_at"]);
 
-		info.classList.remove("reported-content-age-loading");
+    info.classList.remove("reported-content-age-loading");
     Array.from(info.children).forEach(e => e.remove());
     info.innerText = "ⓘ";
     info.onclick = () => new Modal({
@@ -108,7 +108,7 @@ export default class ReportContentData extends Component {
     }).addContent(
       $(`<table>${commentKeys.map(e => `<tr><th scope="row"><b>${e}</b></th><td>${data[e]}</td></tr>`).join("\n")}</table>`)
     );
-		info.title = "Info";
+    info.title = "Info";
     (valueCell.children[0] as HTMLElement).title += `\nActionable from ${created} - ${Util.Time.advanceDate(created, {})})`;
 
     if (!this.Settings.loadMessage) return;
@@ -117,27 +117,26 @@ export default class ReportContentData extends Component {
     } catch(error) {
       ErrorHandler.write(`${error}`);
     }
-	}
+  }
   
   /**
 	 * The callback to execute when the settings button is pressed.
 	 * 
-	 * NOTE: Dependent on proper `this` binding.
+	 * NOTE: Dependent on proper `this` binding; assign to events in a callback.
 	 * @returns false to stop propagation & prevent default.
 	 */
-	protected onSettingsButton(): false {
-		DialogForm.getRequestedInput(
-			[
-        $(`<label for="setting-loadMessage" title="Should the reported content be loaded onto this page next time?">Load Message? <input type="checkbox" id="setting-loadMessage" value="true" ${this.Settings.loadMessage ? "checked" : ""}></input></label>`),
-				$(`<button type="submit">Submit Changes to Settings</button>`),
-			],
-			"Mod Tools Settings",
-			(e: FormData) => this.Settings.loadMessage = e.get("setting-loadMessage") === "true",
-		);
+  protected onSettingsButton(): false {
+    DialogForm.getRequestedInput(
+      [
+        $(`<label for="setting-loadMessage" title="Should the reported content be loaded onto this page next time?">Load Message? <input type="checkbox" id="setting-loadMessage" name="setting-loadMessage" value="true" ${this.Settings.loadMessage ? "checked" : ""}></input></label><br />`),
+      ],
+      "Mod Tools Settings",
+      (e: FormData) => this.Settings.loadMessage = e.get("setting-loadMessage") === "true",
+    );
 
-		// Stop propagation & prevent default.
-		return false;
-	}
+    // Stop propagation & prevent default.
+    return false;
+  }
 
   private async drawMessage(data: CommentJson) {
     // Display comment
@@ -174,26 +173,26 @@ export default class ReportContentData extends Component {
     if (dText["html"]) flexBox.appendChild(html`<div style="background-color: rgba(0,0,0,0.1); border-radius: 1rem; padding: 1rem;"><b>Message:</b><br />${dText["html"]}</div>`);
   }
 
-	private static findReportedRow(): { row: HTMLTableRowElement; type: ResourceType } | null {
-		const table = document.querySelector(ReportContentData.tableSelector);
-		if (!table) return null;
-		const rows = table.childElementCount === 1 ? table.children[0].children : table.children;
-		for (const row of rows) {
-			const labelText = (row.children[0] as HTMLElement).innerText;
-			const type = RESOURCE_TYPES.find((t) => t.rowLabel === labelText);
-			if (type) return { row: row as HTMLTableRowElement, type };
-		}
-		return null;
-	}
+  private static findReportedRow(): { row: HTMLTableRowElement; type: ResourceType } | null {
+    const table = document.querySelector(ReportContentData.tableSelector);
+    if (!table) return null;
+    const rows = table.childElementCount === 1 ? table.children[0].children : table.children;
+    for (const row of rows) {
+      const labelText = (row.children[0] as HTMLElement).innerText;
+      const type = RESOURCE_TYPES.find((t) => t.rowLabel === labelText);
+      if (type) return { row: row as HTMLTableRowElement, type };
+    }
+    return null;
+  }
 
-	private static findAgeRow(type: ResourceType): HTMLTableRowElement | null {
-		const table = document.querySelector(ReportContentData.tableSelector);
-		if (!table) return null;
-		const rows = table.childElementCount === 1 ? table.children[0].children : table.children;
-		for (const row of rows) {
-			const labelText = (row.children[0] as HTMLElement).innerText;
-			if (type.ageLabel === labelText) return row as HTMLTableRowElement;
-		}
-		return null;
-	}
+  private static findAgeRow(type: ResourceType): HTMLTableRowElement | null {
+    const table = document.querySelector(ReportContentData.tableSelector);
+    if (!table) return null;
+    const rows = table.childElementCount === 1 ? table.children[0].children : table.children;
+    for (const row of rows) {
+      const labelText = (row.children[0] as HTMLElement).innerText;
+      if (type.ageLabel === labelText) return row as HTMLTableRowElement;
+    }
+    return null;
+  }
 }
