@@ -206,8 +206,7 @@ export default class DMailToStaffNote extends Component {
 				form.style.display = inputBox.style.display = "none";
 			}
 		};
-		const content = document.querySelector(".dmail");
-    if (!content) throw new Error("Expected HTML element not found (`.dmail`)")
+		const content = Util.DOM.querySelector(".dmail");
 		content.insertAdjacentElement("beforeend", cBoxLabel);
 		content.insertAdjacentElement("beforeend", cBox);
 		// #region Settings Button
@@ -243,8 +242,7 @@ export default class DMailToStaffNote extends Component {
 		if (!id) return null;
 		const { id: recipientId, name: recipientName } = this.pullIdAndName(2);
 		const { id: senderId, name: senderName } = this.pullIdAndName(1);
-		const title = document.querySelector<HTMLAnchorElement>(".dmail h2")?.innerText;
-    if (title === undefined) throw new Error("Expected HTML element not found (`.dmail h2`).");
+		const title = Util.DOM.querySelector<HTMLAnchorElement>(".dmail h2").innerText;
     return {
 			id,
 			recipientId,
@@ -261,8 +259,7 @@ export default class DMailToStaffNote extends Component {
 	 * @returns 
 	 */
 	private static pullIdAndName(number: number) {
-		const user = document.querySelector<HTMLAnchorElement>(`.dmail ul li:nth-of-type(${number}) a[href^='/users/']`);
-    if (!user) throw new Error("Expected HTML element not found (`.dmail ul li:nth-of-type(${number}) a[href^='/users/']`).");
+		const user = Util.DOM.querySelector<HTMLAnchorElement>(`.dmail ul li:nth-of-type(${number}) a[href^='/users/']`);
     const id = /^\/users\/([0-9]+)/.exec(new URL(user.href).pathname)?.[1];
     if (!id) throw new Error("Expected URL path segment not found (`/users/:id`; no `:id` found).");
 		return {

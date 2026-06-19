@@ -11,13 +11,16 @@ import PreparedStructure from "./PreparedStructure";
  */
 export class Form implements PreparedStructure {
 
-    private static inputTimeout = 500;          // Typing timeout on text input fields
+    /** Typing timeout on text input fields */
+    private static readonly inputTimeout = 500;
 
-    private created = false;                    // Used for caching, true if get() has been called before
-    private element: JQuery<HTMLElement>;       // DOM element for the form
-    private content: FormElement[];            // Array of form elements
+    /** Used for caching, true if get() has been called before */
+    private created = false;
 
-    private inputList: Map<string, JQuery<HTMLElement>>;
+    /** DOM element for the form */
+    private readonly element: JQuery<HTMLElement>;
+
+    private readonly inputList: Map<string, JQuery<HTMLElement>>;
 
     /**
      * Prepares the form structure and settings.  
@@ -26,7 +29,11 @@ export class Form implements PreparedStructure {
      * @param content Form elements
      * @param onSubmit Form submission callback
      */
-    public constructor(options: SectionOptions = {}, content: FormElement[] = [], onSubmit?: FormSubmitEvent) {
+    public constructor(
+      options: SectionOptions = {},
+      private readonly content: FormElement[] = [],
+      onSubmit?: FormSubmitEvent,
+    ) {
         if (!options.name) options.name = Util.ID.make();
         if (!options.columns) options.columns = 1;
         if (!options.width) options.width = options.columns;
@@ -48,7 +55,6 @@ export class Form implements PreparedStructure {
                 onSubmit?.(values, this);
             });
 
-        this.content = content;
         this.inputList = new Map();
     }
 
@@ -612,6 +618,7 @@ export class Form implements PreparedStructure {
      * Creates a file input FormElement based on the provided parameters  
      * @param options Element configuration
      * TODO Changed function type
+     * IDEA: Type to accepted MIME types?
      */
     public static file(options: ElementOptions & { accept: string }, changed?: InputChangeEvent<unknown>): FormElement {
         if (!options.name) options.name = Util.ID.make();
@@ -1027,13 +1034,6 @@ export class FormElement {
 
     private created = false;
 
-    private wrapper: JQuery<HTMLElement>;
-    private input?: JQuery<HTMLElement>;
-    private label?: JQuery<HTMLElement>;
-    private content: FormElement[];
-    private container: JQuery<HTMLElement>;
-    private postProcessing: (wrapper: JQuery<HTMLElement>) => void;
-
     /**
      * Constructs a form element based on provided data.  
      * Only the `wrapper` parameter is required, everything else is optional.
@@ -1045,20 +1045,20 @@ export class FormElement {
      * @param postProcessing Function to run after the object has been built. Takes the wrapper as a parameter.
      */
     public constructor(
-        wrapper: JQuery<HTMLElement>,
-        input?: JQuery<HTMLElement>,
-        label?: JQuery<HTMLElement>,
-        content?: FormElement[],
-        container?: JQuery<HTMLElement>,
-        postProcessing?: (wrapper: JQuery<HTMLElement>) => void) {
+        private readonly wrapper: JQuery<HTMLElement>,
+        private readonly input?: JQuery<HTMLElement>,
+        private readonly label?: JQuery<HTMLElement>,
+        private readonly content: FormElement[] = [],
+        private readonly container: JQuery<HTMLElement> = wrapper,
+        private readonly postProcessing?: (wrapper: JQuery<HTMLElement>) => void) {
 
         this.wrapper = wrapper;
         this.input = input;
         this.label = label;
-        this.content = content ? content : [];
-        this.container = container ? container : wrapper;
+        this.content = content;
+        this.container = container;
 
-        this.postProcessing = postProcessing ? postProcessing : (): void => { return; };
+        this.postProcessing = postProcessing;
     }
 
     public getInput(): JQuery<HTMLElement> | undefined {
@@ -1102,7 +1102,7 @@ export class FormElement {
                 }
             }
 
-            this.postProcessing(this.wrapper);
+            this.postProcessing?.(this.wrapper);
 
             this.created = true;
         }

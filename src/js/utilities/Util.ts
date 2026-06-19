@@ -330,13 +330,22 @@ export default class Util {
 		return input;
 	}
 
+  /**
+   * Normalizes template variables into a RegExp that properly matches all instances when used in `String.replace`.
+   * 
+   * This will escape the `$`, ensure a `RegExp` has the `g` flag, & match naked string literals against both the `$<varName>`, `%<varName>` & `%<varName>%` patterns.
+   * @param varName The variable to convert to a RegExp.
+   * @todo Escape literal `string` `varName`s (could include a `$`, could include other things)
+   */
 	private static normalizeTemplateVariable(varName: string | RegExp) {
 		return !(varName instanceof RegExp) ?
 			RegExp(
-				(varName.startsWith("$") || varName.startsWith("%")) ? varName : `\\$${varName}|%${varName}%?`,
+				(varName.startsWith("$") || varName.startsWith("%")) ? varName.replace(/^[$%]|%$/g, "") : `\\$${varName}|%${varName}%?`,
 				"g",
 			) :
-			varName;
+			varName.global ?
+        varName : 
+        new RegExp(varName.source, `g${varName.flags}`);
 	}
 	// #endregion replaceTemplateVariables
 }

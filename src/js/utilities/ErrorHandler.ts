@@ -14,7 +14,15 @@ export default class ErrorHandler {
             `REMT v.${Script.version} for ${Script.handler.name} v.${Script.handler.version}`,
             window.navigator.userAgent,
             message,
-            (error && error.stack) ? error.stack : error,
+            ...(error && error instanceof Error ? 
+              [
+                `Error Name: ${error.name}`,
+                `Error message: ${error.message}`,
+                error.stack ?
+                  error.stack.split("\n").join("\n\t") :
+                  "No provided stack trace",
+              ] :
+              [error]),
         ].join("\n"));
 
         console.error([
