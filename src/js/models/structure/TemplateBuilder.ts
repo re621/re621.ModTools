@@ -391,7 +391,7 @@ export class TemplateBuilder {
 		// Editing the pending draft. Promote it to the saved list once the body has content.
 		// (A title without a body inserts nothing, so it's not yet a useful template.)
 		if (this.pending && index === current.length) {
-			this.pending = { ...this.pending, ...patch };
+      this.pending = Object.assign({}, this.pending, patch);
 			if (this.pending.body) {
 				const next = [...current, this.pending];
 				this.pending = undefined;
@@ -404,7 +404,7 @@ export class TemplateBuilder {
 
 		if (!current[index]) return;
 		const next = [...current];
-		next[index] = { ...next[index], ...patch };
+		next[index] = Object.assign({}, next[index], patch);
 		this.config.setTemplates(next);
 		this.updateChipText(index, patch.title);
 		this.renderRow();

@@ -240,13 +240,13 @@ class PostFilterUtils {
                 const parts = b.split("...");
                 if (parts.length !== 2) return false;
 
-                const parsedParts = [];
+                const parsedParts: number[] = [];
                 for (const el of parts) parsedParts.push(parseFloat(el));
 
                 return a >= Math.min(...parsedParts) && a <= Math.max(...parsedParts);
             }
+            // default: return false;
         }
-        return false;
     }
 
     /** Returns true if the specified post has the provided tag */

@@ -34,7 +34,7 @@ export default class Page {
      * Returns the query parameter, or null if the key does not exist
      * @return string Query parameter
      */
-    public static getQueryParameter(key: string): string {
+    public static getQueryParameter(key: string): string | null {
         return this.getInstance().url.searchParams.get(key);
     }
 
@@ -104,7 +104,7 @@ export default class Page {
      * Returns the type of the page, according to the definitions below
      * @returns Page type, as a string
      */
-    public static getPageName(): string {
+    public static getPageName(): string | null {
         for (const [name, value] of Object.entries(PageDefinition as RegExpList)) {
             if (typeof value.test == "function")
                 if (Page.matches(value as RegExp)) return name;

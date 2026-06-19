@@ -5,7 +5,12 @@ import Component from "./Component";
 
 export default class RecordBuilder extends Component {
 
-    private input: JQuery<HTMLElement>;
+    /**
+     * The element on the HTML from the server where the record text is placed.
+     * 
+     * NOTE: Initialized at the top of `create`, before all usages.
+     */
+    private input!: JQuery<HTMLTextAreaElement>;
 
     public constructor() {
         super({
@@ -34,7 +39,7 @@ export default class RecordBuilder extends Component {
 
         this.buildInterface(wrapper);
 
-        return;
+        return Promise.resolve();
     }
 
     private buildInterface(wrapper: JQuery<HTMLElement>): JQuery<HTMLElement> {
@@ -48,6 +53,7 @@ export default class RecordBuilder extends Component {
                 buttons: [],
             })
             .appendTo(wrapper);
+        /** @todo Refactor to only use after initialization. */
         let reasonSelector: JQuery<HTMLElement> = null,
             reasonInput: JQuery<HTMLElement> = null;
 
@@ -137,7 +143,7 @@ export default class RecordBuilder extends Component {
                 .appendTo(reasonSelector);
         }
 
-        let reasonInputTimer = null;
+        let reasonInputTimer: number | undefined;
         reasonInput = $("<textarea>")
             .attr({
                 id: "custom-reason-" + id,
@@ -147,7 +153,7 @@ export default class RecordBuilder extends Component {
             .appendTo(reasonContainer)
             .on("input", (event, preventChange) => {
                 clearTimeout(reasonInputTimer);
-                reasonInputTimer = setTimeout(() => {
+                reasonInputTimer = window.setTimeout(() => {
                     reasonInput.trigger("remt:input", preventChange);
                 }, 200);
             })
@@ -167,7 +173,7 @@ export default class RecordBuilder extends Component {
             .appendTo(sourcesContainer);
 
 
-        let sourcesInputTimer = null;
+        let sourcesInputTimer: number | undefined;
         const sourcesInput = $("<textarea>")
             .attr({
                 id: "record-sources-" + id,
@@ -176,7 +182,7 @@ export default class RecordBuilder extends Component {
             .appendTo(sourcesContainer)
             .on("input propertychange", () => {
                 clearTimeout(sourcesInputTimer);
-                sourcesInputTimer = setTimeout(() => {
+                sourcesInputTimer = window.setTimeout(() => {
                     container.data("sources", sourcesInput.val() + "")
                     this.generateRecordText();
                 }, 200);
@@ -220,7 +226,7 @@ export default class RecordBuilder extends Component {
         }
 
         container.on("remt:buttons", (event, preventChange) => {
-            const buttons = [];
+            const buttons: string[] = [];
             for (const btn of ruleWrapper.find("button.active"))
                 buttons.push((btn as HTMLInputElement).name);
 
@@ -235,7 +241,7 @@ export default class RecordBuilder extends Component {
     private generateRecordText() {
         // console.log("%c[RE621.ModTools]%c Updating Record Text", "color: maroon", "color: unset");
 
-        const result = [];
+        const result: string[] = [];
 
         for (const form of $("form.record-builder")) {
             result.push(this.processForm($(form)));
@@ -252,19 +258,19 @@ export default class RecordBuilder extends Component {
 
 
         // Sources
-        const sourceList = (form.data("sources") || "").split("\n").filter(n => n.trim());
-        let sourceOutput = [];
+        const sourceList: string[] = (form.data("sources") || "").split("\n").filter(n => n.trim());
+        let sourceOutput: string[] = [];
         if (sourceList.length == 0) sourceOutput = [];
         else if (sourceList.length == 1) sourceOutput = [`"[Source]":${processSource(sourceList[0])}`];
         else
             for (const [index, source] of sourceList.entries()) sourceOutput.push(`"[${index + 1}]":${processSource(source)}`);
 
         // Append rules excerpts
-        const rulesOutput = [];
+        const rulesOutput: string[] = [];
         for (const name of (form.data("buttons") || [])) {
             const ruleData = Records.Rules[name];
 
-            const ruleLines = [];
+            const ruleLines: string[] = [];
             for (const ruleLine of ruleData.rules) {
                 if(!ruleLine) {
                     ruleLines.push("");

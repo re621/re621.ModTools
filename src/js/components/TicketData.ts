@@ -17,7 +17,7 @@ export default class TicketData extends Component {
 
 
 
-        return;
+        return Promise.resolve();
     }
 
 }

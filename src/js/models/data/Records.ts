@@ -380,7 +380,7 @@ interface SiteRule {
 
     /* Rule text */
     preface?: string,
-    rules: string[],
+    rules: (string | null)[],
     postface?: string,
 
     /** Override for the rules link anchor */

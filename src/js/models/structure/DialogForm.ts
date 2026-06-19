@@ -13,7 +13,10 @@ export class DialogForm extends Modal {
         return this._promise;
     }
 
-    private $form: JQuery<HTMLFormElement>;
+    /**
+     * NOTE: Is definitively assigned in `createForm`.
+     */
+    private $form!: JQuery<HTMLFormElement>;
 
 	/** Normalizes parameters by converting a string parameter for the title to a @see DialogConfig compliant object/preserving the object. */
 	private static _fixTitle(title: string | DialogConfig) { return (typeof(title) === "string") ? { title: title } : title;}
@@ -71,8 +74,8 @@ export class DialogForm extends Modal {
 		onError?: { (e: unknown): Err | T },
 		onComplete?: { (): void },
 	): Promise<FormData | T | Err> {
-		let r: Promise<FormData | T | Err> = (new DialogForm(elements, DialogForm._fixTitle(title))).promise;
-		if (!("call" in then)) ({then, onError, onComplete} = then);
+		let r: Promise<any> = (new DialogForm(elements, DialogForm._fixTitle(title))).promise;
+		if (typeof then === "object") ({then, onError, onComplete} = then);
 		if (then) r = r.then(then);
 		if (onError) r = r.catch(onError);
 		if (onComplete) r = r.finally(onComplete);

@@ -16,7 +16,7 @@ export default class LinkGrabber extends Component {
         });
     }
 
-    protected create(): Promise<void> {
+    protected async create(): Promise<void> {
         const menu = $("menu.nav-secondary");
         if(!menu.length) return;
 

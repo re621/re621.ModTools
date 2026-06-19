@@ -4,6 +4,7 @@ import REMT from "../../REMT";
 import Danbooru from "../models/api/Danbooru";
 import Util from "../utilities/Util";
 import { DialogForm } from "../models/structure/DialogForm";
+import Debug from "../models/Debug";
 
 export default class DMailToStaffNote extends Component {
 	public static readonly TICKET_MATCHER = /^"Your ticket":\/tickets\/([0-9]+) has been updated by /;
@@ -11,9 +12,10 @@ export default class DMailToStaffNote extends Component {
 		["dmailId", () => this.dmailJson["id"].toString()],
 		["title", () => this.dmailJson["title"].toString()],
 		["ticketId", (v) => {
-			if (!this.dmailJson || !(this.dmailJson["body"])) return v; // `%${v}%`;
+			if (!this.dmailJson || !(this.dmailJson["body"])) return v;
 			const b: string = this.dmailJson["body"].toString();
-			return DMailToStaffNote.TICKET_MATCHER.test(b) ? DMailToStaffNote.TICKET_MATCHER.exec(b)[1].toString() : v; // `%${v}%`;
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			return DMailToStaffNote.TICKET_MATCHER.test(b) ? DMailToStaffNote.TICKET_MATCHER.exec(b)![1].toString() : v;
 		}],
 	]);
 	private dmailJson: any | undefined;
@@ -46,8 +48,8 @@ export default class DMailToStaffNote extends Component {
 			],
 			"Settings",
 			(e: FormData) => {
-				this.Settings.header = e.get("setting-header").toString();
-				this.Settings.footer = e.get("setting-footer").toString();
+				this.Settings.header = e.get("setting-header")?.toString() ?? "";
+				this.Settings.footer = e.get("setting-footer")?.toString() ?? "";
 				// TODO: Update text boxes
 			},
 		);
@@ -59,8 +61,12 @@ export default class DMailToStaffNote extends Component {
 	 * IDEA: Add option to edit a preexisting staff note.
 	 * @todo: Disable textarea & reenable it when the submit button is pressed so it's actually included in the form's output.
 	 */
-	protected create(): Promise<void> {
+	protected async create(): Promise<void> {
 		const dmailInfo = DMailToStaffNote.findDMailIds();
+    if (!dmailInfo) {
+      Debug.log("Failed to pull required info from URL in `DMailToStaffNote`.");
+      return;
+    }
 		this.dmailJson = {};
 		this.dmailJson.id = dmailInfo.id;
 		this.dmailJson.title = dmailInfo.title;
@@ -201,6 +207,7 @@ export default class DMailToStaffNote extends Component {
 			}
 		};
 		const content = document.querySelector(".dmail");
+    if (!content) throw new Error("Expected HTML element not found (`.dmail`)")
 		content.insertAdjacentElement("beforeend", cBoxLabel);
 		content.insertAdjacentElement("beforeend", cBox);
 		// #region Settings Button
@@ -232,25 +239,20 @@ export default class DMailToStaffNote extends Component {
 	 * @returns An object containing all the info about the DMail exchange that could be pulled from the page's HTML w/o querying the server.
 	 */
 	public static findDMailIds() {
-		const retVal = {
-			id: undefined,
-			recipientId: undefined,
-			senderId: undefined,
-			recipientName: undefined,
-			senderName: undefined,
-			title: undefined,
-		};
-		const id = /^\/dmails\/([0-9]+)/.exec(window.location.pathname);
+		const id = /^\/dmails\/([0-9]+)/.exec(window.location.pathname)?.[1];
 		if (!id) return null;
-		retVal.id = id[1];
-		const recipient = this.pullIdAndName(2);
-		retVal.recipientId = recipient.id;
-		retVal.recipientName = recipient.name;
-		const sender = this.pullIdAndName(1);
-		retVal.senderId = sender.id;
-		retVal.senderName = sender.name;
-		retVal.title = document.querySelector<HTMLAnchorElement>(".dmail h2").innerText;
-		return retVal;
+		const { id: recipientId, name: recipientName } = this.pullIdAndName(2);
+		const { id: senderId, name: senderName } = this.pullIdAndName(1);
+		const title = document.querySelector<HTMLAnchorElement>(".dmail h2")?.innerText;
+    if (title === undefined) throw new Error("Expected HTML element not found (`.dmail h2`).");
+    return {
+			id,
+			recipientId,
+			senderId,
+			recipientName,
+			senderName,
+			title,
+		};
 	}
 
 	/**
@@ -260,8 +262,11 @@ export default class DMailToStaffNote extends Component {
 	 */
 	private static pullIdAndName(number: number) {
 		const user = document.querySelector<HTMLAnchorElement>(`.dmail ul li:nth-of-type(${number}) a[href^='/users/']`);
+    if (!user) throw new Error("Expected HTML element not found (`.dmail ul li:nth-of-type(${number}) a[href^='/users/']`).");
+    const id = /^\/users\/([0-9]+)/.exec(new URL(user.href).pathname)?.[1];
+    if (!id) throw new Error("Expected URL path segment not found (`/users/:id`; no `:id` found).");
 		return {
-			id: /^\/users\/([0-9]+)/.exec(new URL(user.href).pathname)[1],
+			id: id,
 			name: user.innerText,
 		};
 	}

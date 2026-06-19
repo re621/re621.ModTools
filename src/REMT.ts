@@ -79,7 +79,7 @@ export default class REMT {
                     return;
                 }
                 const token = $("head meta[name=csrf-token]");
-                if (token) REMT.API.login(token.attr("content"));
+                if (token) REMT.API.login(token.attr("content") ?? "");
             });
         } catch (error) {
             ErrorHandler.write("An error occurred during script initialization", error);
@@ -101,7 +101,7 @@ export default class REMT {
         // Load modules (asynchronous)
         const promises: Promise<void>[] = [];
         for (const instance of Object.values(REMT.Registry))
-            promises.push(instance.load());
+            promises.push(instance?.load() ?? Promise.resolve());
         Promise.all(promises).then(() => {
             console.log("%c[RE621.ModTools]%c loaded", "color: maroon", "color: unset");
         });
@@ -110,7 +110,7 @@ export default class REMT {
 }
 new REMT().run();
 
-interface ComponentListAnnotated extends ComponentList {
+interface ComponentListAnnotated extends Partial<ComponentList> {
     RecordBuilder?: RecordBuilder,
 
     TicketData?: TicketData,

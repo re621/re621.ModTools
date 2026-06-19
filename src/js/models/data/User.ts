@@ -64,7 +64,7 @@ export default class User {
         User.postsPerPage = data.userPerPage || 75;
 
         // From meta tags
-        User.commentThreshold = parseInt(getValue("user-comment-threshold", -3));
+        User.commentThreshold = parseInt(getValue("user-comment-threshold", "-3"));
         User.blacklistedTags = getValue("blacklisted-tags", "[]");
         User.blacklistUsers = getValue("blacklist-users", "false") == "true";
 
@@ -74,10 +74,10 @@ export default class User {
 
         User.defaultImageSize = ImageScalingMode.get(getValue("default-image-size"));
 
-        function getValue(name: string, fallback = null): string {
+        function getValue(name: string, fallback = ""): string {
             const el = $(`meta[name="${name}"]`);
             if (el.length == 0) return fallback;
-            return el.attr("content");
+            return el.attr("content") ?? fallback;
         }
     }
 
@@ -93,12 +93,13 @@ export enum ImageScalingMode {
 export namespace ImageScalingMode {
     export function get(mode: string): ImageScalingMode {
         switch (mode) {
-            case "large": return ImageScalingMode.Sample;
             case "fitv": return ImageScalingMode.FitHeight;
             case "fit": return ImageScalingMode.FitWidth;
             case "original": return ImageScalingMode.Original;
+            case "large":
+            default:
+              return ImageScalingMode.Sample;
         }
-        return ImageScalingMode.Sample;
     }
 }
 

@@ -60,7 +60,7 @@ export default class Util {
      */
     public static chunkArray<T>(input: T[] | Set<T>, size: number, method: "balance" | "chunk" | "split" = "balance"): T[][] {
         if (!Array.isArray(input)) input = Array.from(input);
-        const result = [];
+        const result: T[][] = [];
         switch (method) {
             case "chunk": {
                 for (let i = 0; i < input.length; i += size)
@@ -179,10 +179,10 @@ export default class Util {
      * @param input Textarea to parse
      */
     public static getTagString(input: JQuery<HTMLElement>): string {
-        return input.val().toString().trim()
+        return input.val()?.toString().trim()
             .toLowerCase()
             .replace(/\r?\n|\r/g, " ")      // strip newlines
-            .replace(/(?:\s){2,}/g, " ");   // strip multiple spaces
+            .replace(/(?:\s){2,}/g, " ") ?? "";   // strip multiple spaces
     }
 
     public static getTags(input: string): string[];
@@ -190,7 +190,7 @@ export default class Util {
     public static getTags(input: JQuery<HTMLElement>[]): string[];
     public static getTags(input: string | JQuery<HTMLElement> | JQuery<HTMLElement>[]): string[] {
         if (Array.isArray(input)) {
-            const result = [];
+            const result: string[] = [];
             for (const element of input)
                 result.push(...Util.getTags(element));
             return result;
@@ -303,7 +303,7 @@ export default class Util {
 		variables: Map<string | RegExp, string | ((key: string, ...args: any[]) => string)>,
 	): string;
 	/**
-	 * 
+	 * DON'T USE THIS FORM DIRECTLY.
 	 * @param input The string to perform replacement on.
 	 * @param variables The things to replace. Should be either a Map with the keys as the variable name & the values as the resultant output, or an array of variables to be replaced using @see replacer .
 	 * @param replacer A function that takes a value from @see variables as input & returns the resultant output.
@@ -311,20 +311,20 @@ export default class Util {
 	 */
 	public static replaceTemplateVariables(
 		input: string,
-		variables: Array<string|RegExp> | Map<string|RegExp, string|((key: string, ...args: any[]) => string)>/*  | StringDictionary<string|((key: string, ...args: any[]) => string)> */,
+		variables: Array<string|RegExp> | Map<string|RegExp, string|((key: string, ...args: any[]) => string)>,
 		replacer?: (key: string, ...args: any[]) => string,
 	): string {
 		if (variables instanceof Array) {
+      if (!replacer) throw new Error("When using an array of variables to replace, this function requires a replacer function.");
 			for (const e of variables) {
-				input = input.replace(this.normalizeTemplateVariable(e), replacer);
+        input = input.replace(this.normalizeTemplateVariable(e), replacer);
 			}
 		} else {
-			for (const e of variables.keys()) {
-				const v = variables.get(e);
-				// Hack for type stupidity
+			for (const [k, v] of variables.entries()) {
+				// NOTE: Hack for type stupidity
 				input = typeof v === "string" ? 
-					input.replace(this.normalizeTemplateVariable(e), v) :
-					input.replace(this.normalizeTemplateVariable(e), v);
+					input.replace(this.normalizeTemplateVariable(k), v) :
+					input.replace(this.normalizeTemplateVariable(k), v);
 			}
 		}
 		return input;

@@ -12,7 +12,7 @@ export default class Modal {
     // private config: ModalConfig;
 
     private triggers: ModalTrigger[] = [];
-    private activeTrigger: JQuery<HTMLElement>;
+    private activeTrigger?: JQuery<HTMLElement>;
     private triggersMulti: boolean;
 
     public isDisabled = false;
@@ -24,9 +24,9 @@ export default class Modal {
     public close(): void { this.isOpen = false; }
     public toggle(): void { this.isOpen = !this.isOpen; }
 
-    public constructor(config: ModalConfig) {
+    public constructor(initialConfig: ModalConfig) {
         this.id = Util.ID.make();
-        config = this.validateConfig(config);
+        const config = Object.freeze(this.validateConfig(initialConfig));
 
         this.triggersMulti = config.triggerMulti;
         this.isDisabled = config.disabled;
@@ -76,7 +76,8 @@ export default class Modal {
         if (config.structure)
             this.$modal.one("dialogopen.lazyload", () => {
                 this.$modal.html("");
-                this.$modal.append(config.structure.render());
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                this.$modal.append(config.structure!.render());
             });
 
         this.registerTrigger(config.triggers);
@@ -103,35 +104,34 @@ export default class Modal {
      * @param config Configuration to parse
 	 * @todo Convert to using `Object.assign` with a default object instead.
      */
-    private validateConfig(config: ModalConfig): ModalConfig {
+    private validateConfig(config: ModalConfig): RequiredModalConfig | Required<ModalConfig> {
         // const result: ModalConfig = Object.assign({}, Modal.defaultConfig, config);
         const result: ModalConfig = {};
 
-        result.title = typeof config.title === "undefined" ? "Dialog" : config.title;
-        result.autoOpen = typeof config.autoOpen === "undefined" ? false : config.autoOpen;
-        result.triggers = typeof config.triggers === "undefined" ? [] : config.triggers;
-        result.triggerMulti = typeof config.triggerMulti === "undefined" ? false : config.triggerMulti;
+        return {
+          title: typeof config.title === "undefined" ? "Dialog" : config.title,
+        autoOpen: typeof config.autoOpen === "undefined" ? false : config.autoOpen,
+        triggers: typeof config.triggers === "undefined" ? [] : config.triggers,
+        triggerMulti: typeof config.triggerMulti === "undefined" ? false : config.triggerMulti,
 
-        result.content = typeof config.content === "undefined" ? $("") : config.content;
-        result.structure = typeof config.structure === "undefined" ? null : config.structure;
+        content: typeof config.content === "undefined" ? $("") : config.content,
+        structure: typeof config.structure === "undefined" ? null : config.structure,
 
-        result.width = typeof config.width === "undefined" ? "auto" : config.width;
-        result.height = typeof config.height === "undefined" ? "auto" : config.height;
-        result.minWidth = typeof config.minWidth === "undefined" ? 150 : config.minWidth;
-        result.minHeight = typeof config.minHeight === "undefined" ? 150 : config.minHeight;
-        result.maxWidth = typeof config.maxWidth === "undefined" ? undefined : config.maxWidth;
-        result.maxHeight = typeof config.minHeight === "undefined" ? undefined : config.maxHeight;
+        width: typeof config.width === "undefined" ? "auto" : config.width,
+        height: typeof config.height === "undefined" ? "auto" : config.height,
+        minWidth: typeof config.minWidth === "undefined" ? 150 : config.minWidth,
+        minHeight: typeof config.minHeight === "undefined" ? 150 : config.minHeight,
+        maxWidth: typeof config.maxWidth === "undefined" ? -1 /* undefined */ : config.maxWidth,
+        maxHeight: typeof config.maxHeight === "undefined" ? -1 /* undefined */ : config.maxHeight,
 
-        result.disabled = typeof config.disabled === "undefined" ? false : config.disabled;
-        result.dialogClass = typeof config.dialogClass === "undefined" ? "" : config.dialogClass;
-        if (typeof config.position === "undefined") result.position = { my: "center", at: "center" };
-        else
-            result.position = {
-                my: !config.position.my ? "center" : config.position.my,
-                at: !config.position.at ? "center" : config.position.at,
-            }
-
-        return result;
+        disabled: typeof config.disabled === "undefined" ? false : config.disabled,
+        dialogClass: typeof config.dialogClass === "undefined" ? "" : config.dialogClass,
+        position: (typeof config.position === "undefined") ? result.position = { my: "center", at: "center" } :
+          result.position = {
+        my: !config.position.my ? "center" : config.position.my,
+        at: !config.position.at ? "center" : config.position.at,
+      }
+    };
     }
 
     /**
@@ -171,7 +171,7 @@ export default class Modal {
             event.preventDefault();
 
             const $target = $(event.currentTarget);
-            if (this.triggersMulti && !this.activeTrigger.is($target) && this.isOpen) {
+            if (this.triggersMulti && !this.activeTrigger?.is($target) && this.isOpen) {
                 this.toggle(); // TODO Update the modal window instead of toggling
             }
             this.activeTrigger = $target;
@@ -206,7 +206,7 @@ export default class Modal {
      * Returns the element that triggered the modal
      * @returns JQuery<HTMLElement> trigger
      */
-    public getActiveTrigger(): JQuery<HTMLElement> {
+    public getActiveTrigger(): JQuery<HTMLElement> | undefined {
         return this.activeTrigger;
     }
 
@@ -234,7 +234,7 @@ export interface ModalConfig {
      * Optional. The modal content is replaced with this generated structure when the window is open.  
      * If used, the content parameter is used as a placeholder to properly size and center the window.
      */
-    structure?: PreparedStructure;
+    structure?: PreparedStructure | null;
 
     /** List of JQuery object & event name pairs that trigger the modal opening */
     triggers?: ModalTrigger | ModalTrigger[];
@@ -254,6 +254,24 @@ export interface ModalConfig {
     dialogClass?: string;
     /** Initial position of the modal window */
     position?: {
+        at: string;
+        my: string;
+    };
+}
+interface RequiredModalConfig extends ModalConfig {
+    title: string;
+    autoOpen: boolean;
+    content: JQuery<HTMLElement>;
+    structure: PreparedStructure | null;
+    triggers: ModalTrigger | ModalTrigger[];
+    triggerMulti: boolean;
+    width: number | "auto";
+    height: number | "auto";
+    minWidth: number;
+    minHeight: number;
+    disabled: boolean;
+    dialogClass: string;
+    position: {
         at: string;
         my: string;
     };

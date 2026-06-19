@@ -49,7 +49,7 @@ export default class PageObserver {
             this.targets.set(selector, []);
 
         return new Promise<boolean>((resolve) => {
-            this.targets.get(selector).push(resolve);
+            this.targets.get(selector)?.push(resolve);
         });
     }
 

@@ -36,13 +36,13 @@ export default class XMConnect {
                 ontimeout: validDetails.ontimeout,
             };
 
-            details.onabort = (event): void => { callbacks.onabort(event); reject(event); };
-            details.onerror = (event): void => { callbacks.onerror(event); reject(event); };
-            details.onload = (event): void => { callbacks.onload(event); resolve(event); };
-            details.onloadstart = (event): void => { callbacks.onloadstart(event); };
-            details.onprogress = (event): void => { callbacks.onprogress(event); };
-            details.onreadystatechange = (event): void => { callbacks.onreadystatechange(event); };
-            details.ontimeout = (event): void => { callbacks.ontimeout(event); reject(event); };
+            details.onabort = (event): void => { callbacks.onabort?.(event); reject(event); };
+            details.onerror = (event): void => { callbacks.onerror?.(event); reject(event); };
+            details.onload = (event): void => { callbacks.onload?.(event); resolve(event); };
+            details.onloadstart = (event): void => { callbacks.onloadstart?.(event); };
+            details.onprogress = (event): void => { callbacks.onprogress?.(event); };
+            details.onreadystatechange = (event): void => { callbacks.onreadystatechange?.(event); };
+            details.ontimeout = (event): void => { callbacks.ontimeout?.(event); reject(event); };
 
             XMConnect.xmlHttpRequest(validDetails);
         });
@@ -125,7 +125,10 @@ export default class XMConnect {
     public static browserDownload(a: any, b?: string, c?: boolean): void {
 
         // Fallback to avoid a crash in Vivaldi
-        if (Debug.Vivaldi) return XMConnect.download(a, b);
+        if (Debug.Vivaldi) {
+          if (!b) Debug.log("Attempting to safely execute download despite incorrect parameters.");
+          return XMConnect.download(a, b!);
+        }
 
         const downloadDetails: GMDownloadDetails = typeof a === "string"
             ? { url: a, name: b, saveAs: c }
@@ -133,8 +136,10 @@ export default class XMConnect {
 
         // Workaround to SWF files not being whitelisted by default in Tampermonkey
         downloadDetails.onerror = (event): void => {
-            if (event.error == "not_whitelisted")
-                XMConnect.download(a, b);
+            if (event.error == "not_whitelisted") {
+              if (!b) Debug.log("Attempting to safely execute download despite incorrect parameters.");
+              XMConnect.download(a, b!);
+            }
             else if (a.onerror) a.onerror(event);
             else throw "Error: unable to download file" + (event.error ? (` [${event.error}]`) : "");
         }

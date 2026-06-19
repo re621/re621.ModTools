@@ -53,7 +53,9 @@ export default class KeybindManager {
         // Register the keybind function in the executor
         for (const key of keybind.keys) {
             if (key.length == 0) continue;
-            this.executors.get(key)[keybind.bindMeta] = keybind;
+            const v = this.executors.get(key)
+            if (!v) continue;
+            v[keybind.bindMeta] = keybind;
         }
     }
 
@@ -70,7 +72,7 @@ export default class KeybindManager {
 
     public static record(callback: (sequence: string[]) => void): void {
         KeybindManager.listening = true;
-        let keys = [];
+        let keys: string[] = [];
 
         $(document).on("keydown.remt.record", (event) => {
             const key = event.key
@@ -95,7 +97,7 @@ export default class KeybindManager {
 
     public static count(sequence: string): number {
         if (!this.executors.has(sequence)) return 0;
-        return Object.keys(this.executors.get(sequence)).length;
+        return Object.keys(this.executors.get(sequence) || {}).length;
     }
 
     private static refreshListener(keys: string[], element?: string, selector?: string): void {
@@ -110,6 +112,7 @@ export default class KeybindManager {
                 this.listeners.set(key, (event: Event) => {
                     if (KeybindManager.listening) return;
                     const listenerExecutor = this.executors.get(key);
+                    if (!listenerExecutor) return;
                     Debug.log(`[${key}]: triggered ${Object.entries(listenerExecutor).length} executors`);
                     for (const [bindMeta, keyObj] of Object.entries(listenerExecutor)) {
                         if (!keyObj.enabled) continue;
@@ -125,10 +128,10 @@ export default class KeybindManager {
                 });
 
                 // Create the listener itself
-                const $element: any = element ? $(element) : $(document);
-                if (!selector) selector = null;
+                const $element: JQuery<HTMLElement | Document> = element ? $(element) : $(document);
+                if (!selector) selector = undefined;
 
-                let cooldown = null;
+                let cooldown: number | undefined;
                 $element.on("keydown.remt.hotkey-" + key, selector, key, (event: Event) => {
                     if (keydown) return;
                     if (cooldown) return;
@@ -136,14 +139,14 @@ export default class KeybindManager {
                     keydown = true;
                     if (!KeybindManager.enabled || KeybindManager.listening) return false;
                     Debug.log(`[${key}]: caught`);
-                    this.listeners.get(key)(event);
+                    this.listeners.get(key)?.(event);
 
                     // Slightly throttles the keystroke input speed
                     // Should only be an issue with holdable keybinds
                     clearTimeout(cooldown);
-                    cooldown = setTimeout(() => {
+                    cooldown = window.setTimeout(() => {
                         clearTimeout(cooldown);
-                        cooldown = null;
+                        cooldown = undefined;
                     }, 50);
                 });
 

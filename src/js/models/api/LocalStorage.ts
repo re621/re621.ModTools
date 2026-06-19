@@ -32,7 +32,7 @@ export default class LocalStorage {
     public static Assets = {
         Images: {
             get Expires(): number {
-                return parseInt(LocalStorage.get(LocalStorage.Index.a0)) || 0;
+                return parseInt(LocalStorage.get(LocalStorage.Index.a0) ?? "0") || 0;
             },
             set Expires(value: number) {
                 if (value == 0) LocalStorage.remove(LocalStorage.Index.a0);
@@ -57,21 +57,21 @@ export default class LocalStorage {
     // DNP cache
     public static DNP = {
         get Expires(): number {
-            return parseInt(LocalStorage.get(LocalStorage.Index.d0)) || 0;
+            return parseInt(LocalStorage.get(LocalStorage.Index.d0) ?? "0") || 0;
         },
         set Expires(value: number) {
             if (value == 0) LocalStorage.remove(LocalStorage.Index.d0);
             else LocalStorage.set(LocalStorage.Index.d0, value + "");
         },
         get Version(): number {
-            return parseInt(LocalStorage.get(LocalStorage.Index.d1)) || 0;
+            return parseInt(LocalStorage.get(LocalStorage.Index.d1) ?? "0") || 0;
         },
         set Version(value: number) {
             if (value == 0) LocalStorage.remove(LocalStorage.Index.d1);
             else LocalStorage.set(LocalStorage.Index.d1, value + "");
         },
         get CreatedAt(): number {
-            return parseInt(LocalStorage.get(LocalStorage.Index.d2)) || 0;
+            return parseInt(LocalStorage.get(LocalStorage.Index.d2) ?? "0") || 0;
         },
         set CreatedAt(value: number) {
             if (value == 0) LocalStorage.remove(LocalStorage.Index.d2);
@@ -147,7 +147,7 @@ export default class LocalStorage {
 
     public static Version = {
         get Expires(): number {
-            return parseInt(LocalStorage.get(LocalStorage.Index.v0)) || 0;
+            return parseInt(LocalStorage.get(LocalStorage.Index.v0) ?? "0") || 0;
         },
         set Expires(value: number) {
             if (value == 0) LocalStorage.remove(LocalStorage.Index.v0);
