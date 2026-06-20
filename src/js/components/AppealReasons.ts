@@ -23,8 +23,8 @@ export default class AppealReasons extends Component {
 
 	public static get defaultTemplates(): TemplateData[] {
 		return [
-			{ title: "Approved", body: "Your appeal has been accepted, and the post has been restored." },
-			{ title: "Rejected", body: "Your appeal has been rejected, and the post will remain deleted." },
+			{ title: "Approved", body: "Your appeal has been accepted and the post has been restored." },
+			{ title: "Rejected", body: "Your appeal has been rejected and the post will remain deleted." },
 		];
 	}
 
@@ -40,7 +40,7 @@ export default class AppealReasons extends Component {
 		const target = document.querySelector<HTMLTextAreaElement>("textarea[name='appeal[response]']");
 		if (!target) return Promise.resolve();
 
-		this.reporterName = document.querySelector<HTMLElement>("#c-appeals .appeal-display-report-creator .user-post-uploader")?.innerText ?? "";
+		this.reporterName = document.querySelector<HTMLElement>("#c-appeals .appeal-display-report-creator a")?.innerText ?? "";
 
 		this.builder = new TemplateBuilder({
 			targetField: target,
