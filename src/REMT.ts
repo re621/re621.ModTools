@@ -18,6 +18,7 @@ import DMailToStaffNote from "./js/components/DMailToStaffNote";
 import ReportContentData from "./js/components/ReportContentData";
 import DMailBuilder from "./js/components/DMailBuilder";
 import ForumBuilder from "./js/components/ForumBuilder";
+import RemoveHumanoid from "./js/components/RemoveHumanoid";
 
 export default class REMT {
 
@@ -25,6 +26,7 @@ export default class REMT {
     public static API: ZestyAPI;
 
     private loadOrder = [
+        RemoveHumanoid,
         RecordBuilder,
 
         TicketData,
@@ -112,6 +114,7 @@ export default class REMT {
 new REMT().run();
 
 interface ComponentListAnnotated extends Partial<ComponentList> {
+    RemoveHumanoid?: RemoveHumanoid,
     RecordBuilder?: RecordBuilder,
 
     TicketData?: TicketData,
