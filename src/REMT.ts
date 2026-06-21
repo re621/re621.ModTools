@@ -101,7 +101,8 @@ export default class REMT {
         // Load modules (asynchronous)
         const promises: Promise<void>[] = [];
         for (const instance of Object.values(REMT.Registry))
-            promises.push(instance?.load() ?? Promise.resolve());
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            promises.push(instance!.load());
         Promise.all(promises).then(() => {
             console.log("%c[RE621.ModTools]%c loaded", "color: maroon", "color: unset");
         });

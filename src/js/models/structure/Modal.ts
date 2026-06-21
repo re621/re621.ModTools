@@ -102,32 +102,31 @@ export default class Modal {
     /**
      * Parses the configuration and sets the default values for missing entries
      * @param config Configuration to parse
-	 * @todo Convert to using `Object.assign` with a default object instead.
+     * @todo Convert to using `Object.assign` with a default object instead.
      */
     private validateConfig(config: ModalConfig): RequiredModalConfig | Required<ModalConfig> {
         // const result: ModalConfig = Object.assign({}, Modal.defaultConfig, config);
-        const result: ModalConfig = {};
 
         return {
-          title: typeof config.title === "undefined" ? "Dialog" : config.title,
-        autoOpen: typeof config.autoOpen === "undefined" ? false : config.autoOpen,
-        triggers: typeof config.triggers === "undefined" ? [] : config.triggers,
-        triggerMulti: typeof config.triggerMulti === "undefined" ? false : config.triggerMulti,
+          title: config.title ?? "Dialog",
+        autoOpen: config.autoOpen ?? false,
+        triggers: config.triggers ?? [],
+        triggerMulti: config.triggerMulti ?? false,
 
-        content: typeof config.content === "undefined" ? $("") : config.content,
-        structure: typeof config.structure === "undefined" ? null : config.structure,
+        content: config.content ?? $(""),
+        structure: config.structure ?? null,
 
-        width: typeof config.width === "undefined" ? "auto" : config.width,
-        height: typeof config.height === "undefined" ? "auto" : config.height,
-        minWidth: typeof config.minWidth === "undefined" ? 150 : config.minWidth,
-        minHeight: typeof config.minHeight === "undefined" ? 150 : config.minHeight,
-        maxWidth: typeof config.maxWidth === "undefined" ? undefined : config.maxWidth,
-        maxHeight: typeof config.maxHeight === "undefined" ? undefined : config.maxHeight,
+        width: config.width ?? "auto",
+        height: config.height ?? "auto",
+        minWidth: config.minWidth ?? 150,
+        minHeight: config.minHeight ?? 150,
+        maxWidth: config.maxWidth ?? undefined,
+        maxHeight: config.maxHeight ?? undefined,
 
-        disabled: typeof config.disabled === "undefined" ? false : config.disabled,
-        dialogClass: typeof config.dialogClass === "undefined" ? "" : config.dialogClass,
-        position: (typeof config.position === "undefined") ? result.position = { my: "center", at: "center" } :
-          result.position = {
+        disabled: config.disabled ?? false,
+        dialogClass: config.dialogClass ?? "",
+        position: (typeof config.position === "undefined") ? { my: "center", at: "center" } :
+          {
         my: !config.position.my ? "center" : config.position.my,
         at: !config.position.at ? "center" : config.position.at,
       }
@@ -221,6 +220,9 @@ export default class Modal {
 	}
 }
 
+/**
+ * @todo Make strict & require a `Partial<ModalConfig>` in the constructor.
+ */
 export interface ModalConfig {
     /** String displayed on top of the modal window */
     title?: string;
