@@ -150,7 +150,7 @@ export class UtilDOM {
     /** Throws an error if the element isn't found. */
     public static querySelector<K extends keyof SVGElementTagNameMap>(selectors: K, parentElement?: Element | Document): SVGElementTagNameMap[K];
     /** Throws an error if the element isn't found. */
-    public static querySelector<K extends keyof MathMLElementTagNameMap>(selectors: K, parentElement?: Element | Document): MathMLElementTagNameMap[K];
+    // public static querySelector<K extends keyof MathMLElementTagNameMap>(selectors: K, parentElement?: Element | Document): MathMLElementTagNameMap[K];
     /** Throws an error if the element isn't found. */
     public static querySelector<K extends Element>(selectors: string, parentElement?: Element | Document): K;
     /** Throws an error if the element isn't found. */

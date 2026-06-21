@@ -9,6 +9,6 @@
         "noImplicitAny": false,
         "module": "es6",
         "target": "es6",
-        "moduleResolution": "bundler"
+        "moduleResolution": "node",//"bundler"
     }
 }
