@@ -48,8 +48,8 @@ export default class Modal {
                 height: config.height,
                 minWidth: config.minWidth,
                 minHeight: config.minHeight,
-                maxWidth: config.maxWidth,
-                maxHeight: config.maxHeight,
+                maxWidth: (config.maxWidth ?? 0) < 0 ? undefined : config.maxWidth,
+                maxHeight: (config.maxHeight ?? 0) < 0 ? undefined : config.maxHeight,
 
                 position: {
                     my: config.position.my,
@@ -121,8 +121,8 @@ export default class Modal {
         height: typeof config.height === "undefined" ? "auto" : config.height,
         minWidth: typeof config.minWidth === "undefined" ? 150 : config.minWidth,
         minHeight: typeof config.minHeight === "undefined" ? 150 : config.minHeight,
-        maxWidth: typeof config.maxWidth === "undefined" ? -1 /* undefined */ : config.maxWidth,
-        maxHeight: typeof config.maxHeight === "undefined" ? -1 /* undefined */ : config.maxHeight,
+        maxWidth: typeof config.maxWidth === "undefined" ? undefined : config.maxWidth,
+        maxHeight: typeof config.maxHeight === "undefined" ? undefined : config.maxHeight,
 
         disabled: typeof config.disabled === "undefined" ? false : config.disabled,
         dialogClass: typeof config.dialogClass === "undefined" ? "" : config.dialogClass,
