@@ -1,6 +1,9 @@
 import { PageDefinition } from "../models/data/Page";
 import User from "../models/data/User";
+import { DialogForm } from "../models/structure/DialogForm";
 import { TemplateBuilder, TemplateData } from "../models/structure/TemplateBuilder";
+import { html } from "../utilities/HtmlTemplate";
+import Util from "../utilities/Util";
 import Component from "./Component";
 
 interface StoredButton extends TemplateData {
@@ -50,14 +53,21 @@ export default class TicketReasons extends Component {
 		];
 	}
 
-	public Settings: { enabled: boolean; buttons: StoredButton[]; greeting: string } = {
+	public Settings: { enabled: boolean; buttons: StoredButton[]; insertMode: "replace" | "insert"; greeting: string } = {
 		enabled: true,
 		buttons: TicketReasons.defaultTemplates,
+    insertMode: "replace",
 		greeting: DEFAULT_GREETING,
 	};
 
+  private readonly settingsButtonLabel = "Ticket Template Settings";
 	protected create(): Promise<void> {
 		if (!this.isEnabled) return Promise.resolve();
+    Util.DOM.addSettingsButton({
+      id: this.settingsButtonLabel.replace(/\s+/g, "-"),
+      name: this.settingsButtonLabel,
+      onClick: () => this.onSettingsButton(),
+    });
 
 		const target = document.querySelector<HTMLTextAreaElement>("textarea[name='ticket[response]']");
 		if (!target) return Promise.resolve();
@@ -67,10 +77,11 @@ export default class TicketReasons extends Component {
 		const req = rows.find((e) => e.innerText.includes("Requested by"));
 		this.reporterName = req?.querySelector<HTMLElement>("td a")?.innerText ?? "";
 
+    const scopedInsertMode = () => this.Settings.insertMode;
 		this.builder = new TemplateBuilder({
 			targetField: target,
 			label: "Ticket reply templates",
-			insertMode: "replace",
+			get insertMode() { return scopedInsertMode(); },
 			defaults: TicketReasons.defaultTemplates,
 			getTemplates: () => this.Settings.buttons.map((b) => ({
 				title: b.title ?? b.name ?? "",
@@ -98,4 +109,31 @@ export default class TicketReasons extends Component {
 	protected async destroy(): Promise<void> {
 		this.builder?.destroy();
 	}
+  
+  /**
+	 * The callback to execute when the settings button is pressed.
+	 * 
+	 * NOTE: Dependent on proper `this` binding; assign to events in a callback.
+	 * @returns false to stop propagation & prevent default.
+	 */
+  protected onSettingsButton(): false {
+    DialogForm.getRequestedInput(
+      [
+        $(html`<fieldset title="How should the button's text be added to the text box?">
+            <legend>Text insertion mode</legend>
+            <label for="setting-insertMode-insert" title="Insert the text at the cursor position.">Insert <input type="radio" id="setting-insertMode-insert" name="setting-insertMode" value="insert"${(this.Settings.insertMode ?? "insert") === "insert" ? " checked" : ""} /></label>
+            <label for="setting-insertMode-replace" title="Replace the entire contents of the text box.">Replace <input type="radio" id="setting-insertMode-replace" name="setting-insertMode" value="replace"${this.Settings.insertMode === "replace" ? " checked" : ""} /></label>
+          </fieldset>` as HTMLFieldSetElement),
+        $(`<br />`),
+      ],
+      this.settingsButtonLabel,
+      (e: FormData) => {
+        const v = e.get("setting-insertMode");
+        if (v && (v === "insert" || v === "replace")) this.Settings.insertMode = v;
+      },
+    );
+
+    // Stop propagation & prevent default.
+    return false;
+  }
 }
