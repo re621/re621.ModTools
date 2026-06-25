@@ -19,6 +19,7 @@ import ReportContentData from "./js/components/ReportContentData";
 import DMailBuilder from "./js/components/DMailBuilder";
 import ForumBuilder from "./js/components/ForumBuilder";
 import RemoveHumanoid from "./js/components/RemoveHumanoid";
+import AutoTaggingButtons from "./js/components/AutoTaggingButtons";
 
 export default class REMT {
 
@@ -27,6 +28,7 @@ export default class REMT {
 
     private loadOrder = [
         RemoveHumanoid,
+        AutoTaggingButtons,
         RecordBuilder,
 
         TicketData,
@@ -115,6 +117,7 @@ new REMT().run();
 
 interface ComponentListAnnotated extends Partial<ComponentList> {
     RemoveHumanoid?: RemoveHumanoid,
+    AutoTaggingButtons?: AutoTaggingButtons,
     RecordBuilder?: RecordBuilder,
 
     TicketData?: TicketData,
