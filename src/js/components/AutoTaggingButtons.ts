@@ -138,11 +138,11 @@ export default class AutoTaggingButtons extends Component {
   protected onSettingsButton(): false {
     DialogForm.getRequestedInput(
       [
-        $(`<label for="setting-doShow" title="Should the button be loaded onto this page next time?">Show remove humanoid button? <input type="checkbox" id="setting-doShow" name="setting-doShow" value="true" ${this.Settings.doShow ? "checked" : ""}></input></label>`),
-        $(`<br />`),
+        $(`<label for="setting-doShow" title="Should any button be loaded onto this page next time?">Show buttons? <input type="checkbox" id="setting-doShow" name="setting-doShow" value="true" ${this.Settings.doShow ? "checked" : ""}></input></label>`),
         $(`<br />`),
         $(`<label for="setting-forceConfirm" title="Should you need to confirm the edit first?">Force Confirm? <input type="checkbox" id="setting-forceConfirm" name="setting-forceConfirm" value="true" ${this.Settings.forceConfirm ? "checked" : ""}></input></label>`),
-        $(`<label for="setting-buttons" title="">Buttons in JSON <textarea id="setting-buttons" name="setting-buttons" value="${JSON.stringify(this.Settings.buttons, undefined, 2)}"></textarea></label>`),
+        $(`<br />`),
+        $(`<label for="setting-buttons" title="">Buttons in JSON<br /><textarea id="setting-buttons" name="setting-buttons">${JSON.stringify(this.Settings.buttons, undefined, 2)}</textarea></label>`),
         $(`<br />`),
       ],
       "Auto Tag Edits Settings",
