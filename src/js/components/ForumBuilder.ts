@@ -22,10 +22,11 @@ export default class ForumBuilder extends Component {
 		});
 	}
 
+  private readonly settingsButtonLabel = "Forum Template Settings";
 	protected create(): Promise<void> {
     Util.DOM.addSettingsButton({
-      id: "Forum-Template-Settings",
-      name: "Forum Template Settings",
+      id: this.settingsButtonLabel.replace(/\s+/g, "-"),
+      name: this.settingsButtonLabel,
       onClick: () => this.onSettingsButton(),
     });
 		const target = document.querySelector<HTMLTextAreaElement>("form.new_forum_post textarea[name='forum_post[body]']");
@@ -43,7 +44,6 @@ export default class ForumBuilder extends Component {
 	}
 
   private instantiateAndMount(target: HTMLTextAreaElement, scopedInsertMode = () => this.Settings.insertMode) {
-    // const scopedInsertMode = () => this.Settings.insertMode;
     const builder = new TemplateBuilder({
 			targetField: target,
 			label: "Forum templates",
@@ -71,7 +71,7 @@ export default class ForumBuilder extends Component {
           </fieldset>` as HTMLFieldSetElement),
         $(`<br />`),
       ],
-      "Forum Template Settings",
+      this.settingsButtonLabel,
       (e: FormData) => {
         const v = e.get("setting-insertMode");
         if (v && (v === "insert" || v === "replace")) this.Settings.insertMode = v;

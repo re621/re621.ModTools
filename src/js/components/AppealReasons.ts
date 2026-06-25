@@ -38,11 +38,12 @@ export default class AppealReasons extends Component {
 		greeting: DEFAULT_GREETING,
 	};
 
+  private readonly settingsButtonLabel = "Appeal Template Settings";
 	protected create(): Promise<void> {
 		if (!this.isEnabled) return Promise.resolve();
     Util.DOM.addSettingsButton({
-      id: "Appeal-Template-Settings",
-      name: "Appeal Template Settings",
+      id: this.settingsButtonLabel.replace(/\s+/g, "-"),
+      name: this.settingsButtonLabel,
       onClick: () => this.onSettingsButton(),
     });
 
@@ -97,7 +98,7 @@ export default class AppealReasons extends Component {
           </fieldset>` as HTMLFieldSetElement),
         $(`<br />`),
       ],
-      "Appeal Template Settings",
+      this.settingsButtonLabel,
       (e: FormData) => {
         const v = e.get("setting-insertMode");
         if (v && (v === "insert" || v === "replace")) this.Settings.insertMode = v;
