@@ -103,7 +103,7 @@ export class DialogForm extends Modal {
     }
 }
 
-interface DialogConfig extends ModalConfig {
+export interface DialogConfig extends ModalConfig {
 	defaultElements?: JQuery<HTMLElement>[];
 	// onClose?: JQueryUI.DialogEvent;
 	onClose?: JQuery.TypeEventHandler<HTMLElement, undefined, HTMLElement, HTMLElement, "dialogclose">;

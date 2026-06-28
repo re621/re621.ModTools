@@ -1,7 +1,7 @@
 import ZestyAPI from "@re621/zestyapi";
 import css from "./css/style.module.scss";
 
-import { ComponentList } from "./js/components/Component";
+import { ComponentList, SettingsDialogConfig } from "./js/components/Component";
 import LinkGrabber from "./js/components/LinkGrabber";
 import RecordBuilder from "./js/components/RecordBuilder";
 import TicketData from "./js/components/TicketData";
@@ -20,6 +20,7 @@ import DMailBuilder from "./js/components/DMailBuilder";
 import ForumBuilder from "./js/components/ForumBuilder";
 import RemoveHumanoid from "./js/components/RemoveHumanoid";
 import AutoTaggingButtons from "./js/components/AutoTaggingButtons";
+import { MultiDialogForm } from "./js/models/structure/MultiDialogForm";
 
 export default class REMT {
 
@@ -108,7 +109,21 @@ export default class REMT {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             promises.push(instance!.load());
         Promise.all(promises).then(() => {
-            console.log("%c[RE621.ModTools]%c loaded", "color: maroon", "color: unset");
+            const allConfigs = Object.values(REMT.Registry).reduce<SettingsDialogConfig[]>((p, e) => {
+              if (e?.settingsMenuDialogParameters) p.push(e!.settingsMenuDialogParameters!); return p; }, []);
+            const configs = allConfigs.filter(e => e) as SettingsDialogConfig[];
+            if (configs.length <= 0) {
+              console.log("%c[RE621.ModTools]%c loaded; no settings to load", "color: maroon", "color: unset");
+              return;
+            }
+            console.log("%c[RE621.ModTools]%c loaded; loading %s settings...", "color: maroon", "color: unset", configs.length);
+            Util.DOM.addSettingsButton({
+              id: "remt-component-settings",
+              icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" name="settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>',
+              name: "REMT",
+              onClick: () => MultiDialogForm.getRequestedInput(configs),
+            });
+            console.log("%c[RE621.ModTools]%c fully loaded.", "color: maroon", "color: unset");
         });
     }
 

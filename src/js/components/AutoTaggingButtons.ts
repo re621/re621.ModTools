@@ -1,7 +1,6 @@
 import REMT from "../../REMT";
 import { PageDefinition } from "../models/data/Page";
-import Debug from "../models/Debug";
-import { DialogForm } from "../models/structure/DialogForm";
+import ErrorHandler from "../utilities/ErrorHandler";
 import { html } from "../utilities/HtmlTemplate";
 import Util from "../utilities/Util";
 import Component from "./Component";
@@ -42,15 +41,7 @@ export default class AutoTaggingButtons extends Component {
 	};
 
 	protected override create() {
-    try {
-      Util.DOM.addSettingsButton({
-        id: "AutoTaggingButtonsSettings",
-        name: "Auto Tag Edits Settings",
-        onClick: () => this.onSettingsButton(),
-      });
-    } catch (error) {
-      Debug.log(error);
-    }
+    this.initSettingsMenu();
     if (!this.Settings.doShow) return Promise.resolve();
     const id = /^\/posts\/([0-9]+)/.exec(window.location.pathname)?.[1];
     if (!id) return Promise.resolve();
@@ -128,16 +119,10 @@ export default class AutoTaggingButtons extends Component {
       sidebar.insertAdjacentElement("afterbegin", html`<br />`);
     }
   }
-  
-  /**
-	 * The callback to execute when the settings button is pressed.
-	 * 
-	 * NOTE: Dependent on proper `this` binding; assign to events in a callback.
-	 * @returns false to stop propagation & prevent default.
-	 */
-  protected onSettingsButton(): false {
-    DialogForm.getRequestedInput(
-      [
+
+  private initSettingsMenu() {
+    this._settingsMenuDialogParameters = {
+      elements:[
         $(`<label for="setting-doShow" title="Should any button be loaded onto this page next time?">Show buttons? <input type="checkbox" id="setting-doShow" name="setting-doShow" value="true" ${this.Settings.doShow ? "checked" : ""}></input></label>`),
         $(`<br />`),
         $(`<label for="setting-forceConfirm" title="Should you need to confirm the edit first?">Force Confirm? <input type="checkbox" id="setting-forceConfirm" name="setting-forceConfirm" value="true" ${this.Settings.forceConfirm ? "checked" : ""}></input></label>`),
@@ -145,15 +130,15 @@ export default class AutoTaggingButtons extends Component {
         $(`<label for="setting-buttons" title="">Buttons in JSON<br /><textarea id="setting-buttons" name="setting-buttons">${JSON.stringify(this.Settings.buttons, undefined, 2)}</textarea></label>`),
         $(`<br />`),
       ],
-      "Auto Tag Edits Settings",
-      (e: FormData) => {
+      optionsOrTitle: "Auto Tag Edits Settings",
+      then: (e: FormData) => {
         this.Settings.doShow = e.get("setting-doShow") === "true";
         this.Settings.forceConfirm = e.get("setting-forceConfirm") === "true";
-        this.Settings.buttons = JSON.parse(e.get("setting-buttons")?.toString() ?? JSON.stringify(this.Settings.buttons)) as AutoTaggingAction[];
-      },
-    );
-
-    // Stop propagation & prevent default.
-    return false;
+        try {
+          this.Settings.buttons = JSON.parse(e.get("setting-buttons")?.toString() ?? JSON.stringify(this.Settings.buttons)) as AutoTaggingAction[];
+        } catch (error) {
+          ErrorHandler.write("Failed to parse JSON input", error);
+        }
+      }};
   }
 }
