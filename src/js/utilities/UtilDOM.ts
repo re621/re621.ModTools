@@ -57,7 +57,7 @@ export class UtilDOM {
 
         const $tab = $(`<li class="nav-remt-${config.id}">`)[prepend ? "prependTo" : "appendTo"](target);
         const $link = $("<a>")
-            .html(config.name)
+            .html(config.icon ? `${config.icon}<span>${config.name}</span>` : config.name)
             .attr({
                 "title": config.title,
                 "id": config.id,
@@ -161,13 +161,14 @@ export class UtilDOM {
     }
 }
 
-interface SettingsButton {
+export interface SettingsButton {
 
     /** Unique button ID */
     id: string;
 
     /** Text inside the link */
     name?: string;
+    icon?: string;
     /** Link address */
     href?: string;
     /** Hover text */

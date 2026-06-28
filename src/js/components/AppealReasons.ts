@@ -41,11 +41,7 @@ export default class AppealReasons extends Component {
   private readonly settingsButtonLabel = "Appeal Template Settings";
 	protected create(): Promise<void> {
 		if (!this.isEnabled) return Promise.resolve();
-    Util.DOM.addSettingsButton({
-      id: this.settingsButtonLabel.replace(/\s+/g, "-"),
-      name: this.settingsButtonLabel,
-      onClick: () => this.onSettingsButton(),
-    });
+    this.initSettingsMenu();
 
 		const target = document.querySelector<HTMLTextAreaElement>("textarea[name='appeal[response]']");
 		if (!target) return Promise.resolve();
@@ -81,16 +77,10 @@ export default class AppealReasons extends Component {
 	protected async destroy(): Promise<void> {
 		this.builder?.destroy();
 	}
-  
-  /**
-	 * The callback to execute when the settings button is pressed.
-	 * 
-	 * NOTE: Dependent on proper `this` binding; assign to events in a callback.
-	 * @returns false to stop propagation & prevent default.
-	 */
-  protected onSettingsButton(): false {
-    DialogForm.getRequestedInput(
-      [
+
+  private initSettingsMenu() {
+    this._settingsMenuDialogParameters = {
+      elements: [
         $(html`<fieldset title="How should the button's text be added to the text box?">
             <legend>Text insertion mode</legend>
             <label for="setting-insertMode-insert" title="Insert the text at the cursor position.">Insert <input type="radio" id="setting-insertMode-insert" name="setting-insertMode" value="insert"${(this.Settings.insertMode ?? "insert") === "insert" ? " checked" : ""} /></label>
@@ -98,14 +88,11 @@ export default class AppealReasons extends Component {
           </fieldset>` as HTMLFieldSetElement),
         $(`<br />`),
       ],
-      this.settingsButtonLabel,
-      (e: FormData) => {
+      optionsOrTitle: this.settingsButtonLabel,
+      then: (e: FormData) => {
         const v = e.get("setting-insertMode");
         if (v && (v === "insert" || v === "replace")) this.Settings.insertMode = v;
       },
-    );
-
-    // Stop propagation & prevent default.
-    return false;
+    };
   }
 }

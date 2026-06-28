@@ -1,7 +1,5 @@
 import REMT from "../../REMT";
 import { PageDefinition } from "../models/data/Page";
-import Debug from "../models/Debug";
-import { DialogForm } from "../models/structure/DialogForm";
 import { html } from "../utilities/HtmlTemplate";
 import Util from "../utilities/Util";
 import Component from "./Component";
@@ -22,15 +20,7 @@ export default class RemoveHumanoid extends Component {
 	};
 
 	protected override create() {
-    try {
-      Util.DOM.addSettingsButton({
-        id: "RemoveHumanoidSettings",
-        name: "Mod Tools Settings",
-        onClick: () => this.onSettingsButton(),
-      });
-    } catch (error) {
-      Debug.log(error);
-    }
+    this.initSettingsMenu();
     if (!this.Settings.doShow) return Promise.resolve();
     const id = /^\/posts\/([0-9]+)/.exec(window.location.pathname)?.[1];
     if (!id) return Promise.resolve();
@@ -55,16 +45,10 @@ export default class RemoveHumanoid extends Component {
     sidebar.insertAdjacentElement("afterbegin", html`<br />`);
 		return Promise.resolve();
 	}
-  
-  /**
-	 * The callback to execute when the settings button is pressed.
-	 * 
-	 * NOTE: Dependent on proper `this` binding; assign to events in a callback.
-	 * @returns false to stop propagation & prevent default.
-	 */
-  protected onSettingsButton(): false {
-    DialogForm.getRequestedInput(
-      [
+
+  private initSettingsMenu() {
+    this._settingsMenuDialogParameters = {
+      elements: [
         $(`<label for="setting-doShow" title="Should the button be loaded onto this page next time?">Show remove humanoid button? <input type="checkbox" id="setting-doShow" name="setting-doShow" value="true" ${this.Settings.doShow ? "checked" : ""}></input></label>`),
         $(`<br />`),
         $(`<label for="setting-addAnthro" title="Should the button also add anthro next time?">Add anthro? <input type="checkbox" id="setting-addAnthro" name="setting-addAnthro" value="true" ${this.Settings.addAnthro ? "checked" : ""}></input></label>`),
@@ -72,15 +56,12 @@ export default class RemoveHumanoid extends Component {
         $(`<label for="setting-forceConfirm" title="Should you need to confirm the edit first?">Force Confirm? <input type="checkbox" id="setting-forceConfirm" name="setting-forceConfirm" value="true" ${this.Settings.forceConfirm ? "checked" : ""}></input></label>`),
         $(`<br />`),
       ],
-      "Mod Tools Settings",
-      (e: FormData) => {
+      optionsOrTitle: "Mod Tools Settings",
+      then: (e: FormData) => {
         this.Settings.doShow = e.get("setting-doShow") === "true";
         this.Settings.addAnthro = e.get("setting-addAnthro") === "true";
         this.Settings.forceConfirm = e.get("setting-forceConfirm") === "true";
       },
-    );
-
-    // Stop propagation & prevent default.
-    return false;
+    };
   }
 }

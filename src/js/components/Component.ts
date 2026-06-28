@@ -3,6 +3,7 @@ import XM from "../models/api/XM";
 import KeybindManager, { Keybind, ResponseFunction } from "../models/data/Keybinds";
 import Page from "../models/data/Page";
 import Debug from "../models/Debug";
+import { DialogConfig } from "../models/structure/DialogForm";
 import PageObserver from "../models/structure/PageObserver";
 import ErrorHandler from "../utilities/ErrorHandler";
 import Util from "../utilities/Util";
@@ -297,7 +298,13 @@ export default class Component {
             else content.removeAttr(name);
         }
     }
+
+    // #region Subclass Sandbox
+    protected _settingsMenuDialogParameters?: SettingsDialogConfig;
+    public get settingsMenuDialogParameters() { return this._settingsMenuDialogParameters; }
+    // #endregion Subclass Sandbox
 }
+export type SettingsDialogConfig = { elements: JQuery<HTMLElement>[], optionsOrTitle?: string | DialogConfig, then?: { (e: FormData): any } };
 
 /**
  * Component options.  

@@ -75,11 +75,7 @@ export default class ReportContentData extends Component {
   };
 
   protected async create(): Promise<void> {
-    Util.DOM.addSettingsButton({
-      id: "ReportContentDataSettings",
-      name: "Mod Tools Settings",
-      onClick: () => this.onSettingsButton(),
-    });
+    this.initSettingsMenu();
     const found = ReportContentData.findReportedRow();
     if (!found) return;
     const { row, type } = found;
@@ -118,24 +114,15 @@ export default class ReportContentData extends Component {
       ErrorHandler.write(`${error}`);
     }
   }
-  
-  /**
-	 * The callback to execute when the settings button is pressed.
-	 * 
-	 * NOTE: Dependent on proper `this` binding; assign to events in a callback.
-	 * @returns false to stop propagation & prevent default.
-	 */
-  protected onSettingsButton(): false {
-    DialogForm.getRequestedInput(
-      [
+
+  private initSettingsMenu() {
+    this._settingsMenuDialogParameters = {
+      elements: [
         $(`<label for="setting-loadMessage" title="Should the reported content be loaded onto this page next time?">Load Message? <input type="checkbox" id="setting-loadMessage" name="setting-loadMessage" value="true" ${this.Settings.loadMessage ? "checked" : ""}></input></label><br />`),
       ],
-      "Mod Tools Settings",
-      (e: FormData) => this.Settings.loadMessage = e.get("setting-loadMessage") === "true",
-    );
-
-    // Stop propagation & prevent default.
-    return false;
+      optionsOrTitle: "Mod Tools Settings",
+      then: (e: FormData) => this.Settings.loadMessage = e.get("setting-loadMessage") === "true",
+    };
   }
 
   private async drawMessage(data: CommentJson) {
