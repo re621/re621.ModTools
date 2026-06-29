@@ -303,6 +303,38 @@ export default class Component {
     // #region Subclass Sandbox
     protected _settingsMenuDialogParameters?: SettingsDialogConfig;
     public get settingsMenuDialogParameters() { return this._settingsMenuDialogParameters; }
+    protected resetSettings() {
+      for (const [k, v] of Object.entries(this.SettingsDefaults)) {
+        this.Settings[k] = v;
+      }
+    }
+
+    protected get prettyPrintName() { return this.name.replace(/(?<=[a-z])[A-Z]/g, " $&"); }
+    protected get settingsDialogTitle() { return `${this.prettyPrintName} Settings`; }
+    protected get settingsIdPrefix() { return `${this.prettyPrintName.replace(/\s+/g, "-")}-setting-`; }
+    protected handleResetSettingsDialogElement(e: FormData, forceConfirm = true) {
+      if (
+        e.get(`${this.settingsIdPrefix}resetSettings`) === "true" &&
+        (!forceConfirm || confirm(`Reset ${this.settingsDialogTitle} to defaults?`))
+      ) {
+        this.resetSettings();
+        return true;
+      }
+      return false;
+    }
+    protected get resetSettingsDialogElement() { return `<label for="${this.settingsIdPrefix}resetSettings" title="Reset settings to defaults?">Reset<input type="checkbox" id="${this.settingsIdPrefix}resetSettings" name="${this.settingsIdPrefix}resetSettings" value="true" /></label>`; }
+    protected simpleSettingsCheckbox(setting: keyof typeof this.Settings/* string */, label?: string, title?: string) {
+      return /* html */`
+        <label for="${this.settingsIdPrefix}${setting}"${title ? `title="${title}"` : ""}>
+          ${label ?? `${setting[0].toUpperCase()}${(setting as string).slice(1).replace(/(?<=[a-z])[A-Z]/g, " $&")}?`}
+          &nbsp;
+          <input type="checkbox"
+                 id="${this.settingsIdPrefix}${setting}"
+                 name="${this.settingsIdPrefix}${setting}"
+                 value="true"
+                 ${this.Settings[setting] ? " checked" : ""} />
+        </label>`;
+    }
     // #endregion Subclass Sandbox
 }
 export type SettingsDialogConfig = { elements: JQuery<HTMLElement>[], optionsOrTitle?: string | DialogConfig, then?: { (e: FormData): any } };
