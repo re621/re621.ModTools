@@ -3,6 +3,7 @@ import XM from "../models/api/XM";
 import KeybindManager, { Keybind, ResponseFunction } from "../models/data/Keybinds";
 import Page from "../models/data/Page";
 import Debug from "../models/Debug";
+import { JsonStrictObject } from "../models/JsonTypes";
 import { DialogConfig } from "../models/structure/DialogForm";
 import PageObserver from "../models/structure/PageObserver";
 import ErrorHandler from "../utilities/ErrorHandler";
@@ -356,9 +357,10 @@ export type PrimitiveMap = {
     [prop: string]: PrimitiveType | PrimitiveType[];
 }
 
-export type JSONObject = {
-    [prop: string]: PrimitiveType | PrimitiveType[] | JSONObject | JSONObject[];
-}
+export type JSONObject = JsonStrictObject;
+// export type JSONObject = {
+//     [prop: string]: PrimitiveType | PrimitiveType[] | JSONObject | JSONObject[];
+// }
 
 export interface Settings extends JSONObject {
     enabled: boolean;
