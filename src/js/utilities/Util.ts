@@ -290,7 +290,7 @@ export default class Util {
 	public static replaceTemplateVariables(
 		input: string,
 		variables: Array<string | RegExp>,
-		replacer: (key: string, ...args: any[]) => string,
+		replacer: StringReplacer,
 	): string;
 	/**
 	 * 
@@ -300,7 +300,17 @@ export default class Util {
 	 */
 	public static replaceTemplateVariables(
 		input: string,
-		variables: Map<string | RegExp, string | ((key: string, ...args: any[]) => string)>,
+		variables: Map<string | RegExp, string | StringReplacer>,
+	): string;
+	/**
+	 * 
+	 * @param input The string to perform replacement on.
+	 * @param variables The things to replace as a Map with the keys as the variable name & the values as the resultant output.
+	 * @returns {string} @see input with all @see variables replaced with their values.
+	 */
+	public static replaceTemplateVariables(
+		input: string,
+		variables: { [k: string]: string | StringReplacer },
 	): string;
 	/**
 	 * DON'T USE THIS FORM DIRECTLY.
@@ -311,8 +321,8 @@ export default class Util {
 	 */
 	public static replaceTemplateVariables(
 		input: string,
-		variables: Array<string|RegExp> | Map<string|RegExp, string|((key: string, ...args: any[]) => string)>,
-		replacer?: (key: string, ...args: any[]) => string,
+		variables: Array<string|RegExp> | Map<string|RegExp, string|StringReplacer> | { [k: string]: string | StringReplacer },
+		replacer?: StringReplacer,
 	): string {
 		if (variables instanceof Array) {
       if (!replacer) throw new Error("When using an array of variables to replace, this function requires a replacer function.");
@@ -320,7 +330,8 @@ export default class Util {
         input = input.replace(this.normalizeTemplateVariable(e), replacer);
 			}
 		} else {
-			for (const [k, v] of variables.entries()) {
+      const entries = variables instanceof Map ? variables.entries() : Object.entries(variables);
+			for (const [k, v] of entries) {
 				// NOTE: Hack for type stupidity
 				input = typeof v === "string" ? 
 					input.replace(this.normalizeTemplateVariable(k), v) :
@@ -340,7 +351,7 @@ export default class Util {
 	private static normalizeTemplateVariable(varName: string | RegExp) {
 		return !(varName instanceof RegExp) ?
 			RegExp(
-				(varName.startsWith("$") || varName.startsWith("%")) ? varName.replace(/^[$%]|%$/g, "") : `\\$${varName}|%${varName}%?`,
+				(varName.startsWith("$") || varName.startsWith("%")) ? varName.replace(/^[$%]|%$/g, "\\$&") : `\\$${varName}|%${varName}%?`,
 				"g",
 			) :
 			varName.global ?
@@ -349,6 +360,7 @@ export default class Util {
 	}
 	// #endregion replaceTemplateVariables
 }
+type StringReplacer = (key: string, ...args: any[]) => string;
 // interface StringDictionary<B> {
 // 	[index: string]: B;
 // }
