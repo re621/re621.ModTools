@@ -18,7 +18,6 @@ import DMailToStaffNote from "./js/components/DMailToStaffNote";
 import ReportContentData from "./js/components/ReportContentData";
 import DMailBuilder from "./js/components/DMailBuilder";
 import ForumBuilder from "./js/components/ForumBuilder";
-import RemoveHumanoid from "./js/components/RemoveHumanoid";
 import AutoTaggingButtons from "./js/components/AutoTaggingButtons";
 import { MultiDialogForm } from "./js/models/structure/MultiDialogForm";
 
@@ -28,7 +27,6 @@ export default class REMT {
     public static API: ZestyAPI;
 
     private loadOrder = [
-        RemoveHumanoid,
         AutoTaggingButtons,
         RecordBuilder,
 
@@ -131,7 +129,6 @@ export default class REMT {
 new REMT().run();
 
 interface ComponentListAnnotated extends Partial<ComponentList> {
-    RemoveHumanoid?: RemoveHumanoid,
     AutoTaggingButtons?: AutoTaggingButtons,
     RecordBuilder?: RecordBuilder,
 
