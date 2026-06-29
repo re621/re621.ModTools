@@ -4,82 +4,82 @@
  */
 export default class User {
 
-    public static loggedIn: boolean;
+  public static loggedIn: boolean;
+
+  // From body parameters
+  public static username: string;
+  public static userID: number;
+  public static level: number;
+  public static levelString: string;
+
+  public static isMember: boolean;
+  public static isPrivileged: boolean;
+  public static isContributor: boolean;
+  public static isFormerStaff: boolean;
+  public static isJanitor: boolean;
+  public static isModerator: boolean;
+  public static isAdmin: boolean;
+
+  public static isBlocked: boolean;
+  public static isVerified: boolean;
+  public static canApprovePosts: boolean;
+  public static canUploadFree: boolean;
+
+  public static postsPerPage: number;
+
+  // From meta tags
+  public static commentThreshold: number;
+  public static blacklistedTags: string;
+  public static blacklistUsers: boolean;
+  public static enableJSNavigation: boolean;
+  public static enableAutoComplete: boolean;
+  public static styleUsernames: boolean;
+  public static defaultImageSize: ImageScalingMode;
+
+  public static init(): void {
+    const data = $("body").data() as BodyParams;
+
+    User.loggedIn = data.userIsAnonymous == false;
 
     // From body parameters
-    public static username: string;
-    public static userID: number;
-    public static level: number;
-    public static levelString: string;
+    User.username = data.userName || "Anonymous";
+    User.userID = data.userId || -1;
+    User.level = data.userLevel || 0;
+    User.levelString = data.userLevelString || "Anonymous";
 
-    public static isMember: boolean;
-    public static isPrivileged: boolean;
-    public static isContributor: boolean;
-    public static isFormerStaff: boolean;
-    public static isJanitor: boolean;
-    public static isModerator: boolean;
-    public static isAdmin: boolean;
+    User.isMember = data.userIsMember == true;
+    User.isPrivileged = data.userIsPrivileged == true;
+    User.isContributor = data.userIsContributor == true;
+    User.isFormerStaff = data.userIsFormerStaff == true;
+    User.isJanitor = data.userIsJanitor == true;
+    User.isModerator = data.userIsModerator == true;
+    User.isAdmin = data.userIsAdmin == true;
 
-    public static isBlocked: boolean;
-    public static isVerified: boolean;
-    public static canApprovePosts: boolean;
-    public static canUploadFree: boolean;
+    User.isBlocked = data.userIsBlocked == true;
+    User.isVerified = data.userIsVerified == true;
 
-    public static postsPerPage: number;
+    User.canApprovePosts = data.userCanApprovePosts == true;
+    User.canUploadFree = data.userCanUploadFree == true;
+
+    User.postsPerPage = data.userPerPage || 75;
 
     // From meta tags
-    public static commentThreshold: number;
-    public static blacklistedTags: string;
-    public static blacklistUsers: boolean;
-    public static enableJSNavigation: boolean;
-    public static enableAutoComplete: boolean;
-    public static styleUsernames: boolean;
-    public static defaultImageSize: ImageScalingMode;
+    User.commentThreshold = parseInt(getValue("user-comment-threshold", "-3"));
+    User.blacklistedTags = getValue("blacklisted-tags", "[]");
+    User.blacklistUsers = getValue("blacklist-users", "false") == "true";
 
-    public static init(): void {
-        const data = $("body").data() as BodyParams;
+    User.enableJSNavigation = getValue("enable-js-navigation", "true") == "true";
+    User.enableAutoComplete = getValue("enable-auto-complete", "true") == "true";
+    User.styleUsernames = getValue("style-usernames", "false") == "true";
 
-        User.loggedIn = data.userIsAnonymous == false;
+    User.defaultImageSize = ImageScalingMode.get(getValue("default-image-size"));
 
-        // From body parameters
-        User.username = data.userName || "Anonymous";
-        User.userID = data.userId || -1;
-        User.level = data.userLevel || 0;
-        User.levelString = data.userLevelString || "Anonymous";
-
-        User.isMember = data.userIsMember == true;
-        User.isPrivileged = data.userIsPrivileged == true;
-        User.isContributor = data.userIsContributor == true;
-        User.isFormerStaff = data.userIsFormerStaff == true;
-        User.isJanitor = data.userIsJanitor == true;
-        User.isModerator = data.userIsModerator == true;
-        User.isAdmin = data.userIsAdmin == true;
-
-        User.isBlocked = data.userIsBlocked == true;
-        User.isVerified = data.userIsVerified == true;
-
-        User.canApprovePosts = data.userCanApprovePosts == true;
-        User.canUploadFree = data.userCanUploadFree == true;
-
-        User.postsPerPage = data.userPerPage || 75;
-
-        // From meta tags
-        User.commentThreshold = parseInt(getValue("user-comment-threshold", "-3"));
-        User.blacklistedTags = getValue("blacklisted-tags", "[]");
-        User.blacklistUsers = getValue("blacklist-users", "false") == "true";
-
-        User.enableJSNavigation = getValue("enable-js-navigation", "true") == "true";
-        User.enableAutoComplete = getValue("enable-auto-complete", "true") == "true";
-        User.styleUsernames = getValue("style-usernames", "false") == "true";
-
-        User.defaultImageSize = ImageScalingMode.get(getValue("default-image-size"));
-
-        function getValue(name: string, fallback = ""): string {
-            const el = $(`meta[name="${name}"]`);
-            if (el.length == 0) return fallback;
-            return el.attr("content") ?? fallback;
-        }
+    function getValue(name: string, fallback = ""): string {
+      const el = $(`meta[name="${name}"]`);
+      if (el.length == 0) return fallback;
+      return el.attr("content") ?? fallback;
     }
+  }
 
 }
 
@@ -92,14 +92,14 @@ export enum ImageScalingMode {
 
 export namespace ImageScalingMode {
     export function get(mode: string): ImageScalingMode {
-        switch (mode) {
-            case "fitv": return ImageScalingMode.FitHeight;
-            case "fit": return ImageScalingMode.FitWidth;
-            case "original": return ImageScalingMode.Original;
-            case "large":
-            default:
-              return ImageScalingMode.Sample;
-        }
+      switch (mode) {
+      case "fitv": return ImageScalingMode.FitHeight;
+      case "fit": return ImageScalingMode.FitWidth;
+      case "original": return ImageScalingMode.Original;
+      case "large":
+      default:
+        return ImageScalingMode.Sample;
+      }
     }
 }
 

@@ -1,6 +1,5 @@
 import XM from "../models/api/XM";
 import { PageDefinition } from "../models/data/Page";
-import { DialogForm } from "../models/structure/DialogForm";
 import Modal from "../models/structure/Modal";
 import ErrorHandler from "../utilities/ErrorHandler";
 import { html } from "../utilities/HtmlTemplate";

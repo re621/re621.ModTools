@@ -6,13 +6,13 @@ declare const unsafeWindow: Window;
 
 export default class XM {
 
-    public static Storage = XMStorage;
-    public static Connect = XMConnect;
-    public static Util = XMUtil;
+  public static Storage = XMStorage;
+  public static Connect = XMConnect;
+  public static Util = XMUtil;
 
-    public static Window = typeof unsafeWindow === "undefined" ? window : unsafeWindow;
+  public static Window = typeof unsafeWindow === "undefined" ? window : unsafeWindow;
 
-    /** Returns the information provided by the script manager */
-    public static Info = GM_info;
+  /** Returns the information provided by the script manager */
+  public static Info = GM_info;
 
 }

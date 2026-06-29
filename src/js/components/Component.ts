@@ -11,16 +11,16 @@ import Util from "../utilities/Util";
 
 export default class Component {
 
-    protected name: string;                         // Unique identifier for this component. Defaults to the class name.
+  protected name: string;                         // Unique identifier for this component. Defaults to the class name.
 
-    private initialized = false;                    // Whether or not the component is currently running
-    private eventIndex = 0;                         // Used to provide IDs to the component event listeners
-    private constraintMatches: boolean;             // Whether or not the declared page constraints match
-    private DOMLoadConditions: boolean | string;    // DOM conditions that must be met for the component to load
-    private waitForFocus: boolean;                  // Wait for the window to come into focus before loading
-    private dependencies: string[];                 // List of components names that need to be enabled
+  private initialized = false;                    // Whether or not the component is currently running
+  private eventIndex = 0;                         // Used to provide IDs to the component event listeners
+  private constraintMatches: boolean;             // Whether or not the declared page constraints match
+  private DOMLoadConditions: boolean | string;    // DOM conditions that must be met for the component to load
+  private waitForFocus: boolean;                  // Wait for the window to come into focus before loading
+  private dependencies: string[];                 // List of components names that need to be enabled
 
-	/**
+  /**
 	 * Component settings
 	 * 
 	 * Defines default values and is used to access them via dynamic setters and getters,
@@ -29,302 +29,302 @@ export default class Component {
 	 * 
 	 * The `SettingsCache` object stores the current values of the settings.
 	 */
-    public Settings: Settings = {
-        enabled: true,
-    };
-	/** 
+  public Settings: Settings = {
+    enabled: true,
+  };
+  /** 
 	 * A persistent store of the default values of `Settings` prior to being
 	 * overwritten with dynamic setters and getters.
 	 */
-	private _SettingsDefaults?: Settings;
-	/** 
+  private _SettingsDefaults?: Settings;
+  /** 
 	 * A persistent store of the default values of `Settings` prior to being
 	 * overwritten with dynamic setters and getters.
 	 */
-	private get SettingsDefaults(): Settings {
-		if (!this._SettingsDefaults) throw Error("Component.SettingsDefaults is not yet defined.");
-		return this._SettingsDefaults;
-	}
-	/**
+  private get SettingsDefaults(): Settings {
+    if (!this._SettingsDefaults) throw Error("Component.SettingsDefaults is not yet defined.");
+    return this._SettingsDefaults;
+  }
+  /**
 	 * The current values of `Settings`; used to minimize reading from storage.
 	 */
-    private SettingsCache: Settings;
+  private SettingsCache: Settings;
 
-    public Keybinds: KeybindDefinition[] = [];
+  public Keybinds: KeybindDefinition[] = [];
 
-    public constructor(options: ComponentOptions = {}) {
+  public constructor(options: ComponentOptions = {}) {
 
-        // Validate the options
-        if (options.name) this.name = options.name;
-        else this.name = this.constructor.name;
+    // Validate the options
+    if (options.name) this.name = options.name;
+    else this.name = this.constructor.name;
 
-        if (!options.constraint) options.constraint = [];
-        else if (!Array.isArray(options.constraint)) options.constraint = [options.constraint];
-        this.constraintMatches = options.constraint.length == 0 || Page.matches(options.constraint);
+    if (!options.constraint) options.constraint = [];
+    else if (!Array.isArray(options.constraint)) options.constraint = [options.constraint];
+    this.constraintMatches = options.constraint.length == 0 || Page.matches(options.constraint);
 
-        if (!options.waitForDOM) options.waitForDOM = false;
-        this.DOMLoadConditions = options.waitForDOM;
-        this.waitForFocus = options.waitForFocus || false;
+    if (!options.waitForDOM) options.waitForDOM = false;
+    this.DOMLoadConditions = options.waitForDOM;
+    this.waitForFocus = options.waitForFocus || false;
 
-        this.dependencies = options.dependencies || [];
+    this.dependencies = options.dependencies || [];
 
-        // Initialize the settings cache
-        this.SettingsCache = {
-            enabled: true,
-        };
-    }
+    // Initialize the settings cache
+    this.SettingsCache = {
+      enabled: true,
+    };
+  }
 
-    /** Loads the settings from storage, and sets up listeners to sync them across tabs */
-    public async bootstrapSettings(settings?: Settings): Promise<void> {
-        this._SettingsDefaults = { enabled: true };
+  /** Loads the settings from storage, and sets up listeners to sync them across tabs */
+  public async bootstrapSettings(settings?: Settings): Promise<void> {
+    this._SettingsDefaults = { enabled: true };
 
-        // Load in the saved settings values
-        for (const [key, defaultValue] of Object.entries(settings || this.Settings)) {
-            const savedValue = XM.Storage.getValue(this.name + "." + key, defaultValue);
-            this.SettingsCache[key] = savedValue;
-            this.SettingsDefaults[key] = defaultValue;
-            delete this.Settings[key];
+    // Load in the saved settings values
+    for (const [key, defaultValue] of Object.entries(settings || this.Settings)) {
+      const savedValue = XM.Storage.getValue(this.name + "." + key, defaultValue);
+      this.SettingsCache[key] = savedValue;
+      this.SettingsDefaults[key] = defaultValue;
+      delete this.Settings[key];
 
-            // Define custom setters and getters
-            Object.defineProperty(this.Settings, key, {
-                get: () => {
-                    Debug.log("- fetching", this.name + "." + key);
-                    return this.SettingsCache[key];
-                },
-                set: (newValue) => {
-                    Debug.log("- setting", this.name + "." + key, newValue);
-                    if (JSON.stringify(newValue) == JSON.stringify(defaultValue)) {
-                        this.SettingsCache[key] = defaultValue;
-                        XM.Storage.deleteValue(this.name + "." + key);
-                    } else {
-                        this.SettingsCache[key] = newValue;
-						XM.Storage.setValueAsync(this.name + "." + key, newValue);
-                    }
-                }
-            })
-
-            // Sync settings between tabs
-            XM.Storage.addListener(this.name + "." + key, (settingsTag, oldValue, newValue, remote) => {
-                // Reset to default
-                if (typeof newValue == "undefined") newValue = this.SettingsDefaults[key];
-
-                // Only update if the event came from another tab
-                // Otherwise, the value is already correct, and we don't need an infinite loop
-                if (remote) this.SettingsCache[key] = newValue;
-                else newValue = this.SettingsCache[key];
-
-                this.trigger("settings." + key + "-" + (remote ? "remote" : "local"), newValue);
-                this.trigger("settings." + key, newValue);
-            });
+      // Define custom setters and getters
+      Object.defineProperty(this.Settings, key, {
+        get: () => {
+          Debug.log("- fetching", this.name + "." + key);
+          return this.SettingsCache[key];
+        },
+        set: (newValue) => {
+          Debug.log("- setting", this.name + "." + key, newValue);
+          if (JSON.stringify(newValue) == JSON.stringify(defaultValue)) {
+            this.SettingsCache[key] = defaultValue;
+            XM.Storage.deleteValue(this.name + "." + key);
+          } else {
+            this.SettingsCache[key] = newValue;
+            XM.Storage.setValueAsync(this.name + "." + key, newValue);
+          }
         }
+      })
 
-        this.trigger("bootstrap");
+      // Sync settings between tabs
+      XM.Storage.addListener(this.name + "." + key, (settingsTag, oldValue, newValue, remote) => {
+        // Reset to default
+        if (typeof newValue == "undefined") newValue = this.SettingsDefaults[key];
+
+        // Only update if the event came from another tab
+        // Otherwise, the value is already correct, and we don't need an infinite loop
+        if (remote) this.SettingsCache[key] = newValue;
+        else newValue = this.SettingsCache[key];
+
+        this.trigger("settings." + key + "-" + (remote ? "remote" : "local"), newValue);
+        this.trigger("settings." + key, newValue);
+      });
     }
 
-    /**
+    this.trigger("bootstrap");
+  }
+
+  /**
      * Loads the component's functionality.  
      * Aborted if some of the load conditions do not match.
      */
-    public async load(): Promise<void> {
-        if (!this.constraintMatches || !this.Settings.enabled) return Promise.resolve();
+  public async load(): Promise<void> {
+    if (!this.constraintMatches || !this.Settings.enabled) return Promise.resolve();
 
-        for (const one of this.dependencies) {
-            if (!REMT.Registry[one].Settings.enabled)
-                return Promise.resolve();
-        }
-
-        return this.execPrepare()
-            .then(async () => {
-                // Wait for the window to come into focus
-                if (this.waitForFocus)
-                    await PageObserver.awaitFocus();
-
-                // Determine when to create the DOM structure
-                if (typeof this.DOMLoadConditions == "string") {
-                    PageObserver.watch(this.DOMLoadConditions).then((status) => {
-                        if (!status) {
-                            // TODO Page loaded, but the element was not found
-                            return;
-                        }
-                        this.execCreate();
-                    });
-                } else if (this.DOMLoadConditions) {
-                    $(() => this.execCreate());
-                } else this.execCreate();
-                this.trigger("load");
-            });
+    for (const one of this.dependencies) {
+      if (!REMT.Registry[one].Settings.enabled)
+        return Promise.resolve();
     }
 
-    /** Unloads the component's functionality and returns the DOM to its original state */
-    public async unload(): Promise<void> {
-        await this.execDestroy();
-        this.trigger("unload");
-    }
+    return this.execPrepare()
+      .then(async () => {
+        // Wait for the window to come into focus
+        if (this.waitForFocus)
+          await PageObserver.awaitFocus();
 
-    /** Restarts the component. Shorthand for running `unload()` and `load()`. */
-    public async reload(delay?: number): Promise<void> {
-        await this.unload();
-        if (delay)
-            await Util.sleep(delay);
-        await this.load();
-    }
+        // Determine when to create the DOM structure
+        if (typeof this.DOMLoadConditions == "string") {
+          PageObserver.watch(this.DOMLoadConditions).then((status) => {
+            if (!status) {
+              // TODO Page loaded, but the element was not found
+              return;
+            }
+            this.execCreate();
+          });
+        } else if (this.DOMLoadConditions) {
+          $(() => this.execCreate());
+        } else this.execCreate();
+        this.trigger("load");
+      });
+  }
 
-    /**
+  /** Unloads the component's functionality and returns the DOM to its original state */
+  public async unload(): Promise<void> {
+    await this.execDestroy();
+    this.trigger("unload");
+  }
+
+  /** Restarts the component. Shorthand for running `unload()` and `load()`. */
+  public async reload(delay?: number): Promise<void> {
+    await this.unload();
+    if (delay)
+      await Util.sleep(delay);
+    await this.load();
+  }
+
+  /**
      * Loads necessary component data.
      * Executed before any initialization occurs, and runs even if the load conditions do not match
      */
-    protected async prepare(): Promise<void> { }
+  protected async prepare(): Promise<void> { }
 
-    /** Runs the component's `prepare()` function and loads settings */
-    private async execPrepare(): Promise<void> {
-        try { await this.prepare(); }
-        catch (error) {
-            ErrorHandler.write(`[${this.name}] Fatal crash during "prepare"`, error)
-            return;
-        }
-        this.trigger("prepare");
+  /** Runs the component's `prepare()` function and loads settings */
+  private async execPrepare(): Promise<void> {
+    try { await this.prepare(); }
+    catch (error) {
+      ErrorHandler.write(`[${this.name}] Fatal crash during "prepare"`, error)
+      return;
     }
+    this.trigger("prepare");
+  }
 
-    /**
+  /**
      * Creates the component's DOM structure.  
      * Executed as soon as the load conditions match.
      */
-    protected async create(): Promise<void> { }
+  protected async create(): Promise<void> { }
 
-    /** Runs the component's `create()` function, sets corresponding variables and triggers events. */
-    private async execCreate(): Promise<void> {
-        if (this.initialized) {
-            ErrorHandler.write(`[${this.name}] Attempted to create an initialized module`, new Error());
-            return;
-        }
-
-        try { await this.create(); }
-        catch (error) {
-            ErrorHandler.write(`[${this.name}] Fatal crash during "create"`, error);
-            return;
-        }
-        this.resetHotkeys();
-        this.initialized = true;
-        this.trigger("create");
+  /** Runs the component's `create()` function, sets corresponding variables and triggers events. */
+  private async execCreate(): Promise<void> {
+    if (this.initialized) {
+      ErrorHandler.write(`[${this.name}] Attempted to create an initialized module`, new Error());
+      return;
     }
 
-    /**
+    try { await this.create(); }
+    catch (error) {
+      ErrorHandler.write(`[${this.name}] Fatal crash during "create"`, error);
+      return;
+    }
+    this.resetHotkeys();
+    this.initialized = true;
+    this.trigger("create");
+  }
+
+  /**
      * Completely removes the component's DOM structure and restores the original state.  
      * Typically executed when a component is disabled.
      */
-    protected async destroy(): Promise<void> { }
+  protected async destroy(): Promise<void> { }
 
-    private async execDestroy(): Promise<void> {
-        if (!this.initialized) {
-            // TODO Throw an error?
-            return;
-        }
-
-        try { await this.destroy(); }
-        catch (error) {
-            // TODO Error handling
-        }
-        this.initialized = false;
-        this.trigger("destroy");
+  private async execDestroy(): Promise<void> {
+    if (!this.initialized) {
+      // TODO Throw an error?
+      return;
     }
 
-    public async resetHotkeys(): Promise<void> {
-        const keyMeta: string[] = [];
-        const keybindObj: Keybind[] = [];
+    try { await this.destroy(); }
+    catch (error) {
+      // TODO Error handling
+    }
+    this.initialized = false;
+    this.trigger("destroy");
+  }
 
-        const enabled = this.constraintMatches && this.Settings.enabled;
-        for (const keybind of this.Keybinds) {
-            const meta = this.getName() + "." + keybind.keys;
+  public async resetHotkeys(): Promise<void> {
+    const keyMeta: string[] = [];
+    const keybindObj: Keybind[] = [];
 
-            const keys = (this.Settings[keybind.keys] as string).split("|");
-            if (keybind.ignoreShift) {
-                // This is dumb, but it works for most cases
-                // The function will be executed even if shift is also pressed
-                for (const key of [...keys]) keys.push("shift+" + key);
-            }
+    const enabled = this.constraintMatches && this.Settings.enabled;
+    for (const keybind of this.Keybinds) {
+      const meta = this.getName() + "." + keybind.keys;
 
-            keybindObj.push({
-                keys: keys,
-                fnct: keybind.response,
-                bindMeta: meta,
-                enabled: enabled && (!keybind.page || Page.matches(keybind.page)),
-                element: keybind.element,
-                selector: keybind.selector,
-                holdable: keybind.holdable,
-            });
+      const keys = (this.Settings[keybind.keys] as string).split("|");
+      if (keybind.ignoreShift) {
+        // This is dumb, but it works for most cases
+        // The function will be executed even if shift is also pressed
+        for (const key of [...keys]) keys.push("shift+" + key);
+      }
 
-            keyMeta.push(meta);
-        }
+      keybindObj.push({
+        keys: keys,
+        fnct: keybind.response,
+        bindMeta: meta,
+        enabled: enabled && (!keybind.page || Page.matches(keybind.page)),
+        element: keybind.element,
+        selector: keybind.selector,
+        holdable: keybind.holdable,
+      });
 
-        KeybindManager.unregister(keyMeta);
-        KeybindManager.register(keybindObj);
+      keyMeta.push(meta);
     }
 
-    /** Execute all handlers for the specified component event */
-    public trigger(event: string, data?: PrimitiveType | PrimitiveType[] | PrimitiveMap): void {
-        $(document).trigger(`remt.${this.name}.${event}`, data);
-    }
+    KeybindManager.unregister(keyMeta);
+    KeybindManager.register(keybindObj);
+  }
 
-    /** 
+  /** Execute all handlers for the specified component event */
+  public trigger(event: string, data?: PrimitiveType | PrimitiveType[] | PrimitiveMap): void {
+    $(document).trigger(`remt.${this.name}.${event}`, data);
+  }
+
+  /** 
      * Attach a handler function for the specified event to the component
      * @returns Event ID, unique to this component, that can be used to unbind this handler
      */
-    public on(event: string, handler: (event: JQuery.TriggeredEvent, data?: PrimitiveType | PrimitiveType[] | PrimitiveMap) => void): number {
-        const eventList = event.split(" ");
-        for (const one of eventList)
-            $(document).on(`remt.${this.name}.${one}.${this.eventIndex}`, handler);
-        return this.eventIndex++;
+  public on(event: string, handler: (event: JQuery.TriggeredEvent, data?: PrimitiveType | PrimitiveType[] | PrimitiveMap) => void): number {
+    const eventList = event.split(" ");
+    for (const one of eventList)
+      $(document).on(`remt.${this.name}.${one}.${this.eventIndex}`, handler);
+    return this.eventIndex++;
+  }
+
+  /** Executes a handler function exactly once whe encountering a specified event */
+  public one(event: string, handler: (event: JQuery.TriggeredEvent, data?: PrimitiveType | PrimitiveType[] | PrimitiveMap) => void): void {
+    $(document).one(`remt.${this.name}.${event}`, handler);
+  }
+
+  /** Detaches handlers from the specified component event */
+  public off(event: string, eventID?: number): void {
+    $(document).off(`remt.${this.name}.${event}` + (eventID ? `.${eventID}` : ""));
+  }
+
+  public getName(): string { return this.name; }
+
+  public updateContentHeader(headers: { [name: string]: boolean }, selector = "body") {
+    const content = $(selector);
+
+    for (const [name, value] of Object.entries(headers))
+      setContentParameter(name, value);
+
+    function setContentParameter(name: string, value: boolean): void {
+      if (value) content.attr(name, "true");
+      else content.removeAttr(name);
     }
+  }
 
-    /** Executes a handler function exactly once whe encountering a specified event */
-    public one(event: string, handler: (event: JQuery.TriggeredEvent, data?: PrimitiveType | PrimitiveType[] | PrimitiveMap) => void): void {
-        $(document).one(`remt.${this.name}.${event}`, handler);
+  // #region Subclass Sandbox
+  protected _settingsMenuDialogParameters?: SettingsDialogConfig;
+  public get settingsMenuDialogParameters() { return this._settingsMenuDialogParameters; }
+  protected resetSettings() {
+    for (const [k, v] of Object.entries(this.SettingsDefaults)) {
+      this.Settings[k] = v;
     }
+  }
 
-    /** Detaches handlers from the specified component event */
-    public off(event: string, eventID?: number): void {
-        $(document).off(`remt.${this.name}.${event}` + (eventID ? `.${eventID}` : ""));
-    }
-
-    public getName(): string { return this.name; }
-
-    public updateContentHeader(headers: { [name: string]: boolean }, selector = "body") {
-        const content = $(selector);
-
-        for (const [name, value] of Object.entries(headers))
-            setContentParameter(name, value);
-
-        function setContentParameter(name: string, value: boolean): void {
-            if (value) content.attr(name, "true");
-            else content.removeAttr(name);
-        }
-    }
-
-    // #region Subclass Sandbox
-    protected _settingsMenuDialogParameters?: SettingsDialogConfig;
-    public get settingsMenuDialogParameters() { return this._settingsMenuDialogParameters; }
-    protected resetSettings() {
-      for (const [k, v] of Object.entries(this.SettingsDefaults)) {
-        this.Settings[k] = v;
-      }
-    }
-
-    protected get prettyPrintName() { return this.name.replace(/(?<=[a-z])[A-Z]/g, " $&"); }
-    protected get settingsDialogTitle() { return `${this.prettyPrintName} Settings`; }
-    protected get settingsIdPrefix() { return `${this.prettyPrintName.replace(/\s+/g, "-")}-setting-`; }
-    protected handleResetSettingsDialogElement(e: FormData, forceConfirm = true) {
-      if (
-        e.get(`${this.settingsIdPrefix}resetSettings`) === "true" &&
+  protected get prettyPrintName() { return this.name.replace(/(?<=[a-z])[A-Z]/g, " $&"); }
+  protected get settingsDialogTitle() { return `${this.prettyPrintName} Settings`; }
+  protected get settingsIdPrefix() { return `${this.prettyPrintName.replace(/\s+/g, "-")}-setting-`; }
+  protected handleResetSettingsDialogElement(e: FormData, forceConfirm = true) {
+    if (
+      e.get(`${this.settingsIdPrefix}resetSettings`) === "true" &&
         (!forceConfirm || confirm(`Reset ${this.settingsDialogTitle} to defaults?`))
-      ) {
-        this.resetSettings();
-        return true;
-      }
-      return false;
+    ) {
+      this.resetSettings();
+      return true;
     }
-    protected get resetSettingsDialogElement() { return `<label for="${this.settingsIdPrefix}resetSettings" title="Reset settings to defaults?">Reset<input type="checkbox" id="${this.settingsIdPrefix}resetSettings" name="${this.settingsIdPrefix}resetSettings" value="true" /></label>`; }
-    protected simpleSettingsCheckbox(setting: keyof typeof this.Settings/* string */, label?: string, title?: string) {
-      return /* html */`
+    return false;
+  }
+  protected get resetSettingsDialogElement() { return `<label for="${this.settingsIdPrefix}resetSettings" title="Reset settings to defaults?">Reset<input type="checkbox" id="${this.settingsIdPrefix}resetSettings" name="${this.settingsIdPrefix}resetSettings" value="true" /></label>`; }
+  protected simpleSettingsCheckbox(setting: keyof typeof this.Settings/* string */, label?: string, title?: string) {
+    return /* html */`
         <label for="${this.settingsIdPrefix}${setting}"${title ? `title="${title}"` : ""}>
           ${label ?? `${setting[0].toUpperCase()}${(setting as string).slice(1).replace(/(?<=[a-z])[A-Z]/g, " $&")}?`}
           &nbsp;
@@ -334,8 +334,8 @@ export default class Component {
                  value="true"
                  ${this.Settings[setting] ? " checked" : ""} />
         </label>`;
-    }
-    // #endregion Subclass Sandbox
+  }
+  // #endregion Subclass Sandbox
 }
 export type SettingsDialogConfig = { elements: JQuery<HTMLElement>[], optionsOrTitle?: string | DialogConfig, then?: { (e: FormData): any } };
 
@@ -390,9 +390,6 @@ export type PrimitiveMap = {
 }
 
 export type JSONObject = JsonStrictObject;
-// export type JSONObject = {
-//     [prop: string]: PrimitiveType | PrimitiveType[] | JSONObject | JSONObject[];
-// }
 
 export interface Settings extends JSONObject {
     enabled: boolean;

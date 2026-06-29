@@ -1,5 +1,5 @@
 import { DialogConfig } from "./DialogForm";
-import Modal, { ModalConfig } from "./Modal";
+import Modal from "./Modal";
 
 type PromiseCallbacks<T, Err> = { then?: { (e: FormData): T }, onError?: { (e: unknown): Err }, onComplete?: { (): void } }
 /**
@@ -25,7 +25,7 @@ export class MultiDialogForm extends Modal {
       title: "MultiDialogForm",
       minHeight: 50,
     } as DialogConfig, options)); */
-     super({
+    super({
       title: "MultiDialogForm",
       minHeight: 50,
     });

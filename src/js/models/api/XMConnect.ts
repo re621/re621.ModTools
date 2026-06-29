@@ -6,147 +6,147 @@ declare const GM_download: any;
 
 export default class XMConnect {
 
-    /**
+  /**
      * Make a cross-domain xmlHttpRequest.  
      * For userscripts, the domain name MUST be defined in @resource tag.  
      * For extensions, the domain name MUST be listed in the permissions.
      * @param details Request details
      */
-    public static xmlHttpRequest(details: XMConnectRequest): void {
-        Debug.connectLog(details.url);
-        GM_xmlhttpRequest(XMConnect.validateXHRDetails(details));
-    }
+  public static xmlHttpRequest(details: XMConnectRequest): void {
+    Debug.connectLog(details.url);
+    GM_xmlhttpRequest(XMConnect.validateXHRDetails(details));
+  }
 
-    /**
+  /**
      * Cross-domain xmlHttpRequest, wrapped in a Promise.  
      * For userscripts, the domain name MUST be defined in @resource tag.  
      * For extensions, the domain name MUST be listed in the permissions.
      * @param details Request details
      */
-    public static xmlHttpPromise(details: XMConnectRequest): Promise<GMxmlHttpRequestResponse> {
-        const validDetails = XMConnect.validateXHRDetails(details);
-        return new Promise((resolve, reject) => {
-            const callbacks = {
-                onabort: validDetails.onabort,
-                onerror: validDetails.onerror,
-                onload: validDetails.onload,
-                onloadstart: validDetails.onloadstart,
-                onprogress: validDetails.onprogress,
-                onreadystatechange: validDetails.onreadystatechange,
-                ontimeout: validDetails.ontimeout,
-            };
+  public static xmlHttpPromise(details: XMConnectRequest): Promise<GMxmlHttpRequestResponse> {
+    const validDetails = XMConnect.validateXHRDetails(details);
+    return new Promise((resolve, reject) => {
+      const callbacks = {
+        onabort: validDetails.onabort,
+        onerror: validDetails.onerror,
+        onload: validDetails.onload,
+        onloadstart: validDetails.onloadstart,
+        onprogress: validDetails.onprogress,
+        onreadystatechange: validDetails.onreadystatechange,
+        ontimeout: validDetails.ontimeout,
+      };
 
-            details.onabort = (event): void => { callbacks.onabort?.(event); reject(event); };
-            details.onerror = (event): void => { callbacks.onerror?.(event); reject(event); };
-            details.onload = (event): void => { callbacks.onload?.(event); resolve(event); };
-            details.onloadstart = (event): void => { callbacks.onloadstart?.(event); };
-            details.onprogress = (event): void => { callbacks.onprogress?.(event); };
-            details.onreadystatechange = (event): void => { callbacks.onreadystatechange?.(event); };
-            details.ontimeout = (event): void => { callbacks.ontimeout?.(event); reject(event); };
+      details.onabort = (event): void => { callbacks.onabort?.(event); reject(event); };
+      details.onerror = (event): void => { callbacks.onerror?.(event); reject(event); };
+      details.onload = (event): void => { callbacks.onload?.(event); resolve(event); };
+      details.onloadstart = (event): void => { callbacks.onloadstart?.(event); };
+      details.onprogress = (event): void => { callbacks.onprogress?.(event); };
+      details.onreadystatechange = (event): void => { callbacks.onreadystatechange?.(event); };
+      details.ontimeout = (event): void => { callbacks.ontimeout?.(event); reject(event); };
 
-            XMConnect.xmlHttpRequest(validDetails);
-        });
-    }
+      XMConnect.xmlHttpRequest(validDetails);
+    });
+  }
 
-    /**
+  /**
      * Validates the xmlHttpRequest details, returning a valid set
      * @param details Request details
      */
-    private static validateXHRDetails(details: XMConnectRequest): XMConnectRequest {
-        if (details.headers === undefined) details.headers = {};
-        if (details.headers["User-Agent"] === undefined) {
-            details.headers["User-Agent"] = Script.userAgent;
-            details.headers["X-User-Agent"] = Script.userAgent;
-        }
-
-        if (details.onabort === undefined) details.onabort = (): void => { return; };
-        if (details.onerror === undefined) details.onerror = (): void => { return; };
-        if (details.onload === undefined) details.onload = (): void => { return; };
-        if (details.onloadstart === undefined) details.onloadstart = (): void => { return; };
-        if (details.onprogress === undefined) details.onprogress = (): void => { return; };
-        if (details.onreadystatechange === undefined) details.onreadystatechange = (): void => { return; };
-        if (details.ontimeout === undefined) details.ontimeout = (): void => { return; };
-
-        return details;
+  private static validateXHRDetails(details: XMConnectRequest): XMConnectRequest {
+    if (details.headers === undefined) details.headers = {};
+    if (details.headers["User-Agent"] === undefined) {
+      details.headers["User-Agent"] = Script.userAgent;
+      details.headers["X-User-Agent"] = Script.userAgent;
     }
 
-    /** Downloads a given URL to the local disk. */
-    public static download(url: string, name: string): void;
-    public static download(defaults: GMDownloadDetails): void;
-    public static download(a: any, b?: any): void {
-        if (typeof a === "string") {
-            a = {
-                url: a,
-                name: b,
-            };
-        }
+    if (details.onabort === undefined) details.onabort = (): void => { return; };
+    if (details.onerror === undefined) details.onerror = (): void => { return; };
+    if (details.onload === undefined) details.onload = (): void => { return; };
+    if (details.onloadstart === undefined) details.onloadstart = (): void => { return; };
+    if (details.onprogress === undefined) details.onprogress = (): void => { return; };
+    if (details.onreadystatechange === undefined) details.onreadystatechange = (): void => { return; };
+    if (details.ontimeout === undefined) details.ontimeout = (): void => { return; };
 
-        if (a.headers === undefined) a.headers = {
-            "User-Agent": Script.userAgent,
-            "X-User-Agent": Script.userAgent,
-        };
+    return details;
+  }
 
-        if (a.onerror === undefined) a.onerror = (): void => { return; }
-        if (a.onload === undefined) a.onload = (): void => { return; }
-        if (a.onprogress === undefined) a.onprogress = (): void => { return; }
-        if (a.ontimeout === undefined) a.ontimeout = (): void => { return; }
-
-        let timer: number;
-        XMConnect.xmlHttpRequest({
-            url: a.url,
-            method: "GET",
-            headers: a.headers,
-            responseType: "blob",
-            onerror: (event) => { a.onerror(event); },
-            ontimeout: (event) => { a.ontimeout(event); },
-            onprogress: (event) => {
-                if (timer) clearTimeout(timer);
-                timer = window.setTimeout(() => { a.onprogress(event) }, 500);
-            },
-            onload: (event) => {
-                a.onload(event);
-                const btn = $("<a>")
-                    .attr({
-                        href: URL.createObjectURL(event.response as Blob),
-                        download: a.name,
-                    })
-                    .html("download")
-                    .on("click", () => { btn.remove(); });
-                btn[0].click();
-            }
-        });
+  /** Downloads a given URL to the local disk. */
+  public static download(url: string, name: string): void;
+  public static download(defaults: GMDownloadDetails): void;
+  public static download(a: any, b?: any): void {
+    if (typeof a === "string") {
+      a = {
+        url: a,
+        name: b,
+      };
     }
 
-    /**
+    if (a.headers === undefined) a.headers = {
+      "User-Agent": Script.userAgent,
+      "X-User-Agent": Script.userAgent,
+    };
+
+    if (a.onerror === undefined) a.onerror = (): void => { return; }
+    if (a.onload === undefined) a.onload = (): void => { return; }
+    if (a.onprogress === undefined) a.onprogress = (): void => { return; }
+    if (a.ontimeout === undefined) a.ontimeout = (): void => { return; }
+
+    let timer: number;
+    XMConnect.xmlHttpRequest({
+      url: a.url,
+      method: "GET",
+      headers: a.headers,
+      responseType: "blob",
+      onerror: (event) => { a.onerror(event); },
+      ontimeout: (event) => { a.ontimeout(event); },
+      onprogress: (event) => {
+        if (timer) clearTimeout(timer);
+        timer = window.setTimeout(() => { a.onprogress(event) }, 500);
+      },
+      onload: (event) => {
+        a.onload(event);
+        const btn = $("<a>")
+          .attr({
+            href: URL.createObjectURL(event.response as Blob),
+            download: a.name,
+          })
+          .html("download")
+          .on("click", () => { btn.remove(); });
+        btn[0].click();
+      }
+    });
+  }
+
+  /**
      * Alternative to the normal download method above, using GM_download method.
      */
-    public static browserDownload(url: string, name?: string, saveAs?: boolean): void;
-    public static browserDownload(defaults: GMDownloadDetails): void;
-    public static browserDownload(a: any, b?: string, c?: boolean): void {
+  public static browserDownload(url: string, name?: string, saveAs?: boolean): void;
+  public static browserDownload(defaults: GMDownloadDetails): void;
+  public static browserDownload(a: any, b?: string, c?: boolean): void {
 
-        // Fallback to avoid a crash in Vivaldi
-        if (Debug.Vivaldi) {
-          if (!b) Debug.log("Attempting to safely execute download despite incorrect parameters.");
-          return XMConnect.download(a, b!);
-        }
-
-        const downloadDetails: GMDownloadDetails = typeof a === "string"
-            ? { url: a, name: b, saveAs: c }
-            : a;
-
-        // Workaround to SWF files not being whitelisted by default in Tampermonkey
-        downloadDetails.onerror = (event): void => {
-            if (event.error == "not_whitelisted") {
-              if (!b) Debug.log("Attempting to safely execute download despite incorrect parameters.");
-              XMConnect.download(a, b!);
-            }
-            else if (a.onerror) a.onerror(event);
-            else throw "Error: unable to download file" + (event.error ? (` [${event.error}]`) : "");
-        }
-
-        // All script managers should have a GM_download function
-        GM_download(a);
+    // Fallback to avoid a crash in Vivaldi
+    if (Debug.Vivaldi) {
+      if (!b) Debug.log("Attempting to safely execute download despite incorrect parameters.");
+      return XMConnect.download(a, b!);
     }
+
+    const downloadDetails: GMDownloadDetails = typeof a === "string"
+      ? { url: a, name: b, saveAs: c }
+      : a;
+
+    // Workaround to SWF files not being whitelisted by default in Tampermonkey
+    downloadDetails.onerror = (event): void => {
+      if (event.error == "not_whitelisted") {
+        if (!b) Debug.log("Attempting to safely execute download despite incorrect parameters.");
+        XMConnect.download(a, b!);
+      }
+      else if (a.onerror) a.onerror(event);
+      else throw "Error: unable to download file" + (event.error ? (` [${event.error}]`) : "");
+    }
+
+    // All script managers should have a GM_download function
+    GM_download(a);
+  }
 
 }
 
