@@ -1,4 +1,4 @@
-import { PageDefinition } from "../models/data/Page";
+import Page, { PageDefinition } from "../models/data/Page";
 import Component from "./Component";
 import REMT from "../../REMT";
 import Danbooru from "../models/api/Danbooru";
@@ -187,12 +187,10 @@ export default class DMailToStaffNote extends Component {
 
   /**
 	 * Pulls some info about DMail from the HTML.
-	 * @todo Refactor elsewhere?
 	 * @returns An object containing all the info about the DMail exchange that could be pulled from the page's HTML w/o querying the server.
 	 */
   public static findDMailIds() {
-    const id = /^\/dmails\/([0-9]+)/.exec(window.location.pathname)?.[1];
-    if (!id) return null;
+    const id = Page.getPageID();
     const { id: recipientId, name: recipientName } = this.pullIdAndName(2);
     const { id: senderId, name: senderName } = this.pullIdAndName(1);
     const title = Util.DOM.querySelector<HTMLAnchorElement>(".dmail h2").innerText;
