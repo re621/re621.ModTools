@@ -60,6 +60,18 @@ export default class Danbooru {
     },
   }
 
+  public static Toast = {
+    notice(text: string, timeout = 0) {
+      if (!Danbooru.hasModules) return;
+      Danbooru.Modules.Toast.notice(text, timeout);
+    },
+
+    alert(text: string) {
+      if (!Danbooru.hasModules) return;
+      Danbooru.Modules.Toast.alert(text);
+    },
+  }
+
   public static get DTextFormatter() { return this.Modules?.DTextFormatter; }
 
   /** The page-side jQuery instance. Required when interacting with page-side jQuery state (e.g. `.data()`), since the userscript runs in a sandbox with its own jQuery. */
