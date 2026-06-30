@@ -20,15 +20,18 @@ type Settings = {
   enabled: boolean;
   buttons: (AtypicalButton | LabeledButton | StoredButton | TemplateData)[];
   insertMode: "replace" | "insert";
-  // greeting: string;
+  greeting: string;
 };
 // #endregion Type Stuff
+
+const DEFAULT_GREETING = "Hi %recipientName%,\n\n";
 
 export default class DMailBuilder extends Component {
   public Settings: Settings = {
     enabled: true,
     buttons: DMailBuilder.defaultTemplates,
     insertMode: "insert",
+    greeting: DEFAULT_GREETING,
   };
 
   private builder?: TemplateBuilder;
@@ -138,6 +141,21 @@ export default class DMailBuilder extends Component {
         body: b.body ?? b.text ?? "",
       } as TemplateData)),
       setTemplates: (next) => { this.Settings.buttons = next; },
+      transform: (template) => {
+        const greeting = this.Settings.greeting;
+        const text = greeting.includes("%body%")
+          ? greeting.replace("%body%", template.body)
+          : `${greeting}${template.body}`;
+        // This is empty on page load, so we load it on insertion instead
+        const recipientName = (document.getElementById("dmail_to_name") as HTMLInputElement | undefined)?.value ?? "";
+        return text.replace(/%recipientName%/g, recipientName);
+      },
+      pinnedChip: {
+        title: "Greeting",
+        getBody: () => this.Settings.greeting,
+        setBody: (body) => { this.Settings.greeting = body; },
+        defaultBody: DEFAULT_GREETING,
+      },
     });
     this.builder.mount();
     return Promise.resolve();
