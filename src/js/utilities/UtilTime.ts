@@ -9,19 +9,19 @@ export enum UtilTime {
 }
 
 class UtilTimeStorage {
-    public static cachedNow: number;
+  public static cachedNow: number;
 }
 
 export namespace UtilTime {
 
     /** Returns current timestamp. Alias for `new Date().getTime();` */
     export function now(cached = false): number {
-        if (cached) {
-            if (UtilTimeStorage.cachedNow) return UtilTimeStorage.cachedNow;
-            UtilTimeStorage.cachedNow = UtilTime.now();
-            return UtilTimeStorage.cachedNow;
-        }
-        return new Date().getTime();
+      if (cached) {
+        if (UtilTimeStorage.cachedNow) return UtilTimeStorage.cachedNow;
+        UtilTimeStorage.cachedNow = UtilTime.now();
+        return UtilTimeStorage.cachedNow;
+      }
+      return new Date().getTime();
     }
 
     /**
@@ -30,53 +30,53 @@ export namespace UtilTime {
      * @returns Relative time string
      */
     export function ago(time: number | string | Date): string {
-        switch (typeof time) {
-            case 'string':
-                time = +new Date(time);
-                break;
-            case 'object':
-                time = time.getTime();
-                break;
-        }
+      switch (typeof time) {
+      case 'string':
+        time = +new Date(time);
+        break;
+      case 'object':
+        time = time.getTime();
+        break;
+      }
 
-        const timeFormats = [
-            [60, 'seconds', 1], // 60
-            [120, '1 minute ago', '1 minute from now'], // 60*2
-            [3600, 'minutes', 60], // 60*60, 60
-            [7200, '1 hour ago', '1 hour from now'], // 60*60*2
-            [86400, 'hours', 3600], // 60*60*24, 60*60
-            [172800, 'Yesterday', 'Tomorrow'], // 60*60*24*2
-            [604800, 'days', 86400], // 60*60*24*7, 60*60*24
-            [1209600, 'Last week', 'Next week'], // 60*60*24*7*4*2
-            [2419200, 'weeks', 604800], // 60*60*24*7*4, 60*60*24*7
-            [4838400, 'Last month', 'Next month'], // 60*60*24*7*4*2
-            [29030400, 'months', 2419200], // 60*60*24*7*4*12, 60*60*24*7*4
-            [58060800, 'Last year', 'Next year'], // 60*60*24*7*4*12*2
-            [2903040000, 'years', 29030400], // 60*60*24*7*4*12*100, 60*60*24*7*4*12
-            [5806080000, 'Last century', 'Next century'], // 60*60*24*7*4*12*100*2
-            [58060800000, 'centuries', 2903040000] // 60*60*24*7*4*12*100*20, 60*60*24*7*4*12*100
-        ];
-        let seconds = (+new Date() - time) / 1000,
-            token = 'ago',
-            listChoice = 1;
+      const timeFormats = [
+        [60, 'seconds', 1], // 60
+        [120, '1 minute ago', '1 minute from now'], // 60*2
+        [3600, 'minutes', 60], // 60*60, 60
+        [7200, '1 hour ago', '1 hour from now'], // 60*60*2
+        [86400, 'hours', 3600], // 60*60*24, 60*60
+        [172800, 'Yesterday', 'Tomorrow'], // 60*60*24*2
+        [604800, 'days', 86400], // 60*60*24*7, 60*60*24
+        [1209600, 'Last week', 'Next week'], // 60*60*24*7*4*2
+        [2419200, 'weeks', 604800], // 60*60*24*7*4, 60*60*24*7
+        [4838400, 'Last month', 'Next month'], // 60*60*24*7*4*2
+        [29030400, 'months', 2419200], // 60*60*24*7*4*12, 60*60*24*7*4
+        [58060800, 'Last year', 'Next year'], // 60*60*24*7*4*12*2
+        [2903040000, 'years', 29030400], // 60*60*24*7*4*12*100, 60*60*24*7*4*12
+        [5806080000, 'Last century', 'Next century'], // 60*60*24*7*4*12*100*2
+        [58060800000, 'centuries', 2903040000] // 60*60*24*7*4*12*100*20, 60*60*24*7*4*12*100
+      ];
+      let seconds = (+new Date() - time) / 1000,
+        token = 'ago',
+        listChoice = 1;
 
-        if (seconds >= 0 && seconds < 2) { return 'Just now'; }
-        if (seconds < 0) {
-            seconds = Math.abs(seconds);
-            token = 'from now';
-            listChoice = 2;
-        }
-        let i = 0,
-            format;
+      if (seconds >= 0 && seconds < 2) { return 'Just now'; }
+      if (seconds < 0) {
+        seconds = Math.abs(seconds);
+        token = 'from now';
+        listChoice = 2;
+      }
+      let i = 0,
+        format;
         // eslint-disable-next-line no-cond-assign
-        while (format = timeFormats[i++])
-            if (seconds < format[0]) {
-                if (typeof format[2] == 'string')
-                    return format[listChoice];
-                else
-                    return Math.floor(seconds / format[2]) + ' ' + format[1] + ' ' + token;
-            }
-        return time + "";
+      while (format = timeFormats[i++])
+        if (seconds < format[0]) {
+          if (typeof format[2] == 'string')
+            return format[listChoice];
+          else
+            return Math.floor(seconds / format[2]) + ' ' + format[1] + ' ' + token;
+        }
+      return time + "";
     }
 
     /**
@@ -84,31 +84,31 @@ export namespace UtilTime {
      * @param date Date to format. If none is provided, formats current date
      */
     export function format(date: Date | number | string = new Date()): string {
-        if (typeof date == "number" || typeof date == "string") date = new Date(date);
-        const parts = {
-            year: "" + date.getFullYear(),
-            month: "" + (date.getMonth() + 1),
-            day: "" + date.getDate(),
-            hours: "" + date.getHours(),
-            minutes: "" + date.getMinutes(),
-            seconds: "" + date.getSeconds(),
-        }
+      if (typeof date == "number" || typeof date == "string") date = new Date(date);
+      const parts = {
+        year: "" + date.getFullYear(),
+        month: "" + (date.getMonth() + 1),
+        day: "" + date.getDate(),
+        hours: "" + date.getHours(),
+        minutes: "" + date.getMinutes(),
+        seconds: "" + date.getSeconds(),
+      }
 
-        for (const id in parts) {
-            if (parts[id].length < 2) parts[id] = "0" + parts[id];
-        }
+      for (const id in parts) {
+        if (parts[id].length < 2) parts[id] = "0" + parts[id];
+      }
 
-        return parts.year + "-" + parts.month + "-" + parts.day + " " + parts.hours + ":" + parts.minutes + ":" + parts.seconds;
+      return parts.year + "-" + parts.month + "-" + parts.day + " " + parts.hours + ":" + parts.minutes + ":" + parts.seconds;
     }
 
     export function formatPeriod(input: number): string {
-        if (input < UtilTime.MINUTE) return (input / UtilTime.SECOND).toFixed(1) + " seconds";
-        if (input < UtilTime.HOUR) return (input / UtilTime.MINUTE).toFixed(1) + " minutes";
-        if (input < UtilTime.DAY) return (input / UtilTime.HOUR).toFixed(1) + " hours";
-        if (input < UtilTime.WEEK) return (input / UtilTime.DAY).toFixed(1) + " days";
-        if (input < UtilTime.MONTH) return (input / UtilTime.WEEK).toFixed(1) + " weeks";
-        if (input < UtilTime.YEAR) return (input / UtilTime.MONTH).toFixed(1) + " months";
-        return (input / UtilTime.YEAR).toFixed(1) + " years";
+      if (input < UtilTime.MINUTE) return (input / UtilTime.SECOND).toFixed(1) + " seconds";
+      if (input < UtilTime.HOUR) return (input / UtilTime.MINUTE).toFixed(1) + " minutes";
+      if (input < UtilTime.DAY) return (input / UtilTime.HOUR).toFixed(1) + " hours";
+      if (input < UtilTime.WEEK) return (input / UtilTime.DAY).toFixed(1) + " days";
+      if (input < UtilTime.MONTH) return (input / UtilTime.WEEK).toFixed(1) + " weeks";
+      if (input < UtilTime.YEAR) return (input / UtilTime.MONTH).toFixed(1) + " months";
+      return (input / UtilTime.YEAR).toFixed(1) + " years";
     }
 
     /**
@@ -117,99 +117,99 @@ export namespace UtilTime {
      * @returns String with a date and time in YYMMDD-HHMM format.
      */
     export function getDatetimeShort(): string {
-        function twoDigit(n: number): string { return (n < 10 ? '0' : '') + n; }
+      function twoDigit(n: number): string { return (n < 10 ? '0' : '') + n; }
 
-        const date = new Date();
-        return (date.getFullYear() + "").substring(2) + twoDigit(date.getMonth() + 1) + twoDigit(date.getDate()) + "-" + twoDigit(date.getHours()) + twoDigit(date.getMinutes());
+      const date = new Date();
+      return (date.getFullYear() + "").substring(2) + twoDigit(date.getMonth() + 1) + twoDigit(date.getDate()) + "-" + twoDigit(date.getHours()) + twoDigit(date.getMinutes());
     }
 
     export function formatPlaytime(seconds: number): string {
-        seconds = Math.ceil(seconds);
-        const remainder = (seconds % 60);
-        return Math.floor(seconds / 60) + ":" + (remainder < 10 ? "0" : "") + remainder;
+      seconds = Math.ceil(seconds);
+      const remainder = (seconds % 60);
+      return Math.floor(seconds / 60) + ":" + (remainder < 10 ? "0" : "") + remainder;
     }
     
     /**
-		 * 
-		 * @param date 
-		 * @param param1 
-		 * @todo Add other times
-		 * @todo TEST
-		 * @todo REPLACE
-		 */
-		export function advanceDate(
-				date: Date, {
-						// days = 0,
-						// weeks = 0,
-						months = 6,
-						// years = 0,
-						overflowMonth = false,
-				}) {
-				const r = new Date(date.toISOString());
-				if (months) {
-						const dateBackup = r.getDate();
-						if (dateBackup <= 28) {
-								r.setMonth(r.getMonth() + months);
-						} else {
-								let lastDate = 28;
-								r.setMonth(r.getMonth() + months, lastDate);
-								const t = new Date(r.toISOString());
-								while (t.getMonth() === r.getMonth() && lastDate < dateBackup) {
-										(overflowMonth ? r : t).setDate(++lastDate);
-								}
-								if (!overflowMonth && t.getMonth() !== r.getMonth()) {
-										r.setDate(lastDate - 1);
-								}
-						}
-				}
-				return r;
-		}
+     * 
+     * @param date 
+     * @param param1 
+     * @todo Add other times
+     * @todo TEST
+     * @todo REPLACE
+     */
+    export function advanceDate(
+      date: Date, {
+        // days = 0,
+        // weeks = 0,
+        months = 6,
+        // years = 0,
+        overflowMonth = false,
+      }) {
+      const r = new Date(date.toISOString());
+      if (months) {
+        const dateBackup = r.getDate();
+        if (dateBackup <= 28) {
+          r.setMonth(r.getMonth() + months);
+        } else {
+          let lastDate = 28;
+          r.setMonth(r.getMonth() + months, lastDate);
+          const t = new Date(r.toISOString());
+          while (t.getMonth() === r.getMonth() && lastDate < dateBackup) {
+            (overflowMonth ? r : t).setDate(++lastDate);
+          }
+          if (!overflowMonth && t.getMonth() !== r.getMonth()) {
+            r.setDate(lastDate - 1);
+          }
+        }
+      }
+      return r;
+    }
 
-	/**
-	 * 
-	 * @param created The initial time
-	 * @param now The time to check against
-	 * @returns If >= 6 months have past between `created` & `now`, returns `true`; otherwise, `false`.
-	 * @todo MAKE UNIT TEST
-	 * @todo Make configurable
-	 */
-	export function isDatePastCommentStatute(created: Date, now = new Date()/* , {
-		months = 6,
-	} */) {
-		/* Debug.log(`isDatePastCommentStatute(created: "${created.toUTCString()}", now: "${now.toUTCString()}")`); */
-		if (created.getUTCFullYear() <= now.getUTCFullYear()) {
-			/* Debug.debug(`Created before this year ${now.getUTCFullYear()}`); */
-			const elapsedYears = now.getUTCFullYear() - created.getUTCFullYear();
-			/* Debug.debug(`elapsedYears: ${elapsedYears}`); */
-			if (elapsedYears >= 2) {
-				/* Debug.debug(`2 or more years between ${created.toUTCString()} & ${now.toUTCString()}`);
-				Debug.log(`returns true for isDatePastCommentStatute(created: "${created.toUTCString()}", now: "${now.toUTCString()}")`); */
-				return true;
-			} else if (elapsedYears === 0) {
-				/* Debug.debug(`Created this year ${now.getUTCFullYear()}`); */
-				if (created.getUTCMonth() <= now.getUTCMonth()) {
-					const elapsedMonths = now.getUTCMonth() - created.getUTCMonth();
-					if (elapsedMonths > 6 ||
-						(elapsedMonths === 6 && created.getUTCDate() <= now.getUTCDate())) {
-						/* Debug.log(`returns true for isDatePastCommentStatute(created: "${created.toUTCString()}", now: "${now.toUTCString()}")`); */
-						return true;
-					}/*  else Debug.debug(`Not greater than ${6} months nor equal to ${6} months at a later date (elapsedMonths: ${elapsedMonths}, created.getUTCDate(): ${created.getUTCDate()}, now.getUTCDate(): ${now.getUTCDate()}, created.getUTCFullYear(): ${created.getUTCFullYear()}`); */
-				}
-			} else {
-				const changed = new Date(created.toISOString());
-				// changed.setUTCDate(1);
-				// changed.setUTCMonth(changed.getUTCMonth() + 6);
-				changed.setUTCMonth(changed.getUTCMonth() + 6, 1);
-				// if (changed.getUTCFullYear() != now.getUTCFullYear() || 
-				if (changed.getUTCFullYear() < now.getUTCFullYear() || 
-					changed.getUTCMonth() < now.getUTCMonth() || 
-					(changed.getUTCMonth() === now.getUTCMonth() && created.getUTCDate() <= now.getUTCDate())) {
-					/* Debug.log(`TRUE; More than ${6} months between ${created.toUTCString()} & ${now.toUTCString()} (changed: ${changed.toUTCString()})`); */
-					return true;
-				}
-			}
-		}/*  else Debug.log(`FALSE; Created after this year (now.getUTCFullYear(): ${now.getUTCFullYear()}, created.getUTCFullYear(): ${created.getUTCFullYear()}`); */
-		/* Debug.log(`returns false for isDatePastCommentStatute(created: "${created.toUTCString()}", now: "${now.toUTCString()}")`); */
-		return false;
-	}
+  /**
+   * 
+   * @param created The initial time
+   * @param now The time to check against
+   * @returns If >= 6 months have past between `created` & `now`, returns `true`; otherwise, `false`.
+   * @todo MAKE UNIT TEST
+   * @todo Make configurable
+   */
+  export function isDatePastCommentStatute(created: Date, now = new Date()/* , {
+    months = 6,
+  } */) {
+    /* Debug.log(`isDatePastCommentStatute(created: "${created.toUTCString()}", now: "${now.toUTCString()}")`); */
+    if (created.getUTCFullYear() <= now.getUTCFullYear()) {
+      /* Debug.debug(`Created before this year ${now.getUTCFullYear()}`); */
+      const elapsedYears = now.getUTCFullYear() - created.getUTCFullYear();
+      /* Debug.debug(`elapsedYears: ${elapsedYears}`); */
+      if (elapsedYears >= 2) {
+        /* Debug.debug(`2 or more years between ${created.toUTCString()} & ${now.toUTCString()}`);
+        Debug.log(`returns true for isDatePastCommentStatute(created: "${created.toUTCString()}", now: "${now.toUTCString()}")`); */
+        return true;
+      } else if (elapsedYears === 0) {
+        /* Debug.debug(`Created this year ${now.getUTCFullYear()}`); */
+        if (created.getUTCMonth() <= now.getUTCMonth()) {
+          const elapsedMonths = now.getUTCMonth() - created.getUTCMonth();
+          if (elapsedMonths > 6 ||
+            (elapsedMonths === 6 && created.getUTCDate() <= now.getUTCDate())) {
+            /* Debug.log(`returns true for isDatePastCommentStatute(created: "${created.toUTCString()}", now: "${now.toUTCString()}")`); */
+            return true;
+          }/*  else Debug.debug(`Not greater than ${6} months nor equal to ${6} months at a later date (elapsedMonths: ${elapsedMonths}, created.getUTCDate(): ${created.getUTCDate()}, now.getUTCDate(): ${now.getUTCDate()}, created.getUTCFullYear(): ${created.getUTCFullYear()}`); */
+        }
+      } else {
+        const changed = new Date(created.toISOString());
+        // changed.setUTCDate(1);
+        // changed.setUTCMonth(changed.getUTCMonth() + 6);
+        changed.setUTCMonth(changed.getUTCMonth() + 6, 1);
+        // if (changed.getUTCFullYear() != now.getUTCFullYear() || 
+        if (changed.getUTCFullYear() < now.getUTCFullYear() || 
+          changed.getUTCMonth() < now.getUTCMonth() || 
+          (changed.getUTCMonth() === now.getUTCMonth() && created.getUTCDate() <= now.getUTCDate())) {
+          /* Debug.log(`TRUE; More than ${6} months between ${created.toUTCString()} & ${now.toUTCString()} (changed: ${changed.toUTCString()})`); */
+          return true;
+        }
+      }
+    }/*  else Debug.log(`FALSE; Created after this year (now.getUTCFullYear(): ${now.getUTCFullYear()}, created.getUTCFullYear(): ${created.getUTCFullYear()}`); */
+    /* Debug.log(`returns false for isDatePastCommentStatute(created: "${created.toUTCString()}", now: "${now.toUTCString()}")`); */
+    return false;
+  }
 }

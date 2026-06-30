@@ -1,82 +1,80 @@
 import { PageDefinition } from "../models/data/Page";
 import User from "../models/data/User";
-import { DialogForm } from "../models/structure/DialogForm";
 import { TemplateBuilder, TemplateData } from "../models/structure/TemplateBuilder";
 import { html } from "../utilities/HtmlTemplate";
-import Util from "../utilities/Util";
 import Component from "./Component";
 
 const DEFAULT_GREETING = "Hi %reporterName%,\n\n";
 
 export default class AppealReasons extends Component {
 
-	private builder?: TemplateBuilder;
-	/** The name of the user who filed the appeal. Used for `%reporterName%` substitution. */
-	private reporterName = "";
-	private isEnabled: boolean;
+  private builder?: TemplateBuilder;
+  /** The name of the user who filed the appeal. Used for `%reporterName%` substitution. */
+  private reporterName = "";
+  private isEnabled: boolean;
 
-	public constructor() {
-		super({
-			constraint: PageDefinition.appeals.view,
-			waitForDOM: "textarea[name='appeal[response]']",
-			dependencies: [],
-		});
-		this.isEnabled = User.isJanitor || User.isModerator || User.isAdmin;
-	}
+  public constructor() {
+    super({
+      constraint: PageDefinition.appeals.view,
+      waitForDOM: "textarea[name='appeal[response]']",
+      dependencies: [],
+    });
+    this.isEnabled = User.isJanitor || User.isModerator || User.isAdmin;
+  }
 
-	public static get defaultTemplates(): TemplateData[] {
-		return [
-			{ title: "Approved", body: "Your appeal has been accepted and the post has been restored." },
-			{ title: "Rejected", body: "Your appeal has been rejected and the post will remain deleted." },
-		];
-	}
+  public static get defaultTemplates(): TemplateData[] {
+    return [
+      { title: "Approved", body: "Your appeal has been accepted and the post has been restored." },
+      { title: "Rejected", body: "Your appeal has been rejected and the post will remain deleted." },
+    ];
+  }
 
-	public Settings: { enabled: boolean; buttons: TemplateData[]; insertMode: "replace" | "insert"; greeting: string; } = {
-		enabled: true,
-		buttons: AppealReasons.defaultTemplates,
+  public Settings: { enabled: boolean; buttons: TemplateData[]; insertMode: "replace" | "insert"; greeting: string; } = {
+    enabled: true,
+    buttons: AppealReasons.defaultTemplates,
     insertMode: "replace",
-		greeting: DEFAULT_GREETING,
-	};
+    greeting: DEFAULT_GREETING,
+  };
 
   private readonly settingsButtonLabel = "Appeal Template Settings";
-	protected create(): Promise<void> {
-		if (!this.isEnabled) return Promise.resolve();
+  protected create(): Promise<void> {
+    if (!this.isEnabled) return Promise.resolve();
     this.initSettingsMenu();
 
-		const target = document.querySelector<HTMLTextAreaElement>("textarea[name='appeal[response]']");
-		if (!target) return Promise.resolve();
+    const target = document.querySelector<HTMLTextAreaElement>("textarea[name='appeal[response]']");
+    if (!target) return Promise.resolve();
 
-		this.reporterName = document.querySelector<HTMLElement>("#c-appeals .appeal-display-report-creator a")?.innerText ?? "";
+    this.reporterName = document.querySelector<HTMLElement>("#c-appeals .appeal-display-report-creator a")?.innerText ?? "";
 
     const scopedInsertMode = () => this.Settings.insertMode;
-		this.builder = new TemplateBuilder({
-			targetField: target,
-			label: "Appeal reply templates",
-			get insertMode() { return scopedInsertMode(); },
-			defaults: AppealReasons.defaultTemplates,
-			getTemplates: () => this.Settings.buttons,
-			setTemplates: (next) => { this.Settings.buttons = next; },
-			transform: (template) => {
-				const greeting = this.Settings.greeting;
-				const text = greeting.includes("%body%")
-					? greeting.replace("%body%", template.body)
-					: `${greeting}${template.body}`;
-				return text.replace(/%reporterName%/g, this.reporterName);
-			},
-			pinnedChip: {
-				title: "Greeting",
-				getBody: () => this.Settings.greeting,
-				setBody: (body) => { this.Settings.greeting = body; },
-				defaultBody: DEFAULT_GREETING,
-			},
-		});
-		this.builder.mount();
-		return Promise.resolve();
-	}
+    this.builder = new TemplateBuilder({
+      targetField: target,
+      label: "Appeal reply templates",
+      get insertMode() { return scopedInsertMode(); },
+      defaults: AppealReasons.defaultTemplates,
+      getTemplates: () => this.Settings.buttons,
+      setTemplates: (next) => { this.Settings.buttons = next; },
+      transform: (template) => {
+        const greeting = this.Settings.greeting;
+        const text = greeting.includes("%body%")
+          ? greeting.replace("%body%", template.body)
+          : `${greeting}${template.body}`;
+        return text.replace(/%reporterName%/g, this.reporterName);
+      },
+      pinnedChip: {
+        title: "Greeting",
+        getBody: () => this.Settings.greeting,
+        setBody: (body) => { this.Settings.greeting = body; },
+        defaultBody: DEFAULT_GREETING,
+      },
+    });
+    this.builder.mount();
+    return Promise.resolve();
+  }
 
-	protected async destroy(): Promise<void> {
-		this.builder?.destroy();
-	}
+  protected async destroy(): Promise<void> {
+    this.builder?.destroy();
+  }
 
   private initSettingsMenu() {
     this._settingsMenuDialogParameters = {

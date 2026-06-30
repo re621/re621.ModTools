@@ -7,18 +7,18 @@ import Component from "./Component";
  */
 export default class TicketData extends Component {
 
-    public constructor() {
-        super({
-            constraint: PageDefinition.tickets.view,
-            waitForDOM: "form.edit_ticket",
-        });
-    }
+  public constructor() {
+    super({
+      constraint: PageDefinition.tickets.view,
+      waitForDOM: "form.edit_ticket",
+    });
+  }
 
-    protected create(): Promise<void> {
+  protected create(): Promise<void> {
 
 
 
-        return Promise.resolve();
-    }
+    return Promise.resolve();
+  }
 
 }

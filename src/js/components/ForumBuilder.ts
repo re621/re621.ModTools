@@ -4,48 +4,48 @@ import { html } from "../utilities/HtmlTemplate";
 import Component from "./Component";
 
 export default class ForumBuilder extends Component {
-	public Settings: { enabled: boolean; buttons: TemplateData[]; insertMode: "replace" | "insert"; } = {
-		enabled: true,
-		buttons: [],
+  public Settings: { enabled: boolean; buttons: TemplateData[]; insertMode: "replace" | "insert"; } = {
+    enabled: true,
+    buttons: [],
     insertMode: "insert",
-	};
+  };
 
-	private builder?: TemplateBuilder;
-	private builders?: TemplateBuilder[];
+  private builder?: TemplateBuilder;
+  private builders?: TemplateBuilder[];
 
-	public constructor() {
-		super({
-			constraint: PageDefinition.forums.view_or_post,
-			waitForDOM: ".new_forum_post .dtext_formatter",
-		});
-	}
+  public constructor() {
+    super({
+      constraint: PageDefinition.forums.view_or_post,
+      waitForDOM: ".new_forum_post .dtext_formatter",
+    });
+  }
 
   private readonly settingsButtonLabel = "Forum Template Settings";
-	protected create(): Promise<void> {
+  protected create(): Promise<void> {
     this.initSettingsMenu();
-		const target = document.querySelector<HTMLTextAreaElement>("form.new_forum_post textarea[name='forum_post[body]']");
-		if (!target) return Promise.resolve();
+    const target = document.querySelector<HTMLTextAreaElement>("form.new_forum_post textarea[name='forum_post[body]']");
+    if (!target) return Promise.resolve();
 
-		this.builder = this.instantiateAndMount(target);
+    this.builder = this.instantiateAndMount(target);
 
     this.builders = Array.from(document.querySelectorAll<HTMLTextAreaElement>('form.edit_forum_post textarea[name="forum_post[body]"]')).map(target => this.instantiateAndMount(target));
-		return Promise.resolve();
-	}
+    return Promise.resolve();
+  }
 
-	protected async destroy(): Promise<void> {
-		this.builder?.destroy();
+  protected async destroy(): Promise<void> {
+    this.builder?.destroy();
     this.builders?.forEach(e => e.destroy());
-	}
+  }
 
   private instantiateAndMount(target: HTMLTextAreaElement, scopedInsertMode = () => this.Settings.insertMode) {
     const builder = new TemplateBuilder({
-			targetField: target,
-			label: "Forum templates",
+      targetField: target,
+      label: "Forum templates",
       get insertMode() { return scopedInsertMode(); },
-			getTemplates: () => this.Settings.buttons,
-			setTemplates: (next) => { this.Settings.buttons = next; },
-		});
-		builder.mount();
+      getTemplates: () => this.Settings.buttons,
+      setTemplates: (next) => { this.Settings.buttons = next; },
+    });
+    builder.mount();
     return builder;
   }
 

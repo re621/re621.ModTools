@@ -35,10 +35,10 @@ export function template<T extends Node, T1 extends Node, T2 extends Node>(rende
   return function(strings: Readonly<string[]>, ...args: unknown[]) {
     const parts: Node[] = [];
     let string = strings[0] || "",
-        part: Node | Array<any> | any,
-        root: Node | DocumentFragment | T1 | null = null,
-        node: Node,
-        k = -1;
+      part: Node | Array<any> | any,
+      root: Node | DocumentFragment | T1 | null = null,
+      node: Node,
+      k = -1;
     args.unshift(strings);
 
     // Concatenate the text, using comments as placeholders for already-instantiated `Node`s.

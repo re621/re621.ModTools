@@ -16,12 +16,12 @@ type AutoTaggingAction = {
 };
 
 export default class AutoTaggingButtons extends Component {
-	public constructor() {
-		super({
-			constraint: PageDefinition.posts.view,
-			waitForDOM: ".sidebar",
-		});
-	}
+  public constructor() {
+    super({
+      constraint: PageDefinition.posts.view,
+      waitForDOM: ".sidebar",
+    });
+  }
 
   private static readonly buttonTemplates = {
     replaceSubstring: {
@@ -52,8 +52,8 @@ export default class AutoTaggingButtons extends Component {
     return obj;
   }
 
-	public Settings: { enabled: boolean; doShow: boolean; forceConfirm: boolean; reloadAfterEdit: boolean; buttons: AutoTaggingAction[]; testMode: boolean } = {
-		enabled: true,
+  public Settings: { enabled: boolean; doShow: boolean; forceConfirm: boolean; reloadAfterEdit: boolean; buttons: AutoTaggingAction[]; testMode: boolean } = {
+    enabled: true,
     doShow: true,
     forceConfirm: false,
     reloadAfterEdit: true,
@@ -89,9 +89,9 @@ export default class AutoTaggingButtons extends Component {
         label: "andromorph to male"
       }, */
     ],
-	};
+  };
 
-	protected override create() {
+  protected override create() {
     this.initSettingsMenu();
     if (!this.Settings.doShow) return Promise.resolve();
     const id = /^\/posts\/([0-9]+)/.exec(window.location.pathname)?.[1];
@@ -107,8 +107,8 @@ export default class AutoTaggingButtons extends Component {
       if (!(element.added || element.removalPattern)) continue;
       this.addButton(element, tags, idNum);
     }
-		return Promise.resolve();
-	}
+    return Promise.resolve();
+  }
 
   private static escapeHtml(s: string) {
     return encodeURIComponent(s).replace(/%([0-9a-fA-F]{2})/, (_, g1) => `&#x${g1}`);
