@@ -325,7 +325,7 @@ export default class Component {
   protected get resetSettingsDialogElement() { return `<label for="${this.settingsIdPrefix}resetSettings" title="Reset settings to defaults?">Reset<input type="checkbox" id="${this.settingsIdPrefix}resetSettings" name="${this.settingsIdPrefix}resetSettings" value="true" /></label>`; }
   protected simpleSettingsCheckbox(setting: keyof typeof this.Settings/* string */, label?: string, title?: string) {
     return /* html */`
-        <label for="${this.settingsIdPrefix}${setting}"${title ? `title="${title}"` : ""}>
+        <label for="${this.settingsIdPrefix}${setting}"${title ? ` title="${title}"` : ""}>
           ${label ?? `${setting[0].toUpperCase()}${(setting as string).slice(1).replace(/(?<=[a-z])[A-Z]/g, " $&")}?`}
           &nbsp;
           <input type="checkbox"
@@ -333,6 +333,32 @@ export default class Component {
                  name="${this.settingsIdPrefix}${setting}"
                  value="true"
                  ${this.Settings[setting] ? " checked" : ""} />
+        </label>`;
+  }
+  protected simpleSettingsNumber(
+    setting: keyof typeof this.Settings/* string */,
+    label?: string,
+    title?: string,
+    options: {
+      max?: number,
+      min?: number,
+      placeholder?: string,
+      step?: number | "any",
+    }  = { step: 1 }) {
+    options.step ??= 1;
+    const { max, min, placeholder, step } = options;
+    return /* html */`
+        <label for="${this.settingsIdPrefix}${setting}"${title ? ` title="${title}"` : ""}>
+          ${label ?? `${setting[0].toUpperCase()}${(setting as string).slice(1).replace(/(?<=[a-z])[A-Z]/g, " $&")}?`}
+          &nbsp;
+          <input type="number"
+                 id="${this.settingsIdPrefix}${setting}"
+                 name="${this.settingsIdPrefix}${setting}"
+                 ${(min !== undefined) ? `min="${min}"` : ""}
+                 ${(max !== undefined) ? `max="${max}"` : ""}
+                 ${(step !== undefined) ? `step="${step}"` : ""}
+                 ${placeholder ? `placeholder="${placeholder}"` : ""}
+                 value="${this.Settings[setting]}" />
         </label>`;
   }
   // #endregion Subclass Sandbox
