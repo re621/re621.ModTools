@@ -129,7 +129,7 @@ export default class Component {
     if (!this.constraintMatches || !this.Settings.enabled) return Promise.resolve();
 
     for (const one of this.dependencies) {
-      if (!REMT.Registry[one].Settings.enabled)
+      if (!REMT.Registry[one]?.Settings.enabled)
         return Promise.resolve();
     }
 

@@ -4,12 +4,26 @@ import { TemplateBuilder, TemplateData } from "../models/structure/TemplateBuild
 import { html } from "../utilities/HtmlTemplate";
 import Component from "./Component";
 
-interface StoredButton extends TemplateData {
+// #region Type Stuff
+interface AtypicalButton extends TemplateData {
 	/** Legacy field kept for backward compatibility with stored data. */
-	name?: string;
-	/** Legacy field kept for backward compatibility with stored data. */
-	text?: string;
+	text: string;
 }
+
+interface NamedButton extends TemplateData {
+	/** Legacy field kept for backward compatibility with stored data. */
+	name: string;
+}
+
+interface StoredButton extends AtypicalButton, NamedButton {}
+
+type Settings = {
+  enabled: boolean;
+  buttons: (AtypicalButton | NamedButton | StoredButton | TemplateData)[];
+  insertMode: "replace" | "insert";
+  greeting: string;
+};
+// #endregion Type Stuff
 
 const DEFAULT_GREETING = "Hi %reporterName%,\n\n";
 
@@ -51,7 +65,7 @@ export default class TicketReasons extends Component {
     ];
   }
 
-  public Settings: { enabled: boolean; buttons: StoredButton[]; insertMode: "replace" | "insert"; greeting: string } = {
+  public Settings: Settings = {
     enabled: true,
     buttons: TicketReasons.defaultTemplates,
     insertMode: "replace",
@@ -80,7 +94,7 @@ export default class TicketReasons extends Component {
       getTemplates: () => this.Settings.buttons.map((b) => ({
         title: b.title ?? b.name ?? "",
         body: b.body ?? b.text ?? "",
-      })),
+      } as TemplateData)),
       setTemplates: (next) => { this.Settings.buttons = next; },
       transform: (template) => {
         const greeting = this.Settings.greeting;

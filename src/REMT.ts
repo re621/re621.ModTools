@@ -24,7 +24,8 @@ import DTextCodeCopy from "./js/components/DTextCodeCopy";
 
 export default class REMT {
 
-  public static Registry: ComponentListAnnotated = {};
+  private static _Registry: ComponentListAnnotated = {};
+  public static get Registry(): Readonly<ComponentListAnnotated> { return Object.freeze({...this._Registry}); }
   public static API: ZestyAPI;
 
   private loadOrder = [
@@ -52,7 +53,7 @@ export default class REMT {
     console.log("%c[RE621.ModTools]%c v." + Script.version, "color: maroon", "color: unset");
 
     // Set up the API connection
-    // TODO Temporary instantiation method
+    // TODO: Temporary instantiation method
     REMT.API = window["ZestyAPI"].connect({
       userAgent: Script.userAgent,
       debug: Debug.Connect,
@@ -98,19 +99,21 @@ export default class REMT {
     // Bootstrap settings (synchronous)
     for (const module of this.loadOrder) {
       const instance = new module();
-      REMT.Registry[instance.getName()] = instance;
+      REMT._Registry[instance.getName()] = instance;
       await instance.bootstrapSettings();
     }
     Util.Events.trigger("re621-mt:bootstrap");
 
     // Load modules (asynchronous)
     const promises: Promise<void>[] = [];
-    for (const instance of Object.values(REMT.Registry))
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      promises.push(instance!.load());
+    for (const instance of Object.values(REMT._Registry))
+      promises.push(instance?.load() ?? Promise.resolve());
     Promise.all(promises).then(() => {
-      const allConfigs = Object.values(REMT.Registry).reduce<SettingsDialogConfig[]>((p, e) => {
-        if (e?.settingsMenuDialogParameters) p.push(e!.settingsMenuDialogParameters!); return p; }, []);
+      const allConfigs = Object.values(REMT._Registry).reduce((p, e) => {
+        const v = e?.settingsMenuDialogParameters;
+        if (v) p.push(v);
+        return p;
+      }, [] as SettingsDialogConfig[]);
       const configs = allConfigs.filter(e => e) as SettingsDialogConfig[];
       if (configs.length <= 0) {
         console.log("%c[RE621.ModTools]%c loaded; no settings to load", "color: maroon", "color: unset");

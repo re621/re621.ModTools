@@ -3,15 +3,29 @@ import { TemplateBuilder, TemplateData } from "../models/structure/TemplateBuild
 import { html } from "../utilities/HtmlTemplate";
 import Component from "./Component";
 
-interface StoredButton extends TemplateData {
+// #region Type Stuff
+interface LabeledButton extends TemplateData {
 	/** Legacy field kept for backward compatibility with stored data. */
-	label?: string;
-	/** Legacy field kept for backward compatibility with stored data. */
-	text?: string;
+	label: string;
 }
 
+interface AtypicalButton extends TemplateData {
+	/** Legacy field kept for backward compatibility with stored data. */
+	text: string;
+}
+
+interface StoredButton extends AtypicalButton, LabeledButton {}
+
+type Settings = {
+  enabled: boolean;
+  buttons: (AtypicalButton | LabeledButton | StoredButton | TemplateData)[];
+  insertMode: "replace" | "insert";
+  // greeting: string;
+};
+// #endregion Type Stuff
+
 export default class DMailBuilder extends Component {
-  public Settings: { enabled: boolean; buttons: StoredButton[]; insertMode: "replace" | "insert"; } = {
+  public Settings: Settings = {
     enabled: true,
     buttons: DMailBuilder.defaultTemplates,
     insertMode: "insert",
@@ -122,7 +136,7 @@ export default class DMailBuilder extends Component {
       getTemplates: () => this.Settings.buttons.map((b) => ({
         title: b.title ?? b.label ?? "",
         body: b.body ?? b.text ?? "",
-      })),
+      } as TemplateData)),
       setTemplates: (next) => { this.Settings.buttons = next; },
     });
     this.builder.mount();

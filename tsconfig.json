@@ -1,14 +1,23 @@
 {
-	"typeAcquisition": {
-		"enable": true,
-		"include": ["jquery"]
-	},
-    "compilerOptions": {
-        "rootDir": "./src",
-        "outDir": "./dist/",
-        "noImplicitAny": false,
-        "module": "es6",
-        "target": "es6",
-        "moduleResolution": "node",//"bundler"
-    }
+  "typeAcquisition": {
+    "enable": true,
+    "include": [
+      "jquery",
+      "jqueryui",
+      "tampermonkey",
+    ],
+  },
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist/",
+    "noImplicitAny": false,
+    "module": "es6",
+    "target": "es6",
+    "moduleResolution": "node", // "bundler",
+    // "types": [
+    //   "jquery",
+    //   "jqueryui",
+    //   "tampermonkey",
+    // ],
+  }
 }
