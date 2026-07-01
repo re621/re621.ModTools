@@ -587,12 +587,12 @@ export enum FileExtension {
 export namespace FileExtension {
     export function fromString(input: string): FileExtension {
       switch (input) {
-      case "jpeg":
-      case "jpg": return FileExtension.JPG;
-      case "png": return FileExtension.PNG;
-      case "gif": return FileExtension.GIF;
-      case "swf": return FileExtension.SWF;
-      case "webm": return FileExtension.WEBM;
+        case "jpeg":
+        case "jpg": return FileExtension.JPG;
+        case "png": return FileExtension.PNG;
+        case "gif": return FileExtension.GIF;
+        case "swf": return FileExtension.SWF;
+        case "webm": return FileExtension.WEBM;
       }
       return null;
     }
@@ -631,9 +631,9 @@ export namespace PostRating {
 
     export function toFullString(postRating: PostRating): string {
       switch (postRating.toLowerCase()) {
-      case "s": return "safe";
-      case "q": return "questionable";
-      case "e": return "explicit";
+        case "s": return "safe";
+        case "q": return "questionable";
+        case "e": return "explicit";
       }
       return null;
     }

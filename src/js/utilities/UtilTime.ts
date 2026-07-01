@@ -31,12 +31,12 @@ export namespace UtilTime {
      */
     export function ago(time: number | string | Date): string {
       switch (typeof time) {
-      case 'string':
-        time = +new Date(time);
-        break;
-      case 'object':
-        time = time.getTime();
-        break;
+        case 'string':
+          time = +new Date(time);
+          break;
+        case 'object':
+          time = time.getTime();
+          break;
       }
 
       const timeFormats = [

@@ -52,9 +52,9 @@ export default class PostFilter {
 
       // Convert some values immediately
       switch (filterType) {
-      case FilterType.Size:
-        filter = Util.Size.unformat(filter) + "";
-        break;
+        case FilterType.Size:
+          filter = Util.Size.unformat(filter) + "";
+          break;
       }
       filter = filter.toLowerCase();
 
@@ -92,82 +92,82 @@ export default class PostFilter {
 
       const value = filter.value;
       switch (filter.type) {
-      case FilterType.Tag:
-        result = PostFilterUtils.tagsMatchesFilter(post, value);
-        break;
-      case FilterType.Id:
-        result = PostFilterUtils.compareNumbers(post.id, value, filter.comparison);
-        break;
-      case FilterType.Score:
-        result = PostFilterUtils.compareNumbers(post.score.total, value, filter.comparison);
-        break;
-      case FilterType.Fav:
-        result = post.is_favorited;
-        break;
-      case FilterType.FavCount:
-        result = PostFilterUtils.compareNumbers(post.favorites, value, filter.comparison);
-        break;
-      case FilterType.Rating:
-        result = post.rating === PostRating.fromValue(value);
-        break;
-      case FilterType.Flag:
-        result = post.flags.has(PostFlag.fromString(value)[0]);
-        break;
+        case FilterType.Tag:
+          result = PostFilterUtils.tagsMatchesFilter(post, value);
+          break;
+        case FilterType.Id:
+          result = PostFilterUtils.compareNumbers(post.id, value, filter.comparison);
+          break;
+        case FilterType.Score:
+          result = PostFilterUtils.compareNumbers(post.score.total, value, filter.comparison);
+          break;
+        case FilterType.Fav:
+          result = post.is_favorited;
+          break;
+        case FilterType.FavCount:
+          result = PostFilterUtils.compareNumbers(post.favorites, value, filter.comparison);
+          break;
+        case FilterType.Rating:
+          result = post.rating === PostRating.fromValue(value);
+          break;
+        case FilterType.Flag:
+          result = post.flags.has(PostFlag.fromString(value)[0]);
+          break;
 
-      case FilterType.Uploader:
-      case FilterType.User:
-      case FilterType.UserID:
-        result = post.uploader === parseInt(value);
-        break;
-      case FilterType.Approver:
-        result = post.approver === parseInt(value);
-        break;
+        case FilterType.Uploader:
+        case FilterType.User:
+        case FilterType.UserID:
+          result = post.uploader === parseInt(value);
+          break;
+        case FilterType.Approver:
+          result = post.approver === parseInt(value);
+          break;
 
-      case FilterType.Height:
-        result = PostFilterUtils.compareNumbers(post.img.height, value, filter.comparison);
-        break;
-      case FilterType.Width:
-        result = PostFilterUtils.compareNumbers(post.img.width, value, filter.comparison);
-        break;
-      case FilterType.Size:
-        result = PostFilterUtils.compareNumbers(post.file.size, value, filter.comparison);
-        break;
-      case FilterType.Type:
-        result = post.file.ext === value;
-        break;
-      case FilterType.Duration:
-        result = post.meta.duration == null || PostFilterUtils.compareNumbers(post.meta.duration, value, filter.comparison);
-        break;
-      case FilterType.Ratio:
-        result = PostFilterUtils.compareNumbers(post.img.ratio, value, filter.comparison);
-        break;
+        case FilterType.Height:
+          result = PostFilterUtils.compareNumbers(post.img.height, value, filter.comparison);
+          break;
+        case FilterType.Width:
+          result = PostFilterUtils.compareNumbers(post.img.width, value, filter.comparison);
+          break;
+        case FilterType.Size:
+          result = PostFilterUtils.compareNumbers(post.file.size, value, filter.comparison);
+          break;
+        case FilterType.Type:
+          result = post.file.ext === value;
+          break;
+        case FilterType.Duration:
+          result = post.meta.duration == null || PostFilterUtils.compareNumbers(post.meta.duration, value, filter.comparison);
+          break;
+        case FilterType.Ratio:
+          result = PostFilterUtils.compareNumbers(post.img.ratio, value, filter.comparison);
+          break;
 
-      case FilterType.TagCount:
-        result = PostFilterUtils.compareNumbers(post.tags.all.size, value, filter.comparison)
-        break;
-      case FilterType.GenTags:
-        result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.general.size, value, filter.comparison)
-        break;
-      case FilterType.ArtTags:
-        result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.artist.size, value, filter.comparison)
-        break;
-      case FilterType.CharTags:
-        result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.character.size, value, filter.comparison)
-        break;
-      case FilterType.CopyTags:
-        result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.copyright.size, value, filter.comparison)
-        break;
-      case FilterType.SpecTags:
-        result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.species.size, value, filter.comparison)
-        break;
-      case FilterType.InvTags:
-        result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.invalid.size, value, filter.comparison)
-        break;
-      case FilterType.MetaTags:
-        result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.meta.size, value, filter.comparison)
-        break;
-      default:
-        result = false;
+        case FilterType.TagCount:
+          result = PostFilterUtils.compareNumbers(post.tags.all.size, value, filter.comparison)
+          break;
+        case FilterType.GenTags:
+          result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.general.size, value, filter.comparison)
+          break;
+        case FilterType.ArtTags:
+          result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.artist.size, value, filter.comparison)
+          break;
+        case FilterType.CharTags:
+          result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.character.size, value, filter.comparison)
+          break;
+        case FilterType.CopyTags:
+          result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.copyright.size, value, filter.comparison)
+          break;
+        case FilterType.SpecTags:
+          result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.species.size, value, filter.comparison)
+          break;
+        case FilterType.InvTags:
+          result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.invalid.size, value, filter.comparison)
+          break;
+        case FilterType.MetaTags:
+          result = post.tagCategoriesKnown && PostFilterUtils.compareNumbers(post.tags.meta.size, value, filter.comparison)
+          break;
+        default:
+          result = false;
       }
 
       // Invert the result if necessary
@@ -231,20 +231,20 @@ class PostFilterUtils {
   /** Returns true if the two provided numbers pass the specified comparison type */
   public static compareNumbers(a: number, b: string, mode: ComparisonType): boolean {
     switch (mode) {
-    case ComparisonType.Equals: return a === parseFloat(b);
-    case ComparisonType.Smaller: return a < parseFloat(b);
-    case ComparisonType.EqualsSmaller: return a <= parseFloat(b);
-    case ComparisonType.Larger: return a > parseFloat(b);
-    case ComparisonType.EqualsLarger: return a >= parseFloat(b);
-    case ComparisonType.Range: {
-      const parts = b.split("...");
-      if (parts.length !== 2) return false;
+      case ComparisonType.Equals: return a === parseFloat(b);
+      case ComparisonType.Smaller: return a < parseFloat(b);
+      case ComparisonType.EqualsSmaller: return a <= parseFloat(b);
+      case ComparisonType.Larger: return a > parseFloat(b);
+      case ComparisonType.EqualsLarger: return a >= parseFloat(b);
+      case ComparisonType.Range: {
+        const parts = b.split("...");
+        if (parts.length !== 2) return false;
 
-      const parsedParts: number[] = [];
-      for (const el of parts) parsedParts.push(parseFloat(el));
+        const parsedParts: number[] = [];
+        for (const el of parts) parsedParts.push(parseFloat(el));
 
-      return a >= Math.min(...parsedParts) && a <= Math.max(...parsedParts);
-    }
+        return a >= Math.min(...parsedParts) && a <= Math.max(...parsedParts);
+      }
             // default: return false;
     }
   }

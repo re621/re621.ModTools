@@ -62,22 +62,22 @@ export default class Util {
     if (!Array.isArray(input)) input = Array.from(input);
     const result: T[][] = [];
     switch (method) {
-    case "chunk": {
-      for (let i = 0; i < input.length; i += size)
-        result.push(input.slice(i, i + size));
-      break;
-    }
-    case "split": {
-      result[0] = input.slice(0, size);
-      result[1] = input.slice(size);
-      break;
-    }
-    case "balance":
-    default: {
-      const parts = Math.ceil(input.length / size);
-      for (let i = parts; i > 0; i--)
-        result.push(input.splice(0, Math.ceil(input.length / i)));
-    }
+      case "chunk": {
+        for (let i = 0; i < input.length; i += size)
+          result.push(input.slice(i, i + size));
+        break;
+      }
+      case "split": {
+        result[0] = input.slice(0, size);
+        result[1] = input.slice(size);
+        break;
+      }
+      case "balance":
+      default: {
+        const parts = Math.ceil(input.length / size);
+        for (let i = parts; i > 0; i--)
+          result.push(input.splice(0, Math.ceil(input.length / i)));
+      }
     }
     return result;
   }

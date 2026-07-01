@@ -14,6 +14,6 @@ module.exports = {
     "@typescript-eslint/no-namespace": "off",
     "no-async-promise-executor": "off",
     "no-empty": "off",
-    "indent": ["warn", 2]
+    "indent": ["warn", 2, { SwitchCase: 1 }],
   }
 };

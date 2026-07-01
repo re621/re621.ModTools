@@ -93,12 +93,12 @@ export enum ImageScalingMode {
 export namespace ImageScalingMode {
     export function get(mode: string): ImageScalingMode {
       switch (mode) {
-      case "fitv": return ImageScalingMode.FitHeight;
-      case "fit": return ImageScalingMode.FitWidth;
-      case "original": return ImageScalingMode.Original;
-      case "large":
-      default:
-        return ImageScalingMode.Sample;
+        case "fitv": return ImageScalingMode.FitHeight;
+        case "fit": return ImageScalingMode.FitWidth;
+        case "original": return ImageScalingMode.Original;
+        case "large":
+        default:
+          return ImageScalingMode.Sample;
       }
     }
 }

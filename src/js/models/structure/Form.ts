@@ -307,19 +307,19 @@ export class Form implements PreparedStructure {
 
     if (options.value !== undefined && options.value !== null) {
       switch (typeof options.value) {
-      case "function": {
-        options.value($input);
-        break;
-      }
-      case "object": {
-        $input.val(options.value.text());
-        break;
-      }
-      default: {
-        $input
-          .val(options.value + "")
-          .attr("defval", options.value + "");
-      }
+        case "function": {
+          options.value($input);
+          break;
+        }
+        case "object": {
+          $input.val(options.value.text());
+          break;
+        }
+        default: {
+          $input
+            .val(options.value + "")
+            .attr("defval", options.value + "");
+        }
       }
     }
 
@@ -374,19 +374,19 @@ export class Form implements PreparedStructure {
 
     if (options.value !== undefined && options.value !== null) {
       switch (typeof options.value) {
-      case "function": {
-        options.value($input);
-        break;
-      }
-      case "object": {
-        $input.val(options.value.text());
-        break;
-      }
-      default: {
-        $input
-          .val(options.value + "")
-          .attr("defval", options.value + "");
-      }
+        case "function": {
+          options.value($input);
+          break;
+        }
+        case "object": {
+          $input.val(options.value.text());
+          break;
+        }
+        default: {
+          $input
+            .val(options.value + "")
+            .attr("defval", options.value + "");
+        }
       }
     }
 
@@ -441,19 +441,19 @@ export class Form implements PreparedStructure {
 
     if (options.value !== undefined && options.value !== null) {
       switch (typeof options.value) {
-      case "function": {
-        options.value($input);
-        break;
-      }
-      case "object": {
-        $input.val(options.value.text());
-        break;
-      }
-      default: {
-        $input
-          .val(options.value + "")
-          .attr("defval", options.value + "");
-      }
+        case "function": {
+          options.value($input);
+          break;
+        }
+        case "object": {
+          $input.val(options.value.text());
+          break;
+        }
+        default: {
+          $input
+            .val(options.value + "")
+            .attr("defval", options.value + "");
+        }
       }
     }
 
@@ -509,19 +509,19 @@ export class Form implements PreparedStructure {
 
     if (options.value !== undefined && options.value !== null) {
       switch (typeof options.value) {
-      case "function": {
-        options.value($input);
-        break;
-      }
-      case "object": {
-        $input.val(options.value.text());
-        break;
-      }
-      default: {
-        $input
-          .val(options.value + "")
-          .attr("defval", options.value + "");
-      }
+        case "function": {
+          options.value($input);
+          break;
+        }
+        case "object": {
+          $input.val(options.value.text());
+          break;
+        }
+        default: {
+          $input
+            .val(options.value + "")
+            .attr("defval", options.value + "");
+        }
       }
 
       $input.attr("key", $input.val() + "");
@@ -672,19 +672,19 @@ export class Form implements PreparedStructure {
 
     if (options.value !== undefined && options.value !== null) {
       switch (typeof options.value) {
-      case "function": {
-        options.value($input);
-        break;
-      }
-      case "object": {
-        $input.val(options.value.text());
-        break;
-      }
-      default: {
-        $input
-          .val(options.value + "")
-          .attr("defval", options.value + "");
-      }
+        case "function": {
+          options.value($input);
+          break;
+        }
+        case "object": {
+          $input.val(options.value.text());
+          break;
+        }
+        default: {
+          $input
+            .val(options.value + "")
+            .attr("defval", options.value + "");
+        }
       }
     }
 
@@ -751,19 +751,19 @@ export class Form implements PreparedStructure {
 
     if (options.value !== undefined && options.value !== null) {
       switch (typeof options.value) {
-      case "function": {
-        options.value($input);
-        break;
-      }
-      case "object": {
-        $input.append(options.value);
-        break;
-      }
-      default: {
-        $input
-          .html(options.value + "")
-          .attr("defval", options.value + "");
-      }
+        case "function": {
+          options.value($input);
+          break;
+        }
+        case "object": {
+          $input.append(options.value);
+          break;
+        }
+        default: {
+          $input
+            .html(options.value + "")
+            .attr("defval", options.value + "");
+        }
       }
     }
 
@@ -803,18 +803,18 @@ export class Form implements PreparedStructure {
 
     if (options.value !== undefined && options.value !== null) {
       switch (typeof options.value) {
-      case "function": {
-        options.value($input);
-        break;
-      }
-      case "object": {
-        break;
-      }
-      default: {
-        $input
-          .prop("checked", options.value)
-          .attr("defval", options.value + "");
-      }
+        case "function": {
+          options.value($input);
+          break;
+        }
+        case "object": {
+          break;
+        }
+        default: {
+          $input
+            .prop("checked", options.value)
+            .attr("defval", options.value + "");
+        }
       }
     }
 
@@ -874,19 +874,19 @@ export class Form implements PreparedStructure {
     }
     if (options.value !== undefined && options.value !== null) {
       switch (typeof options.value) {
-      case "function": {
-        options.value($input);
-        break;
-      }
-      case "object": {
-        $input.val(options.value.text());
-        break;
-      }
-      default: {
-        $input
-          .val(options.value + "")
-          .attr("defval", options.value + "");
-      }
+        case "function": {
+          options.value($input);
+          break;
+        }
+        case "object": {
+          $input.val(options.value.text());
+          break;
+        }
+        default: {
+          $input
+            .val(options.value + "")
+            .attr("defval", options.value + "");
+        }
       }
     }
 
@@ -938,18 +938,18 @@ export class Form implements PreparedStructure {
 
     if (options.value !== undefined && options.value !== null) {
       switch (typeof options.value) {
-      case "function": {
-        options.value($element);
-        break;
-      }
-      case "object": {
-        $element.append(options.value);
-        break;
-      }
-      default: {
-        $element.html(options.value + "");
-        break;
-      }
+        case "function": {
+          options.value($element);
+          break;
+        }
+        case "object": {
+          $element.append(options.value);
+          break;
+        }
+        default: {
+          $element.html(options.value + "");
+          break;
+        }
       }
     }
 
@@ -1085,21 +1085,21 @@ export class FormElement {
       if (this.label !== undefined) this.label.attr("for", parentID + "-" + this.label.attr("for"));
       if (this.input !== undefined) this.input.attr("id", parentID + "-" + this.input.attr("id"));
       switch (this.wrapper.prop("tagName")) {
-      case "FORM-INPUT": {
-        if (this.wrapper.attr("id"))
-          this.wrapper.attr("id", parentID + "-" + this.wrapper.attr("id"));
+        case "FORM-INPUT": {
+          if (this.wrapper.attr("id"))
+            this.wrapper.attr("id", parentID + "-" + this.wrapper.attr("id"));
 
-        for (const label of this.wrapper.find("> label")) {
-          const $subLabel = $(label);
-          $subLabel.attr("for", parentID + "-" + $subLabel.attr("for"));
+          for (const label of this.wrapper.find("> label")) {
+            const $subLabel = $(label);
+            $subLabel.attr("for", parentID + "-" + $subLabel.attr("for"));
+          }
+          break;
         }
-        break;
-      }
-      case "FORM-SECTION":
-      case "FORM-ACCORDION": {
-        this.wrapper.attr("id", parentID + "-" + this.wrapper.attr("id"));
-        break;
-      }
+        case "FORM-SECTION":
+        case "FORM-ACCORDION": {
+          this.wrapper.attr("id", parentID + "-" + this.wrapper.attr("id"));
+          break;
+        }
       }
 
       this.postProcessing?.(this.wrapper);
