@@ -53,9 +53,16 @@ export default class RecordBuilder extends Component {
         buttons: [],
       })
       .appendTo(wrapper);
-    /** @todo Refactor to only use after initialization. */
-    let reasonSelector: JQuery<HTMLElement> = null,
-      reasonInput: JQuery<HTMLElement> = null;
+
+    const reasonSelector: JQuery<HTMLElement> = $("<select>")
+      .attr("id", "record-reason-" + id)
+      .addClass("record-reason"),
+      reasonInput: JQuery<HTMLElement> = $("<textarea>")
+        .attr({
+          id: "custom-reason-" + id,
+          class: "custom-reason",
+          placeholder: "Custom Reason",
+        });
 
     // Header
     const header = $("<div>")
@@ -115,9 +122,7 @@ export default class RecordBuilder extends Component {
       .text("Reason")
       .appendTo(reasonContainer);
 
-    reasonSelector = $("<select>")
-      .attr("id", "record-reason-" + id)
-      .addClass("record-reason")
+    reasonSelector
       .appendTo(reasonContainer)
       .on("change remt:change", (event, preventChange) => {
         const reason = Records.Reasons[reasonSelector.val() + ""];
@@ -144,12 +149,7 @@ export default class RecordBuilder extends Component {
     }
 
     let reasonInputTimer: number | undefined;
-    reasonInput = $("<textarea>")
-      .attr({
-        id: "custom-reason-" + id,
-        class: "custom-reason",
-        placeholder: "Custom Reason",
-      })
+    reasonInput
       .appendTo(reasonContainer)
       .on("input", (event, preventChange) => {
         clearTimeout(reasonInputTimer);
@@ -170,6 +170,7 @@ export default class RecordBuilder extends Component {
     $("<label>")
       .attr("for", "record-sources-" + id)
       .text("Sources")
+      .attr("title", "Normalizes links to be relative to this site, and converts links to comments/forum posts from the post/forum topic they were on into direct links to the comment/forum post.")
       .appendTo(sourcesContainer);
 
 
@@ -298,9 +299,10 @@ export default class RecordBuilder extends Component {
     return sourceReason + (rulesOutputJoined ? ("\n\n" + rulesOutputJoined + "\n") : "");
 
     /**
-         * Convert a source link into a common format
-         * @param {string} source Source link
-         */
+     * Convert a source link into a common format
+     * @param {string} source Source link
+     * @todo Change to handle e6ai.
+     */
     function processSource(source: string): string {
       return decodeURI(source)
         .trim()

@@ -112,7 +112,15 @@ export default class Post {
     if ($element.hasClass("post-preview")) return this.fromThumbnailAB($element);
     else if ($element.attr("id") == "image-container") return this.fromThumbnailC($element);
     else if ($element.is("div") && $element.hasClass("post-thumbnail")) return this.fromThumbnailD($element);
-    return null;
+    throw new Error("Element does not contain recognized post data.");
+  }
+
+  public static tryFromThumbnail($element: JQuery<HTMLElement>): Post | null {
+    try {
+      return this.fromThumbnail($element);
+    } catch (error) {
+      return null;
+    }
   }
 
   private static fromThumbnailAB($element: JQuery<HTMLElement>): Post {
@@ -122,7 +130,7 @@ export default class Post {
 
     const tagSet: Set<string> = new Set(data.tags.split(" "));
 
-    if (!data.md5) data.md5 = findMD5(data);
+    data.md5 ||= data.fileUrl?.match(/\/.{2}\/.{2}\/(.{32})\.([a-z]{3,4})(?:\?.+)?$/)?.[1];
     if (!data.favCount) data.favCount = find($element, "faves");
     data.comments = find($element, "comments");
     data.date = findDate($element);
@@ -133,25 +141,18 @@ export default class Post {
       data.height = img[0].naturalHeight;
     }
 
-    function findMD5(data: PostDataTypeAB): string {
-      if (!data.fileUrl) return undefined;
-      const match = data.fileUrl.match(/\/.{2}\/.{2}\/(.{32})\.([a-z]{3,4})(?:\?.+)?$/);
-      if (match == null) return undefined;
-      data.md5 = match[1];
-    }
-
     function findDate($element: JQuery<HTMLElement>): Date {
-      const img = $element.find("img");
-      if (img.length == 0 || !img.attr("title")) return new Date(0);
-
-      const match = img.attr("title").match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [-+]?\d{4}/);
-      if (match == null) return new Date(0);
-      const date = new Date(match[0]);
+      const match = $element
+        ?.find("img")
+        .attr("title")
+        ?.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [-+]?\d{4}/)
+        ?.[0];
+      const date = new Date(match ?? 0);
       return isNaN(date.getTime()) ? new Date(0) : date;
     }
 
     function find($element: JQuery<HTMLElement>, search: "faves" | "comments"): number {
-      const span = $element.find("span.post-score-" + search);
+      const span = $element.find(`span.post-score-${search}`);
       if (span.length == 0) return -1;
       const num = parseInt(span.text().substring(1));
       return isNaN(num) ? -1 : num;
@@ -559,16 +560,16 @@ export default class Post {
     ]
 
     switch (type) {
-    case "original":
-      return `https://static1.e621.net/data/${parts[0]}/${parts[1]}/${parts[2]}.${parts[3]}`
-    case "sample":
-      return ((options.width < 850 || options.height < 850 || options.extension == "gif")
-        ? `https://static1.e621.net/data/${parts[0]}/${parts[1]}/${parts[2]}.${parts[3]}`
-        : `https://static1.e621.net/data/sample/${parts[0]}/${parts[1]}/${parts[2]}.jpg`);
-    case "preview":
-    default: {
-      return `https://static1.e621.net/data/preview/${parts[0]}/${parts[1]}/${parts[2]}.jpg`;
-    }
+      case "original":
+        return `https://static1.e621.net/data/${parts[0]}/${parts[1]}/${parts[2]}.${parts[3]}`
+      case "sample":
+        return ((options.width < 850 || options.height < 850 || options.extension == "gif")
+          ? `https://static1.e621.net/data/${parts[0]}/${parts[1]}/${parts[2]}.${parts[3]}`
+          : `https://static1.e621.net/data/sample/${parts[0]}/${parts[1]}/${parts[2]}.jpg`);
+      case "preview":
+      default: {
+        return `https://static1.e621.net/data/preview/${parts[0]}/${parts[1]}/${parts[2]}.jpg`;
+      }
     }
   }
 

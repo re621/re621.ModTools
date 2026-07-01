@@ -2,7 +2,6 @@ import ZestyAPI from "@re621/zestyapi";
 import css from "./css/style.module.scss";
 
 import { ComponentList, SettingsDialogConfig } from "./js/components/Component";
-import LinkGrabber from "./js/components/LinkGrabber";
 import RecordBuilder from "./js/components/RecordBuilder";
 import TicketData from "./js/components/TicketData";
 import TicketReasons from "./js/components/TicketReasons";
@@ -20,7 +19,6 @@ import DMailBuilder from "./js/components/DMailBuilder";
 import ForumBuilder from "./js/components/ForumBuilder";
 import AutoTaggingButtons from "./js/components/AutoTaggingButtons";
 import { MultiDialogForm } from "./js/models/structure/MultiDialogForm";
-import DTextCodeCopy from "./js/components/DTextCodeCopy";
 
 export default class REMT {
 
@@ -37,13 +35,10 @@ export default class REMT {
 
     AppealReasons,
 
-    LinkGrabber,
-		
     DMailToStaffNote,
     ReportContentData,
     DMailBuilder,
     ForumBuilder,
-    DTextCodeCopy,
   ];
 
   public async run(): Promise<void> {
@@ -142,11 +137,8 @@ interface ComponentListAnnotated extends Partial<ComponentList> {
 
     AppealReasons?: AppealReasons,
 
-    LinkGrabber?: LinkGrabber,
-
     DMailToStaffNote?: DMailToStaffNote,
     ReportContentData?: ReportContentData,
     DMailBuilder?: DMailBuilder,
     ForumBuilder?: ForumBuilder,
-    DTextCodeCopy?: DTextCodeCopy,
 }
