@@ -238,7 +238,7 @@ export default class AutoTaggingButtons extends Component {
   }
 
   private initSettingsMenu() {
-    this._settingsMenuDialogParameters = {
+    this.settingsMenuDialogParameters = {
       elements:[
         $(this.simpleSettingsCheckbox("doShow", "Show buttons?", "Should any button be loaded onto this page next time?")),
         $(`<br />`),

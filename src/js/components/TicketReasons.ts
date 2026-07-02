@@ -119,7 +119,7 @@ export default class TicketReasons extends Component {
   }
 
   private initSettingsMenu() {
-    this._settingsMenuDialogParameters = {
+    this.settingsMenuDialogParameters = {
       elements: [
         $(html`<fieldset title="How should the button's text be added to the text box?">
             <legend>Text insertion mode</legend>

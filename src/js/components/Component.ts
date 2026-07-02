@@ -301,8 +301,12 @@ export default class Component {
   }
 
   // #region Subclass Sandbox
-  protected _settingsMenuDialogParameters?: SettingsDialogConfig;
+  private _settingsMenuDialogParameters?: SettingsDialogConfig;
   public get settingsMenuDialogParameters() { return this._settingsMenuDialogParameters; }
+  protected set settingsMenuDialogParameters(v: SettingsDialogConfig | undefined) {
+    this._settingsMenuDialogParameters = v;
+    this.trigger("settingsConfigured");
+  }
   protected resetSettings() {
     for (const [k, v] of Object.entries(this.SettingsDefaults)) {
       this.Settings[k] = v;
