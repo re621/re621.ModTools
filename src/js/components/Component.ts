@@ -74,6 +74,8 @@ export default class Component {
     };
   }
 
+  private _verboseLogging = false;
+  private get verboseLogging() { return this._verboseLogging || this.Settings["testMode"] || false; }
   /** Loads the settings from storage, and sets up listeners to sync them across tabs */
   public async bootstrapSettings(settings?: Settings): Promise<void> {
     this._SettingsDefaults = { enabled: true };
@@ -93,13 +95,34 @@ export default class Component {
         },
         set: (newValue) => {
           Debug.log("- setting", this.name + "." + key, newValue);
+          const old = this.SettingsCache[key];
+          if (this.verboseLogging) {
+            console.log("Attempting to update %s.\n\tStored: %o\n\tOld: %o\n\tAttempted new: %o", this.name + "." + key, XM.Storage.getValue(this.name + "." + key, old), old, newValue);
+            if (JSON.stringify(newValue) === JSON.stringify(old)) console.log("Should remain the same...");
+          }
           if (JSON.stringify(newValue) == JSON.stringify(defaultValue)) {
             this.SettingsCache[key] = defaultValue;
             XM.Storage.deleteValue(this.name + "." + key);
           } else {
             this.SettingsCache[key] = newValue;
-            XM.Storage.setValueAsync(this.name + "." + key, newValue);
+            try {
+              if (this.verboseLogging) console.log(`Setting ${this.name}.${key} from ${JSON.stringify(old)} to ${JSON.stringify(newValue)}...`);
+              XM.Storage.setValue(this.name + "." + key, newValue);
+              if (XM.Storage.getValue(this.name + "." + key, old) !== newValue) {
+                throw "Failed to set value with `GM_setValue`; retrying with `GM.setValue`";
+              }
+            } catch (error) {
+              console.warn(error);
+              XM.Storage.setValueAsync(this.name + "." + key, newValue).then(() => {
+                if (this.verboseLogging) console.log(`Finished setting ${this.name}.${key} to ${JSON.stringify(newValue)}...`);
+                const stored = XM.Storage.getValue(this.name + "." + key, old);
+                if (stored !== newValue)
+                  console.warn("...and it failed to write the value.\n\tStored: %o\n\tOld: %o\n\tAttempted new: %o", stored, old, newValue);
+                else if (this.verboseLogging) console.log("...& it worked; resultant value: %o (initially %o, attempted value: %o)", stored, old, newValue);
+              });
+            }
           }
+          if (this.verboseLogging) console.log("Initial resultant value: %o (should be %o)", XM.Storage.getValue(this.name + "." + key, old), newValue);
         }
       })
 

@@ -1,4 +1,5 @@
 import Danbooru from "../models/api/Danbooru";
+import { html } from "./HtmlTemplate";
 import Util from "./Util";
 
 export class UtilDOM {
@@ -113,7 +114,19 @@ export class UtilDOM {
     animationLength = "1s",
     spinnerWidth = "5px",
   }) {
-    const s = document.createElement("span");
+    return html`<span
+      class="spinner"
+      style="
+        width: ${size};
+        height: ${size};
+        border: ${spinnerWidth} solid ${mainColor};
+        borderBottomColor: ${secondaryColor};
+        borderRadius: 50%;
+        display: inline-block;
+        boxSizing: border-box;
+        animation: rotation ${animationLength} linear infinite;
+      "></span>` as HTMLSpanElement;
+    /* const s = document.createElement("span");
     s.className = "spinner";
     s.style.width = s.style.height = size;
     s.style.border = `${spinnerWidth} solid ${mainColor}`;
@@ -122,7 +135,7 @@ export class UtilDOM {
     s.style.display = "inline-block";
     s.style.boxSizing = "border-box";
     s.style.animation = `rotation ${animationLength} linear infinite`;
-    return s;
+    return s; */
   }
 
   /**

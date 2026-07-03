@@ -5,7 +5,12 @@ export default class XMStorage {
   }
 
   public static async setValueAsync(name: string, value: any): Promise<void> {
-    await GM.setValue(name, value);
+    try {
+      await GM.setValue(name, value);
+    } catch (error) {
+      console.warn(error);
+      this.setValue(name, value);
+    }
   }
 
   public static getValue<T>(name: string, defaultValue: T): T {
