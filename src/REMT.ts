@@ -19,6 +19,7 @@ import DMailBuilder from "./js/components/DMailBuilder";
 import ForumBuilder from "./js/components/ForumBuilder";
 import AutoTaggingButtons from "./js/components/AutoTaggingButtons";
 import { MultiDialogForm } from "./js/models/structure/MultiDialogForm";
+import AutoClickPosts from "./js/components/AutoClickPosts";
 
 export default class REMT {
 
@@ -39,6 +40,7 @@ export default class REMT {
     ReportContentData,
     DMailBuilder,
     ForumBuilder,
+    AutoClickPosts,
   ];
 
   public async run(): Promise<void> {
@@ -156,4 +158,5 @@ interface ComponentListAnnotated extends Partial<ComponentList> {
     ReportContentData?: ReportContentData,
     DMailBuilder?: DMailBuilder,
     ForumBuilder?: ForumBuilder,
+    AutoClickPosts?: AutoClickPosts,
 }
