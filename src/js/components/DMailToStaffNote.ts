@@ -44,17 +44,14 @@ export default class DMailToStaffNote extends Component {
     footer: "[/section]\n",
   };
 
-  /**
-   * @todo Add placeholder text listing available template variables.
-   */
   private revealSettingsDialog(): boolean {
     DialogForm.getRequestedInput(
       [
         $('<label for="setting-header">Default Staff Note Header</label>'),
-        $(`<textarea id="setting-header" name="setting-header"></textarea>`).text(this.Settings.header),
+        $(`<textarea id="setting-header" name="setting-header" placeholder="Valid template parameters: ${Array.from(this.templateVariables.keys()).join(", ")}"></textarea>`).text(this.Settings.header),
         $('<br />'),
         $('<label for="setting-footer">Default Staff Note Footer</label>'),
-        $(`<textarea id="setting-footer" name="setting-footer"></textarea>`).text(this.Settings.footer),
+        $(`<textarea id="setting-footer" name="setting-footer" placeholder="Valid template parameters: ${Array.from(this.templateVariables.keys()).join(", ")}"></textarea>`).text(this.Settings.footer),
       ],
       "Settings",
       (e: FormData) => {
