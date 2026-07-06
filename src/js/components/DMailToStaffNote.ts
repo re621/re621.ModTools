@@ -11,12 +11,14 @@ export default class DMailToStaffNote extends Component {
   public static readonly TICKET_MATCHER = /^"Your ticket":\/tickets\/([0-9]+) has been updated by /;
   private readonly templateVariables = new Map<string|RegExp, string|((key: string, ...args: any[]) => string)>([
     ["dmailId", () => this.dmailJson["id"].toString()],
+    ["dmailQuery", () => new URL(
+      document.querySelector<HTMLAnchorElement>("a#share-link")?.href ?? location.href,
+    ).search],
     ["title", () => this.dmailJson["title"].toString()],
     ["ticketId", (v) => {
       if (!this.dmailJson || !(this.dmailJson["body"])) return v;
       const b: string = this.dmailJson["body"].toString();
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      return DMailToStaffNote.TICKET_MATCHER.test(b) ? DMailToStaffNote.TICKET_MATCHER.exec(b)![1].toString() : v;
+      return DMailToStaffNote.TICKET_MATCHER.exec(b)?.[1]?.toString() ?? v;
     }],
     ["sender", () => this.dmailJson["from_name"].toString()],
     ["recipient", () => this.dmailJson["to_name"].toString()],
@@ -38,10 +40,13 @@ export default class DMailToStaffNote extends Component {
 
   public Settings = {
     enabled: true,
-    header: '"DMail":[/dmails/%dmailId%] sent regarding ticket #%ticketId%\n[section=$title]',
+    header: '"DMail":[/dmails/%dmailId%%dmailQuery%] sent regarding ticket #%ticketId%\n[section=$title]',
     footer: "[/section]\n",
   };
 
+  /**
+   * @todo Add placeholder text listing available template variables.
+   */
   private revealSettingsDialog(): boolean {
     DialogForm.getRequestedInput(
       [
