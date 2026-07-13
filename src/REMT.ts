@@ -21,6 +21,7 @@ import AutoTaggingButtons from "./js/components/AutoTaggingButtons";
 import { MultiDialogForm } from "./js/models/structure/MultiDialogForm";
 import AutoClickPosts from "./js/components/AutoClickPosts";
 import FilterOldFeedbacks from "./js/components/FilterOldFeedbacks";
+import CiteUser from "./js/components/CiteUser";
 
 export default class REMT {
 
@@ -43,6 +44,7 @@ export default class REMT {
     ForumBuilder,
     AutoClickPosts,
     FilterOldFeedbacks,
+    CiteUser,
   ];
 
   public async run(): Promise<void> {
@@ -162,4 +164,5 @@ interface ComponentListAnnotated extends Partial<ComponentList> {
     ForumBuilder?: ForumBuilder,
     AutoClickPosts?: AutoClickPosts,
     FilterOldFeedbacks?: FilterOldFeedbacks,
+    CiteUser?: CiteUser,
 }
