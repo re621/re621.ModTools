@@ -13,9 +13,12 @@ export default class CiteUser extends Component {
   public static readonly profileSelector = `.profile-name > ${this.rootPattern}`;
   /** Finds presumptively proper user links in DText */
   public static readonly dtextSelector = `${this.rootPattern}.dtext-link`;
+  /** Finds users referenced in staff wikis */
+  public static readonly staffWikiSelector = `.reference-user > ${this.rootPattern}`;
+  public static readonly collectiveSelector = `${CiteUser.publicMessageSelector}, ${CiteUser.profileSelector}, ${CiteUser.dtextSelector}, ${this.staffWikiSelector}`;
   public constructor() {
     super({
-      waitForDOM: `${CiteUser.publicMessageSelector}, ${CiteUser.profileSelector}, ${CiteUser.dtextSelector}`,
+      waitForDOM: CiteUser.collectiveSelector,
     });
   }
 
@@ -56,7 +59,7 @@ export default class CiteUser extends Component {
   }
 
   protected create(): Promise<void> {
-    this.userLinkData = Array.from(document.querySelectorAll<HTMLAnchorElement>(`${CiteUser.publicMessageSelector}, ${CiteUser.profileSelector}, ${CiteUser.dtextSelector}`)).map(CiteUser.processLink).filter(e => /^\/users\/[0-9]+\/?/.test(e[1]));
+    this.userLinkData = Array.from(document.querySelectorAll<HTMLAnchorElement>(CiteUser.collectiveSelector)).map(CiteUser.processLink).filter(e => /^\/users\/[0-9]+\/?/.test(e[1]));
     if (this.userLinkData.length <= 0) return Promise.resolve();
     this.initSettingsMenu();
     return Promise.resolve();
