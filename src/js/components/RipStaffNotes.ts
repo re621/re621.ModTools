@@ -1,4 +1,5 @@
 import Danbooru from "../models/api/Danbooru";
+import { StaffNote, StaffNoteExtended } from "../models/api/e621/StaffNote";
 import { PageDefinition } from "../models/data/Page";
 import { html } from "../utilities/HtmlTemplate";
 import Util from "../utilities/Util";
@@ -10,7 +11,7 @@ import Component from "./Component";
 export default class RipStaffNotes extends Component {
   private static readonly staffNoteSelector = ".staff-note";
   private static readonly staffNoteDTextSelector = "textarea[name=\"staff_note\\[body\\]\"]";
-  private readonly noteTextCache: { [id: number]: string } = {};
+  private readonly noteCache: { [id: number]: Partial<StaffNoteExtended<true>> } = {};
   private textToCopy?: string;
   /**
    * 
@@ -26,18 +27,14 @@ export default class RipStaffNotes extends Component {
   }
 
   private onClick() {
-    function addToClipboard(text: string, prompt = true) {
-      if (prompt && !confirm("Ready to copy! Sorry for the pop-up, but I can't access your clipboard unless directly triggered by a user action, & apparently, network delays don't count.")) return;
-      navigator.clipboard.writeText(text).then(
+    if ((this.textToCopy ??= this.constructTextSync())) {
+      navigator.clipboard.writeText(this.textToCopy).then(
         () => Danbooru.Toast.notice(`Copied staff notes to the clipboard!`),
         err => {
           Danbooru.Toast.alert(`Failed to copy staff notes to the clipboard${err?.message ? `(${err.message})` : ""}; trying it again usually works.`);
-          console.error(err);
+          // console.error(err);
         },
       );
-    }
-    if ((this.textToCopy ??= this.constructTextSync())) {
-      addToClipboard(this.textToCopy, false);
       return;
     }
     Danbooru.Toast.notice(`Retrieving raw staff notes...`);
@@ -101,18 +98,9 @@ export default class RipStaffNotes extends Component {
       ),
     );
   }
-  private retrieveStaffNoteContentsFromHtml(note: HTMLElement) { return note.querySelector<HTMLTextAreaElement>(RipStaffNotes.staffNoteDTextSelector)?.value; }
   private async retrieveStaffNoteContentsAsync(note: HTMLElement, id: number = this.pullIdFromStaffNote(note)) {
-    return this.noteTextCache[id] = this.retrieveStaffNoteContents(note, id, false) ?? await this.retrieveStaffNoteContentsFromServer(id);
-  }
-
-  private retrieveStaffNoteContents(note: HTMLElement, id: number = this.pullIdFromStaffNote(note), retrieveInBackground = true) {
-    if ((id ?? -1) >= 0 && this.noteTextCache[id]) return this.noteTextCache[id];
-    const fromEditBox = this.retrieveStaffNoteContentsFromHtml(note);
-    // It might have been altered; only store it from this source once.
-    if (fromEditBox) return this.noteTextCache[id] ??= fromEditBox;
-    if (retrieveInBackground) this.retrieveStaffNoteContentsFromServer(id).then(e => this.noteTextCache[id] = e);
-    return;
+    // return this.noteTextCache[id] = this.retrieveStaffNoteContents(note, id, false) ?? await this.retrieveStaffNoteContentsFromServer(id);
+    return (this.noteCache[id] ??= StaffNote.extractJsonFromHtml(note)).body ??= StaffNote.retrieveStaffNoteContentsFromHtml(note) ?? await this.retrieveStaffNoteContentsFromServer(id);
   }
 
   private constructTextSync() {
@@ -120,25 +108,14 @@ export default class RipStaffNotes extends Component {
     if (this.Settings.reverseOrder) staffNotes.reverse();
     let text = "";
     function cb(this: RipStaffNotes, note: HTMLElement) {
-      const id = parseInt(/^staff-note-([0-9]+)$/.exec(note.id)?.[1] ?? "-1");
-      if (id < 0) return true;
-      const contents = this.retrieveStaffNoteContents(note, id, false);
-      if (!contents) return true;
-      const authorName = note.querySelector<HTMLTextAreaElement>(".author-name")?.innerText;
-      if (!authorName) return true;
-      text += `${this.buildText(contents, id, authorName)}\n`;
+      const data = StaffNote.extractAllDataFromHtml(note);
+      if (data.id === undefined || data.id < 0) return true;
+      this.noteCache[data.id] = data;
+      if (!data.body) return true;
+      if (!data.creator_name) return true;
+      text += `${this.buildText(data as StaffNoteExtended<true>)}\n\n`;
       return false;
     }
-    // staffNotes.some(note => {
-    //   const id = parseInt(/^staff-note-([0-9]+)$/.exec(note.id)?.[1] ?? "-1");
-    //   const contents = this.retrieveStaffNoteContents(note, id);
-    //   if (!contents) return true;
-    //   if (id < 0) return true;
-    //   const authorName = note.querySelector<HTMLTextAreaElement>(".author-name")?.innerText;
-    //   if (!authorName) return true;
-    //   text += this.buildText(contents, id, authorName);
-    //   return false;
-    // });
     if (staffNotes.some(cb.bind(this))) return;
     return text.trimEnd();
   }
@@ -147,28 +124,24 @@ export default class RipStaffNotes extends Component {
     const staffNotes = Array.from(document.querySelectorAll<HTMLElement>(RipStaffNotes.staffNoteSelector));
     if (this.Settings.reverseOrder) staffNotes.reverse();
     return (await Promise.all(staffNotes.map(async note => {
-      const id = this.pullIdFromStaffNote(note);
-      if (id < 0) return "";
-      const contents = await this.retrieveStaffNoteContentsAsync(note, id);
-      if (!contents) return "";
-      const authorName = note.querySelector<HTMLTextAreaElement>(".author-name")?.innerText;
-      if (!authorName) return "";
-      return this.buildText(contents, id, authorName);
-    }))).join("\n");
+      const data = StaffNote.extractAllDataFromHtml(note);
+      if (data.id === undefined || data.id < 0) return "";
+      this.noteCache[data.id] = data;
+      if (!(data.body ??= await this.retrieveStaffNoteContentsAsync(note, data.id))) return "";
+      if (!data.creator_name) return "";
+      return this.buildText(data as StaffNoteExtended<true>);
+    }))).join("\n\n");
   }
 
   /**
    * @todo Make template string?
-   * @param contents 
-   * @param id 
-   * @param authorName 
-   * @returns 
    */
-  private buildText(contents: string, id: number, authorName: string) {
-    return `[section=From staff note #${id} by ${authorName}]\n` +
-    `Originally from "staff note #${id}":[/staff_notes/${id}] by ${authorName}:\n` +
+  // private buildText({ body, id, creator_name }: { body: string, id: number, creator_name: string }) {
+  private buildText({ body, id, creator_name, creator_id }: StaffNoteExtended<true>) {
+    return `[section=From staff note #${id} by ${creator_name}]\n` +
+    `Originally from "staff note #${id}":[/staff_notes/${id}] by "${creator_name}":[/users/${creator_id}]:\n` +
     `[quote]\n` +
-    `${contents}\n` +
+    `${body}\n` +
     `[/quote]\n` +
     `[/section]`;
   }
