@@ -5,7 +5,7 @@ import Util from "../utilities/Util";
 import Component from "./Component";
     
 /**
- * @todo What does this do?
+ * Pulls all the staff notes on the page, & puts them into your clipboard.
  */
 export default class RipStaffNotes extends Component {
   private static readonly staffNoteSelector = ".staff-note";
@@ -42,10 +42,12 @@ export default class RipStaffNotes extends Component {
     }
     Danbooru.Toast.notice(`Retrieving raw staff notes...`);
     this.constructText().then(
-      addToClipboard,
+      e => alert(
+        `Ready to copy! I can't write to your clipboard unless directly triggered by a user action, but you can go click the button now, or copy the text manually from here:\n\n${this.textToCopy = e}`,
+      ),
       err => {
-        Danbooru.Toast.alert(`Failed to retrieve contents of staff notes.`);
-        console.error(err);
+        Danbooru.Toast.alert(`Failed to retrieve contents of staff notes${err?.message ? `(${err.message})` : ""}.`);
+        // console.error(err);
       },
     );
   }
@@ -71,8 +73,8 @@ export default class RipStaffNotes extends Component {
       this.constructText().then(
         cpy,
         err => {
-          Danbooru.Toast.alert(`Failed to retrieve contents of staff notes.`);
-          console.error(err);
+          Danbooru.Toast.alert(`Failed to retrieve contents of staff notes${err?.message ? `(${err.message})` : ""}.`);
+          // console.error(err);
         },
       );
     });
@@ -86,17 +88,15 @@ export default class RipStaffNotes extends Component {
     if ((!id && id !== 0) || id < 0) throw new Error("Invalid ID for staff note.");
     // (await (await fetch(`/staff_notes/${id}.json`, { body: encodeURIComponent(REMT.API.getAuthToken()) })).json())["body"];
     return fetch(`/staff_notes/${id}.json`, { headers: Util.Network.simpleAuthHeaders }).then(
-      e => e.json().then(
+      response => response.json().then(
         e => {
           if (e["body"]) return e["body"] as string;
           Danbooru.Toast.alert(`Failed to retrieve staff note #${id} from server (empty body).`);
-          console.error("Staff note body was empty")
           throw new Error("Staff note body was empty");
         },
-        e => {
-          Danbooru.Toast.alert(`Failed to retrieve staff note #${id} from server (error parsing response as json).`);
-          console.error(e);
-          throw e;
+        err => {
+          Danbooru.Toast.alert(`Failed to retrieve staff note #${id} from server (error parsing response as json${err?.message ? `; ${err.message}` : ""}).`);
+          throw err;
         },
       ),
     );
