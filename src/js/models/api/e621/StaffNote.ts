@@ -26,6 +26,22 @@ type More = {
 export type StaffNoteExtended<Revived extends boolean = true> = Pick<StaffNote<Revived> & More, keyof (StaffNote<Revived> & More)>
 function tryIdShell(id: number) { return id >= 0 ? id : undefined; }
 export namespace StaffNote {
+  export const jsonKeys = Object.freeze([
+    "id",
+    "created_at",
+    "updated_at",
+    "user_id",
+    "creator_id",
+    "body",
+    "is_deleted",
+    "updater_id",
+  ]);
+  export const extendedJsonKeys = Object.freeze([
+    ...jsonKeys,
+    "creator_name",
+    "updater_name",
+    "user_name",
+  ]);
   /**
    * 
    * @param note The `<article>` representing the staff note.

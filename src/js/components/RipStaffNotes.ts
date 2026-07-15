@@ -49,7 +49,16 @@ export default class RipStaffNotes extends Component {
     );
   }
 
-  Settings = { enabled: true, reverseOrder: true, };
+  Settings = {
+    enabled: true,
+    reverseOrder: true,
+    staffNoteTemplate: `[section=From staff note #%id% by %creator_name%]\n` +
+    `Originally from "staff note #%id%":[/staff_notes/%id%] by "%creator_name%":[/users/%creator_id%]:\n` +
+    `[quote]\n` +
+    `%body%\n` +
+    `[/quote]\n` +
+    `[/section]`
+  };
 
   private initSettingsMenu() {
     const button = html`<button type="submit"${((this.textToCopy ??= this.constructTextSync())) ? "" : " disabled"}>Rip Staff Notes</button>` as HTMLButtonElement;
@@ -76,8 +85,28 @@ export default class RipStaffNotes extends Component {
       );
     });
     this.settingsMenuDialogParameters = {
-      elements:[$(retrieveButton), $(button), $("<br />")],
+      elements:[
+        $(retrieveButton),
+        $(button),
+        $("<br />"),
+        $(this.simpleSettingsTextArea(
+          "staffNoteTemplate",
+          undefined,
+          undefined,
+          { placeholder: `Valid template parameters: ${StaffNote.extendedJsonKeys.join(", ")}` },
+        )),
+        // $(`<textarea id="setting-header" name="setting-header" placeholder=""></textarea>`).text(this.Settings.staffNoteTemplate),
+        $("<br />"),
+        $(this.simpleSettingsCheckbox("reverseOrder")),
+        $("<br />"),
+        $(this.resetSettingsDialogElement),
+        $("<br />"),
+      ],
       optionsOrTitle: "Rip Staff Notes",
+      then: (e: FormData) => {
+        if (this.handleResetSettingsDialogElement(e)) return;
+        this.Settings.reverseOrder = e.get(`${this.settingsIdPrefix}reverseOrder`) === "true";
+      },
     };
   }
 
@@ -137,13 +166,8 @@ export default class RipStaffNotes extends Component {
    * @todo Make template string?
    */
   // private buildText({ body, id, creator_name }: { body: string, id: number, creator_name: string }) {
-  private buildText({ body, id, creator_name, creator_id }: StaffNoteExtended<true>) {
-    return `[section=From staff note #${id} by ${creator_name}]\n` +
-    `Originally from "staff note #${id}":[/staff_notes/${id}] by "${creator_name}":[/users/${creator_id}]:\n` +
-    `[quote]\n` +
-    `${body}\n` +
-    `[/quote]\n` +
-    `[/section]`;
+  private buildText(options: StaffNoteExtended<true>) {
+    return Util.replaceTemplateVariables(this.Settings.staffNoteTemplate, new Map<string, string>(Object.entries(options).map(e => [e[0], e[1].toString()])));
   }
 
   protected create(): Promise<void> {
