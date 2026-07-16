@@ -227,6 +227,10 @@ export const PageDefinition = {
     list: /^\/bans\/?$/,
     new: /^\/bans\/new/,
   },
+  staff_notes: {
+    list: /^\/staff_notes\/?$/,
+    new: /^\/staff_notes\/new/,
+  },
 
   votes: {
     comment: /^\/comment_votes\/?/,

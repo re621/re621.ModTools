@@ -22,6 +22,7 @@ import { MultiDialogForm } from "./js/models/structure/MultiDialogForm";
 import AutoClickPosts from "./js/components/AutoClickPosts";
 import FilterOldFeedbacks from "./js/components/FilterOldFeedbacks";
 import CiteUser from "./js/components/CiteUser";
+import RipStaffNotes from "./js/components/RipStaffNotes";
 
 export default class REMT {
 
@@ -45,6 +46,7 @@ export default class REMT {
     AutoClickPosts,
     FilterOldFeedbacks,
     CiteUser,
+    RipStaffNotes,
   ];
 
   public async run(): Promise<void> {
@@ -165,4 +167,5 @@ interface ComponentListAnnotated extends Partial<ComponentList> {
     AutoClickPosts?: AutoClickPosts,
     FilterOldFeedbacks?: FilterOldFeedbacks,
     CiteUser?: CiteUser,
+    RipStaffNotes?: RipStaffNotes,
 }

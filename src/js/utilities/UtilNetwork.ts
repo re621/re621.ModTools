@@ -1,3 +1,4 @@
+import REMT from "../../REMT";
 import XM from "../models/api/XM";
 
 export class UtilNetwork {
@@ -22,4 +23,13 @@ export class UtilNetwork {
     })
   }
 
+  /**
+   * Gives a User Agent & the required header for an authenticated GET request.
+   */
+  public static get simpleAuthHeaders() {
+    return {
+      "User-Agent": `${XM.Info.script.name}/${XM.Info.script.version} (by ${XM.Info.script.author} on e621)`,
+      "X-CSRF-Token": REMT.API.getAuthToken() ?? document.querySelector("meta[name=csrf-token]")?.getAttribute("content") ?? "~~FAILED TO GET TOKEN~~",
+    };
+  }
 }

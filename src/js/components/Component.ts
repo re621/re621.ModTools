@@ -388,6 +388,55 @@ export default class Component {
                  value="${this.Settings[setting]}" />
         </label>`;
   }
+  protected simpleSettingsTextArea(
+    setting: keyof typeof this.Settings/* string */,
+    label?: string,
+    title?: string,
+    options: {
+      maxlength?: number,
+      minlength?: number,
+      placeholder?: string,
+    }  = {}) {
+    const { maxlength, minlength, placeholder } = options;
+    return `
+        <label for="${this.settingsIdPrefix}${setting}"${title ? ` title="${title}"` : ""}>
+          ${label ?? `${setting[0].toUpperCase()}${(setting as string).slice(1).replace(/(?<=[a-z])[A-Z]/g, " $&")}?`}
+          &nbsp;
+          <textarea
+            id="${this.settingsIdPrefix}${setting}"
+            name="${this.settingsIdPrefix}${setting}"
+            ${(minlength !== undefined) ? `minlength="${minlength}"` : ""}
+            ${(maxlength !== undefined) ? `maxlength="${maxlength}"` : ""}
+            ${placeholder ? `placeholder="${placeholder}"` : ""}>` +
+            `${this.Settings[setting]}`+
+          `</textarea>
+        </label>`;
+  }
+  protected simpleSettingsInputText(
+    setting: keyof typeof this.Settings/* string */,
+    label?: string,
+    title?: string,
+    options: {
+      maxlength?: number,
+      minlength?: number,
+      placeholder?: string,
+      required?: boolean,
+    }  = {}) {
+    const { maxlength, minlength, placeholder, required } = options;
+    return /* html */`
+        <label for="${this.settingsIdPrefix}${setting}"${title ? ` title="${title}"` : ""}>
+          ${label ?? `${setting[0].toUpperCase()}${(setting as string).slice(1).replace(/(?<=[a-z])[A-Z]/g, " $&")}?`}
+          &nbsp;
+          <input type="text"
+                 id="${this.settingsIdPrefix}${setting}"
+                 name="${this.settingsIdPrefix}${setting}"
+                 ${(minlength !== undefined) ? `minlength="${minlength}"` : ""}
+                 ${(maxlength !== undefined) ? `maxlength="${maxlength}"` : ""}
+                 ${placeholder ? `placeholder="${placeholder}"` : ""}
+                 ${required ? "required" : ""}
+                 value="${this.Settings[setting]}" />
+        </label>`;
+  }
   // #endregion Subclass Sandbox
 }
 export type SettingsDialogConfig = { elements: JQuery<HTMLElement>[], optionsOrTitle?: string | DialogConfig, then?: { (e: FormData): any } };
