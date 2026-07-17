@@ -51,7 +51,12 @@ export namespace StaffNote {
     return {
       id: tryPullIdFromStaffNote(note) ?? currentData?.["id"],
       body: retrieveStaffNoteContents(note) ?? currentData?.["body"],
-      is_deleted: note.dataset.isDeleted === "true", // ?? currentData?.["is_deleted"],
+      is_deleted: note.dataset.isDeleted === "true" ?
+        true :
+        note.dataset.isDeleted === "false" ?
+          false :
+          currentData?.["is_deleted"],
+      // is_deleted: JSON.parse(note.dataset.isDeleted ?? "null") ?? currentData?.["is_deleted"],
       created_at: pullCreatedDateFromHtml(note) ?? currentData?.["created_at"],
       updated_at: pullUpdatedDateFromHtml(note) ?? currentData?.["updated_at"],
       creator_id: tryPullCreatorIdFromHtml(note) ?? currentData?.["creator_id"],
@@ -65,18 +70,11 @@ export namespace StaffNote {
    * @returns As much of the staff note as possible.
    */
   export function extractAllDataFromHtml(note: HTMLElement, currentData?: Partial<StaffNoteExtended<true>>): Partial<StaffNoteExtended<true>> {
-    return {
-      id: tryPullIdFromStaffNote(note) ?? currentData?.["id"],
-      body: retrieveStaffNoteContents(note) ?? currentData?.["body"],
-      is_deleted: note.dataset.isDeleted === "true", // ?? currentData?.["is_deleted"],
-      created_at: pullCreatedDateFromHtml(note) ?? currentData?.["created_at"],
-      updated_at: pullUpdatedDateFromHtml(note) ?? currentData?.["updated_at"],
-      creator_id: tryPullCreatorIdFromHtml(note) ?? currentData?.["creator_id"],
+    return Object.assign(extractJsonFromHtml(note, currentData), {
       creator_name: pullCreatorNameFromHtml(note) ?? currentData?.["creator_name"],
-      user_id: tryPullUserIdFromHtml(note) ?? currentData?.["user_id"],
-      updater_id: tryPullUpdaterIdFromHtml(note) ?? currentData?.["updater_id"],
+      user_name: pullUserNameFromHtml(note) ?? currentData?.["user_name"],
       updater_name: pullUpdaterNameFromHtml(note) ?? currentData?.["updater_name"],
-    };
+    });
   }
 
   /**
@@ -104,7 +102,7 @@ export namespace StaffNote {
    * @returns The id if found (either from the HTML or the current URL), -1 otherwise.
    */
   export function pullUserIdFromHtml(note: HTMLElement) {
-    return parseInt(new URL(note.querySelector<HTMLAnchorElement>('.content > *:first-child > a[href="/users/"]')?.href ?? location.href).pathname.match(/\/users\/([0-9]+)/)?.[1] ?? "-1");
+    return parseInt(new URL(note.querySelector<HTMLAnchorElement>('.content > *:first-child > a[href^="/users/"]')?.href ?? location.href).pathname.match(/\/users\/([0-9]+)/)?.[1] ?? "-1");
   }
   /**
    * 
@@ -115,7 +113,7 @@ export namespace StaffNote {
     return tryIdShell(pullUserIdFromHtml(note));
   }
   export function pullUserNameFromHtml(note: HTMLElement) {
-    return (note.querySelector<HTMLAnchorElement>('.content > *:first-child > a[href="/users/"]') ?? document.querySelector<HTMLAnchorElement>('.profile-name > a:first-child[href="/users/"]'))?.innerText;
+    return (note.querySelector<HTMLAnchorElement>('.content > *:first-child > a[href^="/users/"]') ?? document.querySelector<HTMLAnchorElement>('.profile-name > a:first-child[href^="/users/"]'))?.innerText;
   }
   /**
    * 
@@ -123,7 +121,7 @@ export namespace StaffNote {
    * @returns The id if found, -1 otherwise.
    */
   export function pullCreatorIdFromHtml(note: HTMLElement) {
-    return parseInt(new URL(note.querySelector<HTMLAnchorElement>('.author-name > a[href="/users/"]')?.href ?? location.href).pathname.match(/\/users\/([0-9]+)/)?.[1] ?? "-1");
+    return parseInt(new URL(note.querySelector<HTMLAnchorElement>('.author-name > a[href^="/users/"]')?.href ?? location.href).pathname.match(/\/users\/([0-9]+)/)?.[1] ?? "-1");
   }
   /**
    * 
@@ -139,7 +137,7 @@ export namespace StaffNote {
    * @returns The id if found, -1 otherwise.
    */
   export function pullUpdaterIdFromHtml(note: HTMLElement) {
-    const href = note.querySelector<HTMLAnchorElement>('.content .info a[href="/users/"]')?.href;
+    const href = note.querySelector<HTMLAnchorElement>('.content .info a[href^="/users/"]')?.href;
     if (!href) return pullCreatorIdFromHtml(note);
     return parseInt(new URL(href).pathname.match(/\/users\/([0-9]+)/)?.[1] ?? "-1");
   }
@@ -152,7 +150,7 @@ export namespace StaffNote {
     return tryIdShell(pullUpdaterIdFromHtml(note));
   }
   export function pullUpdaterNameFromHtml(note: HTMLElement) {
-    return note.querySelector<HTMLAnchorElement>('.content .info a[href="/users/"]')?.innerText ?? pullCreatorNameFromHtml(note);
+    return note.querySelector<HTMLAnchorElement>('.content .info a[href^="/users/"]')?.innerText ?? pullCreatorNameFromHtml(note);
   }
   export function pullCreatedDateFromHtmlRaw(note: HTMLElement) {
     return note.querySelector<HTMLTimeElement>('.post-time time')?.dateTime;

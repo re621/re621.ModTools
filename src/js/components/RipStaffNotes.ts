@@ -149,16 +149,38 @@ export default class RipStaffNotes extends Component {
     return text.trimEnd();
   }
 
+  /** Used as a simple way to toggle if failures are treated as fatal. */
+  private reportFailure(message: string): string {
+    // Danbooru.Toast.alert(message);
+    // return "";
+    throw new Error(message);
+  }
   private async constructText() {
     const staffNotes = Array.from(document.querySelectorAll<HTMLElement>(RipStaffNotes.staffNoteSelector));
     if (this.Settings.reverseOrder) staffNotes.reverse();
+    // TODO: Do as a batch operation.
     return (await Promise.all(staffNotes.map(async note => {
       const data = StaffNote.extractAllDataFromHtml(note);
-      if (data.id === undefined || data.id < 0) return "";
+      if (data.id === undefined || data.id < 0) {
+        return this.reportFailure(`Failed to retrieve staff note id #${data.id}"`);
+      }
       this.noteCache[data.id] = data;
-      if (!(data.body ??= await this.retrieveStaffNoteContentsAsync(note, data.id))) return "";
-      if (!data.creator_name) return "";
-      return this.buildText(data as StaffNoteExtended<true>);
+      if (!(data.body ??= await this.retrieveStaffNoteContentsAsync(note, data.id))) {
+        return this.reportFailure(`Failed to retrieve body from staff note #${data.id}"`);
+      }
+      /* for (const k in StaffNote.extendedJsonKeys) {
+        if (data[k] === undefined) {
+          return this.reportFailure(`Failed to retrieve key "${k}" from staff note #${data.id}"`);
+        }
+      } */
+      try {
+        return this.buildText(data as StaffNoteExtended<true>);
+      } catch (err) {
+        const m = err instanceof TypeError && err.message.match(/^can't access property "(.+?)" of undefined$/);
+        if (m)
+          return this.reportFailure(`Failed to retrieve key "${m[1]}" from staff note #${data.id}"`);
+        throw err;
+      }
     }))).join("\n\n");
   }
 
