@@ -1,3 +1,5 @@
+import Script from "./Script";
+
 export default class Records {
 
 
@@ -79,7 +81,7 @@ export default class Records {
       rules: "sitetools",
     },
     underage: {
-      text: "You need to be 18 to access this page.\nThis ban won't expire, but if you have reached the sufficient age you can request your ban to be lifted by writing an email to management@e621.net.",
+      text: `You need to be 18 to access this page.\nThis ban won't expire, but if you have reached the sufficient age you can request your ban to be lifted by writing an email to management@${Script.primaryDomain}.`,
       rules: "underage",
     },
   };
@@ -312,7 +314,7 @@ export default class Records {
       group: this.RuleGroups.illegal,
       preface: "By using e621 and/or registering an account, you agree that you are at least eighteen years of age. No individual under the age of eighteen may register an account, use our services, provide any personal information to e621, or otherwise upload or transmit personal information through our services.",
       rules: [],
-      postface: "Even though laws may vary depending on your location, e621.net's management and service office is located in Arizona, USA, and it is those laws that we are required to abide by. We cannot knowingly allow any minors to view pornographic content, so we must be proactive in preventing underage access. This includes accounts that are either legally or illegally accessed by minors. Furthermore, we require official, government-issued photo identification as proof of you turning eighteen in order to release access to your account. Please email us at `management@e621.net` for further details.",
+      postface: `Even though laws may vary depending on your location, ${Script.primaryDomain}'s management and service office is located in Arizona, USA, and it is those laws that we are required to abide by. We cannot knowingly allow any minors to view pornographic content, so we must be proactive in preventing underage access. This includes accounts that are either legally or illegally accessed by minors. Furthermore, we require official, government-issued photo identification as proof of you turning eighteen in order to release access to your account. Please email us at \`management@${Script.primaryDomain}\` for further details.`,
     },
   };
 

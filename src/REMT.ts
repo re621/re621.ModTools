@@ -58,7 +58,7 @@ export default class REMT {
     // Set up the API connection
     // TODO: Temporary instantiation method
     REMT.API = window["ZestyAPI"].connect({
-      userAgent: Script.userAgent,
+      userAgent: Util.Network.userAgent,
       debug: Debug.Connect,
     });
 

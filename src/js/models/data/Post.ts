@@ -1,6 +1,7 @@
 import APIPost from "@re621/zestyapi/dist/responses/APIPost";
 import Util from "../../utilities/Util";
 import { Tag } from "./Tag";
+import Script from "./Script";
 
 export default class Post {
 
@@ -293,7 +294,7 @@ export default class Post {
         md5: data.post.file.md5,
         original: data.post.file.url,
         sample: data.post.sample.url,
-        preview: `https://static1.e621.net/data/preview/${data.post.file.md5.substring(0, 2)}/${data.post.file.md5.substring(2, 4)}/${data.post.file.md5}.jpg`,
+        preview: `https://${Script.primaryStaticDomain}/data/preview/${data.post.file.md5.substring(0, 2)}/${data.post.file.md5.substring(2, 4)}/${data.post.file.md5}.jpg`,
         size: data.post.file.size,
       },
 
@@ -561,14 +562,14 @@ export default class Post {
 
     switch (type) {
       case "original":
-        return `https://static1.e621.net/data/${parts[0]}/${parts[1]}/${parts[2]}.${parts[3]}`
+        return `https://${Script.primaryStaticDomain}/data/${parts[0]}/${parts[1]}/${parts[2]}.${parts[3]}`
       case "sample":
         return ((options.width < 850 || options.height < 850 || options.extension == "gif")
-          ? `https://static1.e621.net/data/${parts[0]}/${parts[1]}/${parts[2]}.${parts[3]}`
-          : `https://static1.e621.net/data/sample/${parts[0]}/${parts[1]}/${parts[2]}.jpg`);
+          ? `https://${Script.primaryStaticDomain}/data/${parts[0]}/${parts[1]}/${parts[2]}.${parts[3]}`
+          : `https://${Script.primaryStaticDomain}/data/sample/${parts[0]}/${parts[1]}/${parts[2]}.jpg`);
       case "preview":
       default: {
-        return `https://static1.e621.net/data/preview/${parts[0]}/${parts[1]}/${parts[2]}.jpg`;
+        return `https://${Script.primaryStaticDomain}/data/preview/${parts[0]}/${parts[1]}/${parts[2]}.jpg`;
       }
     }
   }

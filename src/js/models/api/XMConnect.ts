@@ -1,4 +1,4 @@
-import Script from "../data/Script";
+import Util from "../../utilities/Util";
 import Debug from "../Debug";
 
 declare const GM_xmlhttpRequest: any;
@@ -55,8 +55,8 @@ export default class XMConnect {
   private static validateXHRDetails(details: XMConnectRequest): XMConnectRequest {
     if (details.headers === undefined) details.headers = {};
     if (details.headers["User-Agent"] === undefined) {
-      details.headers["User-Agent"] = Script.userAgent;
-      details.headers["X-User-Agent"] = Script.userAgent;
+      details.headers["User-Agent"] = Util.Network.userAgent;
+      details.headers["X-User-Agent"] = Util.Network.userAgent;
     }
 
     if (details.onabort === undefined) details.onabort = (): void => { return; };
@@ -82,8 +82,8 @@ export default class XMConnect {
     }
 
     if (a.headers === undefined) a.headers = {
-      "User-Agent": Script.userAgent,
-      "X-User-Agent": Script.userAgent,
+      "User-Agent": Util.Network.userAgent,
+      "X-User-Agent": Util.Network.userAgent,
     };
 
     if (a.onerror === undefined) a.onerror = (): void => { return; }

@@ -2,7 +2,7 @@
     "name": "mod621",
     "displayName": "RE621 Mod Tools",
     "namespace": "mod621.bitwolfy.com",
-    "version": "6.4.3",
+    "version": "6.5.0",
     "description": "Moderation toolkit for e621.net",
     "author": "bitWolfy",
     "contributors": [
@@ -14,6 +14,10 @@
     "homepage": "https://github.com/re621/re621.ModTools",
     "funding": "https://ko-fi.com/bitwolfy",
     "repository": "github:re621/re621.ModTools",
+    "config": {
+        "domains": ["e621.net", "e926.net"],
+        "staticDomains": ["static1.e621.net", "static1.e926.net"]
+    },
     "scripts": {
         "push": "npm version patch && git push --follow-tags",
         "push-minor": "npm version minor && git push --follow-tags",
