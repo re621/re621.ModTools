@@ -22,6 +22,7 @@ export default class AutoClickPosts extends Component {
 
   Settings = {
     enabled: true,
+    hideButton: false,
     clickBlacklisted: false,
     clickDisabledFilter: true,
     rateLimit: false,
@@ -53,11 +54,11 @@ export default class AutoClickPosts extends Component {
     }
   }
   private button?: HTMLButtonElement;
-  private modeBox?: HTMLDivElement;
   protected create(): Promise<void> {
-    const modeBox = this.modeBox = document.querySelector<HTMLDivElement>(AutoClickPosts.modeBoxSelector) ?? undefined;
+    const modeBox = document.querySelector<HTMLDivElement>(AutoClickPosts.modeBoxSelector) ?? undefined;
     if (!modeBox) return Promise.resolve();
     this.initSettingsMenu();
+    if (this.Settings.hideButton) return Promise.resolve();
     const button = this.button = html`<button id="auto-click-button">${AutoClickPosts.buttonLabel}</button>` as HTMLButtonElement;
     button.onclick = () => this.onButtonClick();
     modeBox.insertAdjacentElement("afterend", button);
@@ -115,6 +116,8 @@ export default class AutoClickPosts extends Component {
   private initSettingsMenu() {
     this.settingsMenuDialogParameters = {
       elements:[
+        $(this.simpleSettingsCheckbox("hideButton", undefined)),
+        $(`<br />`),
         $(this.simpleSettingsCheckbox("testMode", undefined)),
         $(`<br />`),
         $(this.simpleSettingsCheckbox("clickBlacklisted", undefined, "Should posts currently hidden by your active blacklist filters be clicked?")),
@@ -132,6 +135,7 @@ export default class AutoClickPosts extends Component {
       optionsOrTitle: "Auto-Click Posts Settings",
       then: (e: FormData) => {
         if (this.handleResetSettingsDialogElement(e)) return;
+        this.Settings.hideButton = e.get(`${this.settingsIdPrefix}hideButton`) === "true";
         this.Settings.testMode = e.get(`${this.settingsIdPrefix}testMode`) === "true";
         this.Settings.clickBlacklisted = e.get(`${this.settingsIdPrefix}clickBlacklisted`) === "true";
         this.Settings.clickDisabledFilter = e.get(`${this.settingsIdPrefix}clickDisabledFilter`) === "true";

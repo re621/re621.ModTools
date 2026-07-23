@@ -127,9 +127,12 @@ export default class RipStaffNotes extends Component {
       ),
     );
   }
-  private async retrieveStaffNoteContentsAsync(note: HTMLElement, id: number = this.pullIdFromStaffNote(note)) {
-    // return this.noteTextCache[id] = this.retrieveStaffNoteContents(note, id, false) ?? await this.retrieveStaffNoteContentsFromServer(id);
-    return (this.noteCache[id] ??= StaffNote.extractJsonFromHtml(note)).body ??= StaffNote.retrieveStaffNoteContentsFromHtml(note) ?? await this.retrieveStaffNoteContentsFromServer(id);
+  private async retrieveStaffNoteContentsAsync(note: HTMLElement, id: number = this.pullIdFromStaffNote(note), timeout?: number) {
+    return (this.noteCache[id] ??= StaffNote.extractJsonFromHtml(note)).body ??=
+      StaffNote.retrieveStaffNoteContentsFromHtml(note) ?? 
+      await ((timeout && timeout > 0) ?
+        Util.sleep(timeout).then(() => this.retrieveStaffNoteContentsFromServer(id)) :
+        this.retrieveStaffNoteContentsFromServer(id));
   }
 
   private constructTextSync() {
@@ -159,13 +162,42 @@ export default class RipStaffNotes extends Component {
     const staffNotes = Array.from(document.querySelectorAll<HTMLElement>(RipStaffNotes.staffNoteSelector));
     if (this.Settings.reverseOrder) staffNotes.reverse();
     // TODO: Do as a batch operation.
-    return (await Promise.all(staffNotes.map(async note => {
+    /* const toFetch: number[] = [];
+    const buildNoteText = (data: StaffNoteExtended<true>) => {
+      try {
+        return this.buildText(data);
+      } catch (err) {
+        const m = err instanceof TypeError && err.message.match(/^can't access property "(.+?)" of undefined$/);
+        if (m)
+          return this.reportFailure(`Failed to retrieve key "${m[1]}" from staff note #${data.id}"`);
+        throw err;
+      }
+    };
+    const builtNotes = staffNotes.map((note, index) => {
       const data = StaffNote.extractAllDataFromHtml(note);
       if (data.id === undefined || data.id < 0) {
         return this.reportFailure(`Failed to retrieve staff note id #${data.id}"`);
       }
       this.noteCache[data.id] = data;
-      if (!(data.body ??= await this.retrieveStaffNoteContentsAsync(note, data.id))) {
+      if (!data.body) {
+        toFetch.push(index);
+        return undefined;
+      }
+      return buildNoteText(data as StaffNoteExtended<true>);
+    });
+    if (toFetch.length > 0) {
+      await Promise.all(toFetch.map(e => {
+        staffNotes[i]// 
+      }))
+    } */
+    let asyncCount = 0;
+    return (await Promise.all(staffNotes.map(async (note) => {
+      const data = StaffNote.extractAllDataFromHtml(note);
+      if (data.id === undefined || data.id < 0) {
+        return this.reportFailure(`Failed to retrieve staff note id #${data.id}"`);
+      }
+      this.noteCache[data.id] = data;
+      if (!(data.body ??= await this.retrieveStaffNoteContentsAsync(note, data.id, (asyncCount++ * 2000)))) {
         return this.reportFailure(`Failed to retrieve body from staff note #${data.id}"`);
       }
       /* for (const k in StaffNote.extendedJsonKeys) {
