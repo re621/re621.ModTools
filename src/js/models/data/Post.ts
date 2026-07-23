@@ -232,9 +232,9 @@ export default class Post {
 
       meta: {
         duration: null,
-        animated: tagSet.has("animated") || data.fileExt == "webm" || data.fileExt == "gif" || data.fileExt == "swf",
+        animated: tagSet.has("animated") || FileExtension.mustBeAnimated(data.fileExt),
         sound: tagSet.has("sound"),
-        interactive: data.fileExt == "webm" || data.fileExt == "swf",
+        interactive: FileExtension.isInteractive(data.fileExt),
       },
 
       warning: {
@@ -317,9 +317,9 @@ export default class Post {
 
       meta: {
         duration: null,
-        animated: data.post.tags.includes("animated") || data.post.file.ext == "webm" || data.post.file.ext == "gif" || data.post.file.ext == "swf",
+        animated: data.post.tags.includes("animated") || FileExtension.mustBeAnimated(data.post.file.ext),
         sound: data.post.tags.includes("sound"),
-        interactive: data.post.file.ext == "webm" || data.post.file.ext == "swf",
+        interactive: FileExtension.isInteractive(data.post.file.ext),
       },
 
       warning: {
@@ -433,9 +433,9 @@ export default class Post {
 
       meta: {
         duration: null,
-        animated: tagSet.has("animated") || data.fileExt == "webm" || data.fileExt == "gif" || data.fileExt == "swf",
+        animated: tagSet.has("animated") || FileExtension.mustBeAnimated(data.fileExt),
         sound: tagSet.has("sound"),
-        interactive: data.fileExt == "webm" || data.fileExt == "swf",
+        interactive: FileExtension.isInteractive(data.fileExt),
       },
 
       warning: {
@@ -530,9 +530,9 @@ export default class Post {
 
       meta: {
         duration: data.duration,
-        animated: tagSet.has("animated") || data.file.ext == FileExtension.WEBM || data.file.ext == FileExtension.GIF || data.file.ext == FileExtension.SWF,
+        animated: tagSet.has("animated") || FileExtension.mustBeAnimated(data.file.ext),
         sound: tagSet.has("sound"),
-        interactive: data.file.ext == FileExtension.WEBM || data.file.ext == FileExtension.SWF,
+        interactive: FileExtension.isInteractive(data.file.ext),
       },
 
       warning: {
@@ -542,6 +542,14 @@ export default class Post {
     });
   }
 
+  /**
+   * 
+   * @param type 
+   * @param options 
+   * @returns 
+   * @todo Update for webp samples & such.
+   * @todo Move to `UtilNetwork`.
+   */
   private static rebuildURL(
     type: "preview" | "sample" | "original" = "preview",
     options: {
@@ -557,7 +565,7 @@ export default class Post {
       options.md5.substring(2, 4),
       options.md5,
       options.extension,
-    ]
+    ];
 
     switch (type) {
       case "original":
@@ -583,6 +591,8 @@ export enum FileExtension {
     GIF = "gif",
     SWF = "swf",
     WEBM = "webm",
+    MP4 = "mp4",
+    WEBP = "webp",
 }
 
 export namespace FileExtension {
@@ -590,12 +600,84 @@ export namespace FileExtension {
       switch (input) {
         case "jpeg":
         case "jpg": return FileExtension.JPG;
+        case "apng":
         case "png": return FileExtension.PNG;
         case "gif": return FileExtension.GIF;
         case "swf": return FileExtension.SWF;
         case "webm": return FileExtension.WEBM;
+        case "mp4": return FileExtension.MP4;
+        case "webp": return FileExtension.WEBP;
       }
       return null;
+    }
+
+    export function isInteractive(input: string): boolean {
+      switch (input) {
+        case "webm":
+        case "mp4":
+        case "swf":
+          return true;
+        case "jpeg":
+        case "jpg":
+        case "apng":
+        case "png":
+        case "gif":
+        case "webp":
+        default:
+          return false;
+      }
+    }
+
+    export function canBeAnimated(input: string): boolean {
+      switch (input) {
+        case "swf":
+        case "mp4":
+        case "webm":
+        case "apng":
+        case "gif":
+        case "png":
+        case "webp":
+          return true;
+        case "jpeg":
+        case "jpg":
+        default:
+          return false;
+      }
+    }
+
+    export function isLikelyAnimated(input: string): boolean {
+      switch (input) {
+        case "swf":
+        case "mp4":
+        case "webm":
+        case "apng":
+        case "gif":
+          return true;
+        case "png":
+        case "webp":
+        case "jpeg":
+        case "jpg":
+        default:
+          return false;
+      }
+    }
+
+    // NOTE: Why are video files labeled as interactive?
+    export function mustBeAnimated(input: string): boolean {
+      switch (input) {
+        case "swf":
+        case "mp4":
+        case "webm":
+        case "apng":
+          return true;
+        case "gif":
+        case "png":
+        case "webp":
+        case "jpeg":
+        case "jpg":
+        default:
+          return false;
+      }
     }
 }
 
@@ -632,9 +714,9 @@ export namespace PostRating {
 
     export function toFullString(postRating: PostRating): string {
       switch (postRating.toLowerCase()) {
-        case "s": return "safe";
-        case "q": return "questionable";
-        case "e": return "explicit";
+        case PostRating.Safe: return "safe";
+        case PostRating.Questionable: return "questionable";
+        case PostRating.Explicit: return "explicit";
       }
       return null;
     }
@@ -770,10 +852,10 @@ interface PostDataTypeC {
             url: string,
         },
         sample: {
-            has: true,
-            height: 637,
-            width: 850,
-            url: "https://static1.e621.net/data/sample/33/6e/336ec494422113f0aaf5e879470603ac.jpg",
+            has: boolean,
+            height: number,
+            width: number,
+            url: string,
             alternates?: {
                 "720p"?: AlternateType,
                 "480p"?: AlternateType,
