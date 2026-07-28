@@ -2,6 +2,7 @@ import REMT from "../../REMT";
 import XM from "../models/api/XM";
 import KeybindManager, { Keybind, ResponseFunction } from "../models/data/Keybinds";
 import Page from "../models/data/Page";
+import Script from "../models/data/Script";
 import Debug from "../models/Debug";
 import { JsonStrictObject } from "../models/JsonTypes";
 import { DialogConfig } from "../models/structure/DialogForm";
@@ -285,7 +286,7 @@ export default class Component {
 
   /** Execute all handlers for the specified component event */
   public trigger(event: string, data?: PrimitiveType | PrimitiveType[] | PrimitiveMap): void {
-    $(document).trigger(`remt.${this.name}.${event}`, data);
+    $(document).trigger(`${Script.eventPrefix}.${this.name}.${event}`, data);
   }
 
   /** 
@@ -295,18 +296,18 @@ export default class Component {
   public on(event: string, handler: (event: JQuery.TriggeredEvent, data?: PrimitiveType | PrimitiveType[] | PrimitiveMap) => void): number {
     const eventList = event.split(" ");
     for (const one of eventList)
-      $(document).on(`remt.${this.name}.${one}.${this.eventIndex}`, handler);
+      $(document).on(`${Script.eventPrefix}.${this.name}.${one}.${this.eventIndex}`, handler);
     return this.eventIndex++;
   }
 
   /** Executes a handler function exactly once whe encountering a specified event */
   public one(event: string, handler: (event: JQuery.TriggeredEvent, data?: PrimitiveType | PrimitiveType[] | PrimitiveMap) => void): void {
-    $(document).one(`remt.${this.name}.${event}`, handler);
+    $(document).one(`${Script.eventPrefix}.${this.name}.${event}`, handler);
   }
 
   /** Detaches handlers from the specified component event */
   public off(event: string, eventID?: number): void {
-    $(document).off(`remt.${this.name}.${event}` + (eventID ? `.${eventID}` : ""));
+    $(document).off(`${Script.eventPrefix}.${this.name}.${event}` + (eventID ? `.${eventID}` : ""));
   }
 
   public getName(): string { return this.name; }

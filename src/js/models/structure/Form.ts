@@ -2,6 +2,7 @@ import Component from "../../components/Component";
 import Util from "../../utilities/Util";
 import XM from "../api/XM";
 import KeybindManager from "../data/Keybinds";
+import Script from "../data/Script";
 import Debug from "../Debug";
 import PreparedStructure from "./PreparedStructure";
 
@@ -719,7 +720,7 @@ export class Form implements PreparedStructure {
 
     // When the field value is set externally, this event needs to be triggered on the text input field.
     // There is probably a better way to do this, but this should work for now.
-    $input.on("remt:form:update", () => {
+    $input.on(`${Script.eventPrefix}:form:update`, () => {
       console.log("updating", $input.val());
       if ($input.val() == "") { $selectContainer.find("a").first().trigger("click"); }
       else { $selectContainer.find("a[data-value='" + $input.val() + "']").first().trigger("click"); }

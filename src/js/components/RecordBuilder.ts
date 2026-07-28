@@ -87,12 +87,12 @@ export default class RecordBuilder extends Component {
           reasonSelector.val(prebuilt.reason);
           reasonInput
             .val(reason.text)
-            .trigger("remt:input", true);
+            .trigger(`${Script.eventPrefix}:input`, true);
 
           container.find("button.rules-button").removeClass("active");
           for (const rule of [prebuilt.rules])
             container.find("button.rules-button[name='" + rule + "']").addClass("active");
-          container.trigger("remt:buttons", true);
+          container.trigger(`${Script.eventPrefix}:buttons`, true);
 
           this.generateRecordText();
 
@@ -125,16 +125,16 @@ export default class RecordBuilder extends Component {
 
     reasonSelector
       .appendTo(reasonContainer)
-      .on("change remt:change", (event, preventChange) => {
+      .on(`change ${Script.eventPrefix}:change`, (event, preventChange) => {
         const reason = Records.Reasons[reasonSelector.val() + ""];
         reasonInput
           .val(reason.text || "")
-          .trigger("remt:input", preventChange);
+          .trigger(`${Script.eventPrefix}:input`, preventChange);
 
         container.find("button.rules-button").removeClass("active");
         for (const rule of [reason.rules])
           container.find("button.rules-button[name='" + rule + "']").addClass("active");
-        container.trigger("remt:buttons", true);
+        container.trigger(`${Script.eventPrefix}:buttons`, true);
 
         this.generateRecordText();
       });
@@ -155,10 +155,10 @@ export default class RecordBuilder extends Component {
       .on("input", (event, preventChange) => {
         clearTimeout(reasonInputTimer);
         reasonInputTimer = window.setTimeout(() => {
-          reasonInput.trigger("remt:input", preventChange);
+          reasonInput.trigger(`${Script.eventPrefix}:input`, preventChange);
         }, 200);
       })
-      .on("propertychange remt:input", (event, preventChange) => {
+      .on(`propertychange ${Script.eventPrefix}:input`, (event, preventChange) => {
         container.data("reason", reasonInput.val() + "");
         if (!preventChange) this.generateRecordText();
       });
@@ -223,11 +223,11 @@ export default class RecordBuilder extends Component {
           const button = $(event.currentTarget);
           button.toggleClass("active");
 
-          container.trigger("remt:buttons");
+          container.trigger(`${Script.eventPrefix}:buttons`);
         });
     }
 
-    container.on("remt:buttons", (event, preventChange) => {
+    container.on(`${Script.eventPrefix}:buttons`, (event, preventChange) => {
       const buttons: string[] = [];
       for (const btn of ruleWrapper.find("button.active"))
         buttons.push((btn as HTMLInputElement).name);

@@ -65,6 +65,28 @@ export default class Script {
    * Tools`, that becomes `re621-mt`.
    */
   public static readonly eventPrefixLegacy = Script.displayName.split(" ").reduce((p, e) => p + (p ? e[0].toLowerCase() : e.toLowerCase() + "-"), "");
+
+  /**
+   * A field storing the shorthand name generally used to refer to this
+   * userscript. Originally `REMT`.
+   */
+  public static readonly shortName = "REMT";
+  /**
+   * Changes the script's {@link shortName} to match the pre-established
+   * shorthand prefixed name format used to distinguish this userscript's events
+   * from others.
+   *
+   * E.g. For a {@link shortName} of `REMT`, `remt`.
+   */
+  public static readonly eventPrefix = this.shortName.toLowerCase();
+  /**
+   * Changes the script's {@link shortName} to match the pre-established
+   * shorthand name format used to distinguish this userscript's HTML elements
+   * from others.
+   *
+   * E.g. For a {@link shortName} of `REMT`, `remt`.
+   */
+  public static readonly htmlPrefix = this.shortName.toLowerCase();
   // #endregion Internal Project Identifiers
   /**
    * 

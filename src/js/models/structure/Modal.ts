@@ -167,7 +167,7 @@ export default class Modal {
     if (this.triggers.length == 0) this.activeTrigger = trigger.element;
     this.triggers.push(trigger);
 
-    trigger.element.on(trigger.event + ".remt.dialog-" + this.id, (event) => {
+    trigger.element.on(trigger.event + `.${Script.eventPrefix}.dialog-` + this.id, (event) => {
       if (this.isDisabled) return;
       event.preventDefault();
 
@@ -184,7 +184,7 @@ export default class Modal {
 
   public clearTriggers(): void {
     for (const trigger of this.triggers)
-      trigger.element.off(trigger.event + ".remt.dialog-" + this.id);
+      trigger.element.off(trigger.event + `.${Script.eventPrefix}.dialog-` + this.id);
     this.triggers = [];
   }
 
