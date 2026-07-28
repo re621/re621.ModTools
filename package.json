@@ -15,6 +15,8 @@
     "funding": "https://ko-fi.com/bitwolfy",
     "repository": "github:re621/re621.ModTools",
     "config": {
+        "iconUri": "https://cdn.jsdelivr.net/gh/re621/re621@master/assets/icon64.png",
+        "icon64Uri": "https://cdn.jsdelivr.net/gh/re621/re621@master/assets/icon64.png",
         "domains": ["e621.net", "e926.net"],
         "staticDomains": ["static1.e621.net", "static1.e926.net"]
     },
