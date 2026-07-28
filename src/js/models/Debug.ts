@@ -34,17 +34,22 @@ export default class Debug {
   }
 
   public static prefixAlwaysPrints = true;
+  /** 
+   * Some consoles add a delimiting space between trailing concatenated
+   * parameters to `console.log` et al; this accounts for that.
+   */
+  public static omitSpaceWhenNonFormatted = true;
 
   /**
    * Logs the provided data into the console log with the colored project name
-   * prefix if {@link Debug.Enabled} is enabled or {@link Debug.prefixAlwaysPrints} is true.
+   * prefix if {@link Enabled} is enabled or {@link prefixAlwaysPrints} is true.
    */
   public static logPrefix(message?: any, ...optionalParams: any[]): void {
     if (!Debug.prefixAlwaysPrints && !Debug.Enabled) return;
     if (typeof message === "string" && /%(?:(?:\.[0-9]+)?[dif]|[oOsc])/.test(message))
       console.log(`%c[RE621.ModTools]%c ` + message, "color: maroon", "color: unset", ...optionalParams);
     else
-      console.log(`%c[RE621.ModTools]%c `, "color: maroon", "color: unset", message, ...optionalParams);
+      console.log(`%c[RE621.ModTools]%c${this.omitSpaceWhenNonFormatted ? "" : " "}`, "color: maroon", "color: unset", message, ...optionalParams);
   }
 
   /** Logs the provided data as a table */
