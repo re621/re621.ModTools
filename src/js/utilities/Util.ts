@@ -278,6 +278,7 @@ export default class Util {
    * 
    * @todo Options for strictness
    * @todo Option for `toString() { return this.raw; }`
+   * @todo Allow non-key values in `format`.
    */
   public static parseVersion(v: string) {
     const m = /(\d+)\.(\d+)\.(\d+)(?:-([-a-zA-Z0-9]+))?(?:\+([-a-zA-Z0-9]+))?/.exec(v);
