@@ -32,19 +32,7 @@ export class UtilNetwork {
     })
   }
 
-  /**
-   * Changes the script's name to match the pre-established User Agent format.
-   * E.g. If the package's name (& consequently script's name) is `RE621 Mod Tools`, that becomes `re621.ModTools`.
-  */
-  private static projectNameFormatted = Script.displayName.split(" ").reduce((p, e) => p + (p ? e.toLowerCase().replace(/^./, (e) => e.toUpperCase()) : e.toLowerCase() + "."), "");
-
-  public static userAgent = this.projectNameFormatted + this.trimVersion(Script.version);
-
-  private static trimVersion(value: string): string {
-    const match = value.match(/(\d\.\d+)\.\d+/);
-    if (!match || !match[1]) return "0.0";
-    return match[1];
-  }
+  public static userAgent = Script.projectNameCamelFormatted + Script.versionObj.format`${"major"}.${"minor"}`;
 
   public static get authToken() {
     return REMT.API.getAuthToken() ?? document.querySelector("meta[name=csrf-token]")?.getAttribute("content") ?? "~~FAILED TO GET TOKEN~~";
@@ -75,5 +63,23 @@ export class UtilNetwork {
     if (authHeader)
       base["Authorization"] = authHeader;
     return base;
+  }
+
+  /**
+   * 
+   * @param url 
+   * @param options 
+   * @returns The given URL with the given options resolved
+   */
+  public static normalizeUrl(url: string, options = {
+    preserveQuery: false,
+    trailingPathSlash: false,
+  }) {
+    const parsed = new URL(url);
+    if (!options?.preserveQuery) parsed.search = "";
+    url = parsed.href;
+    if (options?.trailingPathSlash && !url.endsWith("/")) url += "/";
+    else if (!options?.trailingPathSlash && url.endsWith("/")) url = url.slice(0, url.length - 1);
+    return url;
   }
 }

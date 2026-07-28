@@ -240,7 +240,7 @@ export default class RecordBuilder extends Component {
   }
 
   private generateRecordText() {
-    // console.log("%c[RE621.ModTools]%c Updating Record Text", "color: maroon", "color: unset");
+    // Debug.logPrefix("Updating Record Text");
 
     const result: string[] = [];
 

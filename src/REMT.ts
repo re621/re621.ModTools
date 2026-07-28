@@ -53,7 +53,7 @@ export default class REMT {
 
     if (Page.matches(IgnoredPages)) return;
 
-    console.log("%c[RE621.ModTools]%c v." + Script.version, "color: maroon", "color: unset");
+    Debug.logPrefix("v." + Script.version);
 
     // Set up the API connection
     // TODO: Temporary instantiation method
@@ -112,9 +112,9 @@ export default class REMT {
     for (const instance of Object.values(REMT._Registry))
       promises.push(instance?.load() ?? Promise.resolve());
     Promise.all(promises).then(() => {
-      console.log("%c[RE621.ModTools]%c loaded.", "color: maroon", "color: unset");
+      Debug.logPrefix("Loaded.");
       this.buildSettingsButton(true);
-      console.log("%c[RE621.ModTools]%c fully loaded.", "color: maroon", "color: unset");
+      Debug.logPrefix("Fully loaded.");
     });
   }
 
@@ -126,7 +126,7 @@ export default class REMT {
    */
   private buildSettingsButton(addListeners = false) {
     this.settingsButton?.remove();
-    console.log("%c[RE621.ModTools]%c checking for settings...", "color: maroon", "color: unset");
+    Debug.logPrefix("Checking for settings...");
     const configs = Object.values(REMT._Registry).reduce((p, e) => {
       if (!e) return p;
       if (addListeners) e.on("settingsConfigured", () => this.buildSettingsButton());
@@ -135,17 +135,17 @@ export default class REMT {
       return p;
     }, [] as SettingsDialogConfig[]);
     if (configs.length <= 0) {
-      console.log("%c[RE621.ModTools]%c no settings registered", "color: maroon", "color: unset");
+      Debug.logPrefix("No settings registered");
       return;
     }
-    console.log("%c[RE621.ModTools]%c loading %s settings...", "color: maroon", "color: unset", configs.length);
+    Debug.logPrefix("Loading %s settings...", configs.length);
     this.settingsButton = Util.DOM.addSettingsButton({
       id: "remt-component-settings",
       icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" name="settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>',
       name: "REMT",
       onClick: () => MultiDialogForm.getRequestedInput(configs),
     });
-    console.log("%c[RE621.ModTools]%c Settings button built.", "color: maroon", "color: unset");
+    Debug.logPrefix("Settings button built.");
   }
 
 }
