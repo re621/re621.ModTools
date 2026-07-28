@@ -266,6 +266,33 @@ export default class Util {
   }
 
   /**
+   * Parses the given string according to the SemVer format into an object with
+   * convenient formatting & access fields.
+   * 
+   * @todo Options for strictness
+   * @todo Option for `toString() { return this.raw; }`
+   */
+  public static parseVersion(v: string) {
+    const m = /(\d+)\.(\d+)\.(\d+)(?:-([-a-zA-Z0-9]+))?(?:\+([-a-zA-Z0-9]+))?/.exec(v);
+    return {
+      raw: v,
+      full: m?.[0] ?? "0.0.0",
+      major: m?.[1] ?? "0",
+      minor: m?.[2] ?? "0",
+      patch: m?.[3] ?? "0",
+      preRelease: m?.[4] ?? "",
+      build: m?.[5] ?? "",
+      didParseFail: !m,
+      format(strings: TemplateStringsArray, ...values: readonly ("full" | "major" | "minor" | "patch" | "preRelease" | "build")[]) {
+        let r = strings[0];
+        for (let i = 0; i < values.length; r += this[values[i]] + strings[++i]) {}
+        return r;
+      },
+    };
+  }
+  // #endregion Versioning
+
+  /**
      * Formats an array into a string via a non-standard join method.  
      * Ex. ["one"] => "one"
      *     ["one", "two"] => "one and two"
