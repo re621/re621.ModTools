@@ -1,7 +1,14 @@
 import { UtilNetwork } from '../../utilities/UtilNetwork';
 /**
- * Basic script parameters, both hard-coded and derived from the userscript header.
+ * Basic script parameters (both hard-coded and derived from the userscript
+ * header), & miscellaneous site-specific configuration.
+ *
  * GM_info is used here because of XM.Connect initialization issues.
+ * 
+ * If not directly modified by downstream maintainers, expects the following from the script metadata:
+ * * `GM_info.script.name`: At least 2 space-separated terms.
+ * * `GM_info.script.version`: A proper SemVer version; can have any prefix.
+ * * `GM_info.script.homepage`: A proper GitHub repository URL.
  */
 export default class Script {
   public static readonly displayName = GM_info.script.name;

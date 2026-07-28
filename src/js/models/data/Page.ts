@@ -1,3 +1,8 @@
+/**
+ * Utility for parsing the current page's URL.
+ *
+ * @todo Refactor to kill singleton; just use `window.location` directly.
+ */
 export default class Page {
 
   private static instance: Page;
@@ -9,12 +14,12 @@ export default class Page {
   }
 
   /**
-     * Checks if the url the user is currently on satisfies the filter
-     * @param filter Pipe separated list of filters the current location has to satisfy
-     *               Matches are by default on a startsWith basis, but if the url must match
-     *               you can prepend =
-     * @returns true if at least on filter is fulfilled
-     */
+   * Checks if the url the user is currently on satisfies the filter
+   * @param filter Pipe separated list of filters the current location has to satisfy
+   *               Matches are by default on a startsWith basis, but if the url must match
+   *               you can prepend =
+   * @returns true if at least on filter is fulfilled
+   */
   public static matches(filter: RegExp | RegExp[]): boolean {
     if (filter instanceof RegExp) filter = [filter];
     const pathname = this.getInstance().url.pathname.replace(/[/?]$/g, "");
@@ -31,35 +36,35 @@ export default class Page {
   }
 
   /**
-     * Returns the query parameter, or null if the key does not exist
-     * @return string Query parameter
-     */
+   * Returns the query parameter, or null if the key does not exist
+   * @return string Query parameter
+   */
   public static getQueryParameter(key: string): string | null {
     return this.getInstance().url.searchParams.get(key);
   }
 
   /**
-     * Returns true if the search parameters has the provided key, false otherwise
-     * @param key 
-     */
+   * Returns true if the search parameters has the provided key, false otherwise
+   * @param key 
+   */
   public static hasQueryParameter(key: string): boolean {
     return this.getInstance().url.searchParams.has(key);
   }
 
   /**
-     * Sets a query parameter in the current url  
-     * If there is already one with the same key, it will get overridden
-     * @param key 
-     * @param value 
-     */
+   * Sets a query parameter in the current url  
+   * If there is already one with the same key, it will get overridden
+   * @param key 
+   * @param value 
+   */
   public static setQueryParameter(key: string, value: string): void {
     this.getInstance().url.searchParams.set(key, value);
     this.refreshCurrentUrl();
   }
 
   /**
-     * Removes a querystring from the url
-     */
+   * Removes a querystring from the url
+   */
   public static removeQueryParameter(keys: string | string[]): void {
     if (!Array.isArray(keys)) keys = [keys];
     for (const key of keys)
@@ -68,8 +73,8 @@ export default class Page {
   }
 
   /**
-     * Replaces the current url without reloading or pushing the old one to the history
-     */
+   * Replaces the current url without reloading or pushing the old one to the history
+   */
   private static refreshCurrentUrl(): void {
     const url = this.getInstance().url;
     const searchPrefix = url.searchParams.toString().length === 0 ? "" : "?";
@@ -77,33 +82,34 @@ export default class Page {
   }
 
   /**
-     * Returns the name of the current site
-     * @returns e621 or e926
-     */
+   * Returns the name of the current site
+   * @returns The current site's second level (& lower, if present) domain(s).
+   * E.g. `e621` or `e926`.
+   */
   public static getSiteName(): string {
     return this.getInstance().url.hostname.replace(/\.net/g, "");
   }
 
   /**
-     * Returns the ID from the second part of the pathname
-     */
+   * Returns the ID from the second part of the pathname
+   */
   public static getPageID(): string {
     return this.getInstance().url.pathname.split("/")[2];
   }
 
   /**
-     * Returns a singleton instance of the class
-     * @returns Url instance
-     */
+   * Returns a singleton instance of the class
+   * @returns Url instance
+   */
   public static getInstance(): Page {
     if (this.instance === undefined) this.instance = new Page();
     return this.instance;
   }
 
   /**
-     * Returns the type of the page, according to the definitions below
-     * @returns Page type, as a string
-     */
+   * Returns the type of the page, according to the definitions below
+   * @returns Page type, as a string
+   */
   public static getPageName(): string | null {
     for (const [name, value] of Object.entries(PageDefinition as RegExpList)) {
       if (typeof value.test == "function")
@@ -236,11 +242,6 @@ export const PageDefinition = {
     comment: /^\/comment_votes\/?/,
     post: /^\/post_votes\/?/,
   },
-
-  // staff_notes: {
-  //     comment: /^\/comment_votes\/?/,
-  //     post: /^\/post_votes\/?/,
-  // },
 
   // Custom
   pluginSettings: /^\/plugins\/remt.*/,

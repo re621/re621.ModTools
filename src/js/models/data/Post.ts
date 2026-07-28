@@ -771,10 +771,10 @@ interface PostDataTypeC {
             url: string,
         },
         sample: {
-            has: true,
-            height: 637,
-            width: 850,
-            url: "https://static1.e621.net/data/sample/33/6e/336ec494422113f0aaf5e879470603ac.jpg",
+            has: boolean,
+            height: number,
+            width: number,
+            url: string,
             alternates?: {
                 "720p"?: AlternateType,
                 "480p"?: AlternateType,

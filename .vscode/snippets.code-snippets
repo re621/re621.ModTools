@@ -13,7 +13,7 @@
 	// 	"description": "Log output to console"
 	// }
 	"New Component File": {
-		"description": "A new re621.ModTools component",
+		"description": "A new Mod Tools Component",
 		"isFileTemplate": true,
 		"prefix": ["component"],
 		"body": [
