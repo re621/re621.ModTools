@@ -1,4 +1,3 @@
-import XM from "../models/api/XM";
 import { PageDefinition } from "../models/data/Page";
 import Modal from "../models/structure/Modal";
 import ErrorHandler from "../utilities/ErrorHandler";
@@ -150,11 +149,7 @@ export default class ReportContentData extends Component {
       </div>` as HTMLDivElement;
     replacer(flexBox);
 
-    const dText = await (await fetch(`/dtext_preview.json?body=${encodeURIComponent(data.body)}&allow_color="false"`, { method: "POST", "body": JSON.stringify({ "body": data.body, "allow_color": "false" }), headers: {
-      "User-Agent": `${XM.Info.script.name}/${XM.Info.script.version} (by ${XM.Info.script.author} on e621)`,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      "X-CSRF-Token": document.querySelector("meta[name=csrf-token]")!.getAttribute("content") ?? "",
-    } })).json();
+    const dText = await (await fetch(`/dtext_preview.json?body=${encodeURIComponent(data.body)}&allow_color="false"`, { method: "POST", "body": JSON.stringify({ "body": data.body, "allow_color": "false" }), headers: Util.Network.simpleAuthHeaders })).json();
     flexBox.removeChild(commentBox);
     if (dText["html"]) flexBox.appendChild(html`<div style="background-color: rgba(0,0,0,0.1); border-radius: 1rem; padding: 1rem;"><b>Message:</b><br />${dText["html"]}</div>`);
   }

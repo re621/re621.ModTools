@@ -33,11 +33,11 @@ export default class Records {
       rules: "disruptive",
     },
     blacklist: {
-      text: "Please use your [[e621:blacklist|blacklist]].",
+      text: `Please use your [[${Script.siteNameWikiPrefix}:blacklist|blacklist]].`,
       rules: "blacklist",
     },
     blacklist2: {
-      text: "[[e621:blacklist|Blacklist]] quietly, please.",
+      text: `[[${Script.siteNameWikiPrefix}:blacklist|Blacklist]] quietly, please.`,
       rules: "blacklist",
     },
     roleplay: {
@@ -101,7 +101,7 @@ export default class Records {
     disruptive: {
       title: "Disruptive Behavior",
       group: this.RuleGroups.messages,
-      preface: `e621 is an open and friendly community that people visit to share and enjoy furry artwork.\nPeople can have different opinions, but that does not give them permission to make someone else feel uncomfortable or unwanted.`,
+      preface: `${Script.primarySecondLevelDomain} is an open and friendly community that people visit to share and enjoy furry artwork.\nPeople can have different opinions, but that does not give them permission to make someone else feel uncomfortable or unwanted.`,
       rules: [
         "Do not make messages with the apparent purpose of upsetting someone. That includes picking fights, baiting arguments, calling names, or making remarks regarding personal grievances, quarrels, or malicious rumors.",
         "Do not purposefully or repeatedly spread false or defamatory information.",
@@ -312,7 +312,7 @@ export default class Records {
     underage: {
       title: "Age Restrictions",
       group: this.RuleGroups.illegal,
-      preface: "By using e621 and/or registering an account, you agree that you are at least eighteen years of age. No individual under the age of eighteen may register an account, use our services, provide any personal information to e621, or otherwise upload or transmit personal information through our services.",
+      preface: `By using ${Script.primarySecondLevelDomain} and/or registering an account, you agree that you are at least eighteen years of age. No individual under the age of eighteen may register an account, use our services, provide any personal information to ${Script.primarySecondLevelDomain}, or otherwise upload or transmit personal information through our services.`,
       rules: [],
       postface: `Even though laws may vary depending on your location, ${Script.primaryDomain}'s management and service office is located in Arizona, USA, and it is those laws that we are required to abide by. We cannot knowingly allow any minors to view pornographic content, so we must be proactive in preventing underage access. This includes accounts that are either legally or illegally accessed by minors. Furthermore, we require official, government-issued photo identification as proof of you turning eighteen in order to release access to your account. Please email us at \`management@${Script.primaryDomain}\` for further details.`,
     },

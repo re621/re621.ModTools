@@ -1,5 +1,6 @@
 import { PageDefinition } from "../models/data/Page";
 import Records from "../models/data/Records";
+import Script from "../models/data/Script";
 import Util from "../utilities/Util";
 import Component from "./Component";
 
@@ -251,6 +252,8 @@ export default class RecordBuilder extends Component {
     this.input.val(result.join("\n"));
   }
 
+  private static readonly sourceMatcher = new RegExp(`https:\\/\\/(?:${Script.domains.join("|")})\\/`, "g");
+
   private processForm(form: JQuery<HTMLElement>): string {
     // console.log(form.data());
 
@@ -284,7 +287,7 @@ export default class RecordBuilder extends Component {
                 (ruleData.preface ? (ruleData.preface + "\n\n") : "") + 
                 `${ruleLines.join("\n")}\n\n` +
                 (ruleData.postface ? (ruleData.postface + "\n\n") : "") + 
-                `"[Code of Conduct - ${ruleData.title}]":${ruleData.link ? ruleData.link : `/wiki_pages/e621:rules#${name.toLowerCase()}`}\n` +
+                `"[Code of Conduct - ${ruleData.title}]":${ruleData.link ? ruleData.link : `/wiki_pages/${Script.siteNameWikiPrefix}:rules#${name.toLowerCase()}`}\n` +
                 `[/section]`
       );
     }
@@ -301,12 +304,11 @@ export default class RecordBuilder extends Component {
     /**
      * Convert a source link into a common format
      * @param {string} source Source link
-     * @todo Change to handle e6ai.
      */
     function processSource(source: string): string {
       return decodeURI(source)
         .trim()
-        .replace(/https:\/\/e(?:621|926).net\//g, "/")              // Make links relative
+        .replace(RecordBuilder.sourceMatcher, "/")                  // Make links relative
         .replace(/\/posts\/(\d+)#comment-(\d+)/g, "/comments/$2")   // Convert comment links
         .replace(/\/forum_topics\/(\d+)(?:\?page=\d+)?#forum_post_(\d+)/g, "/forum_posts/$2")   // Convert forum post links
         .replace(/\?lr=\d+&/, "?")                                  // Trim the tag history links

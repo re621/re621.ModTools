@@ -1,4 +1,5 @@
 import XM from "./api/XM";
+import Script from "./data/Script";
 
 /** @todo Support granular log levels */
 export default class Debug {
@@ -47,9 +48,9 @@ export default class Debug {
   public static logPrefix(message?: any, ...optionalParams: any[]): void {
     if (!Debug.prefixAlwaysPrints && !Debug.Enabled) return;
     if (typeof message === "string" && /%(?:(?:\.[0-9]+)?[dif]|[oOsc])/.test(message))
-      console.log(`%c[RE621.ModTools]%c ` + message, "color: maroon", "color: unset", ...optionalParams);
+      console.log(`%c[${Script.projectNameFormatted}]%c ` + message, "color: maroon", "color: unset", ...optionalParams);
     else
-      console.log(`%c[RE621.ModTools]%c${this.omitSpaceWhenNonFormatted ? "" : " "}`, "color: maroon", "color: unset", message, ...optionalParams);
+      console.log(`%c[${Script.projectNameFormatted}]%c${this.omitSpaceWhenNonFormatted ? "" : " "}`, "color: maroon", "color: unset", message, ...optionalParams);
   }
 
   /** Logs the provided data as a table */

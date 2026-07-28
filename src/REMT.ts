@@ -53,7 +53,7 @@ export default class REMT {
 
     if (Page.matches(IgnoredPages)) return;
 
-    Debug.logPrefix("v." + Script.version);
+    Debug.logPrefix("v." + Script.versionObj.full);
 
     // Set up the API connection
     // TODO: Temporary instantiation method
@@ -77,7 +77,7 @@ export default class REMT {
 
       bodyLoaded = PageObserver.watch("body").then(() => {
         Debug.log("+ BODY is ready");
-        $("body").attr("remt", Script.version);
+        $("body").attr("remt", Script.versionObj.full);
         Util.DOM.setupDialogContainer(); // TODO Move to the dialog class
         User.init();
       });
@@ -105,7 +105,7 @@ export default class REMT {
       REMT._Registry[instance.getName()] = instance;
       await instance.bootstrapSettings();
     }
-    Util.Events.trigger("re621-mt:bootstrap");
+    Util.Events.trigger(`${Script.eventPrefixLegacy}:bootstrap`);
 
     // Load modules (asynchronous)
     const promises: Promise<void>[] = [];

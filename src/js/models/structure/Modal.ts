@@ -1,5 +1,7 @@
 import Util from "../../utilities/Util";
 import { makeIcon } from "../../utilities/UtilIcons";
+import Script from "../data/Script";
+import Debug from "../Debug";
 import PreparedStructure from "./PreparedStructure";
 
 export default class Modal {
@@ -216,7 +218,7 @@ export default class Modal {
 	 */
   private static ensureModalContainer() {
     if (!document.querySelector("#modal-container")) {
-      console.log("%c[RE621.ModTools]%c: no re621 detected; manually creating 'div#modal-container'...", "color: maroon", "color: unset");
+      Debug.logPrefix(`No ${Script.companionProjectName} detected; manually creating 'div#modal-container'...`);
       $("<div>").attr("id", "modal-container").prependTo("div#page");
     }
   }
