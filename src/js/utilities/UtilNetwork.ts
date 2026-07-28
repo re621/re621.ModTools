@@ -32,7 +32,13 @@ export class UtilNetwork {
     })
   }
 
-  public static userAgent = Script.projectNameCamelFormatted + Script.versionObj.format`${"major"}.${"minor"}`;
+  /**
+   * Backing store for {@link userAgent}.
+   *
+   * NOTE: Lazy init lets {@link Script} be safely initialized.
+   */
+  static #userAgent: string;
+  public static get userAgent() { return this.#userAgent ??= Script.projectNameCamelFormatted + Script.versionObj.format`${"major"}.${"minor"}`; }
 
   public static get authToken() {
     return REMT.API.getAuthToken() ?? document.querySelector("meta[name=csrf-token]")?.getAttribute("content") ?? "~~FAILED TO GET TOKEN~~";
@@ -49,6 +55,7 @@ export class UtilNetwork {
 
   /**
    * Gives a User Agent & the required header for an authenticated GET request.
+   * @todo Add `X-User-Agent`?
    */
   public static get simpleAuthHeaders() {
     const base: {
