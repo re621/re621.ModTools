@@ -1,5 +1,7 @@
 import XM from "./api/XM";
+import Script from "./data/Script";
 
+/** @todo Support granular log levels */
 export default class Debug {
 
   public static get Enabled(): boolean { return XM.Storage.getValue("Debug.enabled", false); }
@@ -28,14 +30,33 @@ export default class Debug {
 
 
   /** Logs the provided data into the console log if debug is enabled */
-  public static log(...data: any[]): void {
-    if (Debug.Enabled) console.log(...data);
+  public static log(message?: any, ...optionalParams: any[]): void {
+    if (Debug.Enabled) console.log(message, ...optionalParams);
+  }
+
+  public static prefixAlwaysPrints = true;
+  /** 
+   * Some consoles add a delimiting space between trailing concatenated
+   * parameters to `console.log` et al; this accounts for that.
+   */
+  public static omitSpaceWhenNonFormatted = true;
+
+  /**
+   * Logs the provided data into the console log with the colored project name
+   * prefix if {@link Enabled} is enabled or {@link prefixAlwaysPrints} is true.
+   */
+  public static logPrefix(message?: any, ...optionalParams: any[]): void {
+    if (!Debug.prefixAlwaysPrints && !Debug.Enabled) return;
+    if (typeof message === "string" && /%(?:(?:\.[0-9]+)?[dif]|[oOsc])/.test(message))
+      console.log(`%c[${Script.projectNameFormatted}]%c ` + message, "color: maroon", "color: unset", ...optionalParams);
+    else
+      console.log(`%c[${Script.projectNameFormatted}]%c${this.omitSpaceWhenNonFormatted ? "" : " "}`, "color: maroon", "color: unset", message, ...optionalParams);
   }
 
   /** Logs the provided data as a table */
-  public static table(obj: any): void {
+  public static table(obj: any, properties?: readonly string[]): void {
     if (!Debug.Enabled) return;
-    console.table(obj);
+    console.table(obj, properties);
   }
 
   /** Logs the provided data into the console log if connections logging is enabled */

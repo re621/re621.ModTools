@@ -7,11 +7,11 @@ export default class ErrorHandler {
 
   public static async write(message: string, error?: Error | any): Promise<void> {
     const notice = $("<div>").html([
-      `<p>RE621.ModTools had encountered an error during script execution.</p>`,
+      `<p>${Script.projectNameFormatted} had encountered an error during script execution.</p>`,
       `<p>Please, report this message, including the error log below, through the <a href="${Script.url.issues}">issue tracker</a>, or in the <a href="${Script.url.thread}">forum thread</a>.</p>`,
     ].join("\n"));
     const textarea = $("<textarea>").val([
-      `REMT v.${Script.version} for ${Script.handler.name} v.${Script.handler.version}`,
+      Script.versionObj.format`REMT v.${"major"}.${"minor"}.${"patch"} for ` + `${Script.handler.name} v.${Script.handler.version}`,
       window.navigator.userAgent,
       message,
       ...(error && error instanceof Error ? 

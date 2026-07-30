@@ -4,7 +4,10 @@ import { html } from "../utilities/HtmlTemplate";
 import Component from "./Component";
     
 /**
- * @todo What does this do?
+ * Automates clicking posts on the post search page; combined with the vanilla
+ * `Mode` selector, allows automating batch actions.
+ *
+ * @todo Add post selection mode.
  */
 export default class AutoClickPosts extends Component {
   private static readonly modeBoxSelector = "#mode-box";

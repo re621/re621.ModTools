@@ -1,4 +1,5 @@
 import Danbooru from "../models/api/Danbooru";
+import Script from "../models/data/Script";
 import { html } from "./HtmlTemplate";
 import Util from "./Util";
 
@@ -21,7 +22,7 @@ export class UtilDOM {
   /** Sets up a container to load modals into */
   public static setupDialogContainer(): void {
     $("<div>")
-      .attr("id", "remt-container")
+      .attr("id", `${Script.htmlPrefix}-container`)
       .prependTo("body");
   }
 
@@ -56,7 +57,7 @@ export class UtilDOM {
 
     if (config.attr === undefined) config.attr = {};
 
-    const $tab = $(`<li class="nav-remt-${config.id}">`)[prepend ? "prependTo" : "appendTo"](target);
+    const $tab = $(`<li class="nav-${Script.htmlPrefix}-${config.id}">`)[prepend ? "prependTo" : "appendTo"](target);
     const $link = $("<a>")
       .html(config.icon ? `${config.icon}<span>${config.name}</span>` : config.name)
       .attr({

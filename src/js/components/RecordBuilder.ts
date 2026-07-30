@@ -1,5 +1,6 @@
 import { PageDefinition } from "../models/data/Page";
 import Records from "../models/data/Records";
+import Script from "../models/data/Script";
 import Util from "../utilities/Util";
 import Component from "./Component";
 
@@ -86,12 +87,12 @@ export default class RecordBuilder extends Component {
           reasonSelector.val(prebuilt.reason);
           reasonInput
             .val(reason.text)
-            .trigger("remt:input", true);
+            .trigger(`${Script.eventPrefix}:input`, true);
 
           container.find("button.rules-button").removeClass("active");
           for (const rule of [prebuilt.rules])
             container.find("button.rules-button[name='" + rule + "']").addClass("active");
-          container.trigger("remt:buttons", true);
+          container.trigger(`${Script.eventPrefix}:buttons`, true);
 
           this.generateRecordText();
 
@@ -124,16 +125,16 @@ export default class RecordBuilder extends Component {
 
     reasonSelector
       .appendTo(reasonContainer)
-      .on("change remt:change", (event, preventChange) => {
+      .on(`change ${Script.eventPrefix}:change`, (event, preventChange) => {
         const reason = Records.Reasons[reasonSelector.val() + ""];
         reasonInput
           .val(reason.text || "")
-          .trigger("remt:input", preventChange);
+          .trigger(`${Script.eventPrefix}:input`, preventChange);
 
         container.find("button.rules-button").removeClass("active");
         for (const rule of [reason.rules])
           container.find("button.rules-button[name='" + rule + "']").addClass("active");
-        container.trigger("remt:buttons", true);
+        container.trigger(`${Script.eventPrefix}:buttons`, true);
 
         this.generateRecordText();
       });
@@ -154,10 +155,10 @@ export default class RecordBuilder extends Component {
       .on("input", (event, preventChange) => {
         clearTimeout(reasonInputTimer);
         reasonInputTimer = window.setTimeout(() => {
-          reasonInput.trigger("remt:input", preventChange);
+          reasonInput.trigger(`${Script.eventPrefix}:input`, preventChange);
         }, 200);
       })
-      .on("propertychange remt:input", (event, preventChange) => {
+      .on(`propertychange ${Script.eventPrefix}:input`, (event, preventChange) => {
         container.data("reason", reasonInput.val() + "");
         if (!preventChange) this.generateRecordText();
       });
@@ -222,11 +223,11 @@ export default class RecordBuilder extends Component {
           const button = $(event.currentTarget);
           button.toggleClass("active");
 
-          container.trigger("remt:buttons");
+          container.trigger(`${Script.eventPrefix}:buttons`);
         });
     }
 
-    container.on("remt:buttons", (event, preventChange) => {
+    container.on(`${Script.eventPrefix}:buttons`, (event, preventChange) => {
       const buttons: string[] = [];
       for (const btn of ruleWrapper.find("button.active"))
         buttons.push((btn as HTMLInputElement).name);
@@ -240,7 +241,7 @@ export default class RecordBuilder extends Component {
   }
 
   private generateRecordText() {
-    // console.log("%c[RE621.ModTools]%c Updating Record Text", "color: maroon", "color: unset");
+    // Debug.logPrefix("Updating Record Text");
 
     const result: string[] = [];
 
@@ -250,6 +251,8 @@ export default class RecordBuilder extends Component {
 
     this.input.val(result.join("\n"));
   }
+
+  private static readonly sourceMatcher = new RegExp(`https:\\/\\/(?:${Script.domains.join("|")})\\/`, "g");
 
   private processForm(form: JQuery<HTMLElement>): string {
     // console.log(form.data());
@@ -284,7 +287,7 @@ export default class RecordBuilder extends Component {
                 (ruleData.preface ? (ruleData.preface + "\n\n") : "") + 
                 `${ruleLines.join("\n")}\n\n` +
                 (ruleData.postface ? (ruleData.postface + "\n\n") : "") + 
-                `"[Code of Conduct - ${ruleData.title}]":${ruleData.link ? ruleData.link : `/wiki_pages/e621:rules#${name.toLowerCase()}`}\n` +
+                `"[Code of Conduct - ${ruleData.title}]":${ruleData.link ? ruleData.link : `/wiki_pages/${Script.siteNameWikiPrefix}:rules#${name.toLowerCase()}`}\n` +
                 `[/section]`
       );
     }
@@ -301,12 +304,11 @@ export default class RecordBuilder extends Component {
     /**
      * Convert a source link into a common format
      * @param {string} source Source link
-     * @todo Change to handle e6ai.
      */
     function processSource(source: string): string {
       return decodeURI(source)
         .trim()
-        .replace(/https:\/\/e(?:621|926).net\//g, "/")              // Make links relative
+        .replace(RecordBuilder.sourceMatcher, "/")                  // Make links relative
         .replace(/\/posts\/(\d+)#comment-(\d+)/g, "/comments/$2")   // Convert comment links
         .replace(/\/forum_topics\/(\d+)(?:\?page=\d+)?#forum_post_(\d+)/g, "/forum_posts/$2")   // Convert forum post links
         .replace(/\?lr=\d+&/, "?")                                  // Trim the tag history links

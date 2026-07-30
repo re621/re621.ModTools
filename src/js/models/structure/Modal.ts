@@ -1,5 +1,7 @@
 import Util from "../../utilities/Util";
 import { makeIcon } from "../../utilities/UtilIcons";
+import Script from "../data/Script";
+import Debug from "../Debug";
 import PreparedStructure from "./PreparedStructure";
 
 export default class Modal {
@@ -100,10 +102,10 @@ export default class Modal {
 		position: { my: "center", at: "center" },
 	}; */
   /**
-     * Parses the configuration and sets the default values for missing entries
-     * @param config Configuration to parse
-     * @todo Convert to using `Object.assign` with a default object instead.
-     */
+   * Parses the configuration and sets the default values for missing entries
+   * @param config Configuration to parse
+   * @todo Convert to using `Object.assign` with a default object instead.
+   */
   private validateConfig(config: ModalConfig): RequiredModalConfig | Required<ModalConfig> {
     // const result: ModalConfig = Object.assign({}, Modal.defaultConfig, config);
 
@@ -134,26 +136,26 @@ export default class Modal {
   }
 
   /**
-     * Appends more content to the modal
-     * @param $content Content to add
-     */
+   * Appends more content to the modal
+   * @param $content Content to add
+   */
   public addContent($content: JQuery<HTMLElement>): void {
     this.$modal.append($content);
   }
 
   /**
-     * Sets the modal content
-     * @param $content Content to add
-     */
+   * Sets the modal content
+   * @param $content Content to add
+   */
   public setContent($content: JQuery<HTMLElement>): void {
     this.$modal.html("");
     this.$modal.append($content);
   }
 
   /**
-     * Listens to the specified element in order to trigger the modal
-     * @param trigger Element-event pair to listen to
-     */
+   * Listens to the specified element in order to trigger the modal
+   * @param trigger Element-event pair to listen to
+   */
   public registerTrigger(trigger: ModalTrigger | ModalTrigger[]): void {
     if (!trigger) return;
     else if (Array.isArray(trigger)) {
@@ -165,7 +167,7 @@ export default class Modal {
     if (this.triggers.length == 0) this.activeTrigger = trigger.element;
     this.triggers.push(trigger);
 
-    trigger.element.on(trigger.event + ".remt.dialog-" + this.id, (event) => {
+    trigger.element.on(trigger.event + `.${Script.eventPrefix}.dialog-` + this.id, (event) => {
       if (this.isDisabled) return;
       event.preventDefault();
 
@@ -182,7 +184,7 @@ export default class Modal {
 
   public clearTriggers(): void {
     for (const trigger of this.triggers)
-      trigger.element.off(trigger.event + ".remt.dialog-" + this.id);
+      trigger.element.off(trigger.event + `.${Script.eventPrefix}.dialog-` + this.id);
     this.triggers = [];
   }
 
@@ -194,27 +196,29 @@ export default class Modal {
 
 
   /**
-     * Completely and irreversibly destroys the modal window
-     */
+   * Completely and irreversibly destroys the modal window
+   */
   public destroy(): void {
     this.$modal.dialog("destroy");
     this.$modal.remove();
   }
 
   /**
-     * Returns the element that triggered the modal
-     * @returns JQuery<HTMLElement> trigger
-     */
+   * Returns the element that triggered the modal
+   * @returns JQuery<HTMLElement> trigger
+   */
   public getActiveTrigger(): JQuery<HTMLElement> | undefined {
     return this.activeTrigger;
   }
 
   /**
-	 * This class doesn't work unless re621 has added the `#modal-container` element, so this manually ensures it's added to enable it to work w/o re621.
+	 * This class doesn't work unless the companion script has added the
+   * `#modal-container` element, so this manually ensures it's added to enable
+   * it to work w/o the companion script.
 	 */
   private static ensureModalContainer() {
     if (!document.querySelector("#modal-container")) {
-      console.log("%c[RE621.ModTools]%c: no re621 detected; manually creating 'div#modal-container'...", "color: maroon", "color: unset");
+      Debug.logPrefix(`No ${Script.companionProjectName} detected; manually creating 'div#modal-container'...`);
       $("<div>").attr("id", "modal-container").prependTo("div#page");
     }
   }

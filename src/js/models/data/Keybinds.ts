@@ -1,5 +1,6 @@
 import Util from "../../utilities/Util";
 import Debug from "../Debug";
+import Script from "./Script";
 
 const validKeys = [
   "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
@@ -74,7 +75,7 @@ export default class KeybindManager {
     KeybindManager.listening = true;
     let keys: string[] = [];
 
-    $(document).on("keydown.remt.record", (event) => {
+    $(document).on(`keydown.${Script.eventPrefix}.record`, (event) => {
       const key = event.key
         .toLowerCase()
         .replace(replacedRegExp, (matched) => {
@@ -84,9 +85,9 @@ export default class KeybindManager {
       keys.push(key);
     });
 
-    $(document).on("keyup.remt.record", () => {
+    $(document).on(`keyup.${Script.eventPrefix}.record`, () => {
       if (keys.length !== 0) {
-        $(document).off(".remt.record");
+        $(document).off(`.${Script.eventPrefix}.record`);
         callback(keys);
         KeybindManager.listening = false;
         return;
@@ -132,7 +133,7 @@ export default class KeybindManager {
         if (!selector) selector = undefined;
 
         let cooldown: number | undefined;
-        $element.on("keydown.remt.hotkey-" + key, selector, key, (event: Event) => {
+        $element.on(`keydown.${Script.eventPrefix}.hotkey-` + key, selector, key, (event: Event) => {
           if (keydown) return;
           if (cooldown) return;
 
@@ -150,7 +151,7 @@ export default class KeybindManager {
           }, 50);
         });
 
-        $element.on("keyup.remt.hotkey-" + key, selector, key, () => {
+        $element.on(`keyup.${Script.eventPrefix}.hotkey-` + key, selector, key, () => {
           keydown = false;
         });
 

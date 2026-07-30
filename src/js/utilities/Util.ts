@@ -1,4 +1,3 @@
-// import Debug from "../models/Debug";
 import { UtilDOM } from "./UtilDOM";
 import { UtilEvents } from "./UtilEvents";
 import UtilID from "./UtilID";
@@ -24,10 +23,10 @@ export default class Util {
   public static SS = window.sessionStorage;
 
   /**
-     * Downloads the provided object as a JSON file
-     * @param data Object to download
-     * @param file File name
-     */
+   * Downloads the provided object as a JSON file
+   * @param data Object to download
+   * @param file File name
+   */
   public static downloadAsJSON(data: any, file: string): void {
     const tempLink = $("<a>")
       .attr({
@@ -40,24 +39,24 @@ export default class Util {
   }
 
   /**
-     * Returns a promise that is fulfilled after the specified time period elapses
-     * @param time Time period, in milliseconds
-     */
+   * Returns a promise that is fulfilled after the specified time period elapses
+   * @param time Time period, in milliseconds
+   */
   public static async sleep(time: number): Promise<void> {
     return new Promise((resolve) => { setTimeout(() => { resolve(); }, time) });
   }
 
   /**
-     * Split the array into chunks of specified size.  
-     * The `method` parameter defines how the array is split.  
-     * - "balance": the chunks are at most `size` big, but otherwise of equal size
-     * - "chunk": all chunks except for the last one of equal size
-     * - "split": first chunk is `size` big, the second contains the remainder
-     * @param input Original array
-     * @param size Size of the resulting chunks
-     * @param method Method by which the array is split
-     * @returns Array of smaller arrays of specified size
-     */
+   * Split the array into chunks of specified size.  
+   * The `method` parameter defines how the array is split.  
+   * - "balance": the chunks are at most `size` big, but otherwise of equal size
+   * - "chunk": all chunks except for the last one of equal size
+   * - "split": first chunk is `size` big, the second contains the remainder
+   * @param input Original array
+   * @param size Size of the resulting chunks
+   * @param method Method by which the array is split
+   * @returns Array of smaller arrays of specified size
+   */
   public static chunkArray<T>(input: T[] | Set<T>, size: number, method: "balance" | "chunk" | "split" = "balance"): T[][] {
     if (!Array.isArray(input)) input = Array.from(input);
     const result: T[][] = [];
@@ -83,11 +82,11 @@ export default class Util {
   }
 
   /**
-     * Returns the indexes of all instances of the specified value in an array
-     * @param input Array to search
-     * @param value Value to look for
-     * @returns Array of number indexes
-     */
+   * Returns the indexes of all instances of the specified value in an array
+   * @param input Array to search
+   * @param value Value to look for
+   * @returns Array of number indexes
+   */
   public static getArrayIndexes<T>(input: T[], value: T): number[] {
     const indexes: number[] = [];
     let i = 0;
@@ -98,11 +97,13 @@ export default class Util {
   }
 
   /**
-     * Convert markdown input into html.  
-     * Very limited in scope, don't rely on this for anything important.
-     * @param input Markdown input
-     * @returns HTML output
-     */
+   * Convert Markdown input into HTML.  
+   *
+   * Very limited in scope, don't rely on this for anything important.
+   * @param input Markdown input
+   * @returns HTML output
+   * @todo Escape HTML characters?
+   */
   public static quickParseMarkdown(input: string): string {
     if (input === undefined) return "";
     return input
@@ -115,10 +116,14 @@ export default class Util {
   }
 
   /**
-     * Parses the provided DText string, returning it as plain text
-     * @param input Input to process
-     * @param removeSections If true, removes `quote`, `code`, and `sections` blocks altogether
-     */
+   * Parses the provided DText string, returning it as plain text
+   * @param input Input to process
+   * @param removeSections If true, removes `quote`, `code`, and `sections` blocks altogether
+   * @todo Properly account for `[color]` tags.
+   * @todo Body matcher is too broad; improve.
+   * @todo We don't have an `[o]` overline tag, nor is there an `<o>` HTML tag; remove.
+   * @todo Leverage the independent parser?
+   */
   public static stripDText(input: string, removeSections = true): string {
     if (removeSections) {
       input = input.replace(/\[quote\][\s\S]*\[\/quote\]/g, "")
@@ -141,16 +146,16 @@ export default class Util {
   }
 
   /**
-     * Trims the thousands off a number and replaced them with a K.  
-     * ex. 54321 -> 54.3k
-     * @param num Number to trim
-     */
+   * Trims the thousands off a number and replaced them with a K.  
+   * ex. 54321 -> 54.3k
+   * @param num Number to trim
+   */
   public static formatK(num: number): string {
     return Math.abs(num) > 999 ? (Math.sign(num) * (Math.abs(num) / 1000)).toFixed(1) + "k" : Math.sign(num) * Math.abs(num) + "";
   }
 
 
-  /* returns an array with the ratio */
+  /* Returns an array with the ratio */
   public static formatRatio(width: number, height: number): [number, number] {
     const d = gcd(width, height);
     return [width / d, height / d];
@@ -175,9 +180,10 @@ export default class Util {
   }
 
   /**
-     * Parses the textarea input specified in the parameter and returns a list of space-separated tags
-     * @param input Textarea to parse
-     */
+   * Parses the textarea input specified in the parameter and returns a list of
+   * space-separated tags
+   * @param input Textarea to parse
+   */
   public static getTagString(input: JQuery<HTMLElement>): string {
     return input.val()?.toString().trim()
       .toLowerCase()
@@ -209,26 +215,27 @@ export default class Util {
     return new RegExp(result.join("|"), "gi");
   }
 
+  // #region Versioning
   /**
-     * Compares two software version numbers (e.g. "1.7.1" or "1.2b").
-     *
-     * This function was born in http://stackoverflow.com/a/6832721.
-     *
-     * @param v1 The first version to be compared.
-     * @param v2 The second version to be compared.
-     * @param [options] Optional flags that affect comparison behavior:
-     *      `lexicographical` _boolean_ compares each part of the version strings lexicographically instead of
-     *      naturally; this allows suffixes such as "b" or "dev" but will cause "1.10" to be considered smaller than "1.2".  
-     *      `zeroExtend` _boolean_ changes the result if one version string has less parts than the other. In
-     *         this case the shorter string will be padded with "zero" parts instead of being considered smaller.  
-     * @returns {number|NaN}
-     *      - 0 if the versions are equal  
-     *      - a negative integer iff v1 < v2  
-     *      - a positive integer iff v1 > v2  
-     *      - NaN if either version string is in the wrong format  
-     * @copyright by Jon Papaioannou (`john.papaioannou@gmail.com`)
-     * @license This function is in the public domain. Do what you want with it, no strings attached.
-     */
+   * Compares two software version numbers (e.g. "1.7.1" or "1.2b").
+   *
+   * This function was born in http://stackoverflow.com/a/6832721.
+   *
+   * @param v1 The first version to be compared.
+   * @param v2 The second version to be compared.
+   * @param [options] Optional flags that affect comparison behavior:
+   *      `lexicographical` _boolean_ compares each part of the version strings lexicographically instead of
+   *      naturally; this allows suffixes such as "b" or "dev" but will cause "1.10" to be considered smaller than "1.2".  
+   *      `zeroExtend` _boolean_ changes the result if one version string has less parts than the other. In
+   *         this case the shorter string will be padded with "zero" parts instead of being considered smaller.  
+   * @returns {number|NaN}
+   *      - 0 if the versions are equal  
+   *      - a negative integer iff v1 < v2  
+   *      - a positive integer iff v1 > v2  
+   *      - NaN if either version string is in the wrong format  
+   * @copyright by Jon Papaioannou (`john.papaioannou@gmail.com`)
+   * @license This function is in the public domain. Do what you want with it, no strings attached.
+   */
   public static versionCompare(v1: string, v2: string, options?: { lexicographical?: boolean; zeroExtend?: boolean }): number {
     const lexicographical = options && options.lexicographical,
       zeroExtend = options && options.zeroExtend;
@@ -266,13 +273,41 @@ export default class Util {
   }
 
   /**
-     * Formats an array into a string via a non-standard join method.  
-     * Ex. ["one"] => "one"
-     *     ["one", "two"] => "one and two"
-     *     ["one", "two", "three"] => "one, two, and three"
-     * @param array Array to format
-     * @param delimiter Delimiter for the last element
-     */
+   * Parses the given string according to the SemVer format into an object with
+   * convenient formatting & access fields.
+   * 
+   * @todo Options for strictness
+   * @todo Option for `toString() { return this.raw; }`
+   * @todo Allow non-key values in `format`.
+   */
+  public static parseVersion(v: string) {
+    const m = /(\d+)\.(\d+)\.(\d+)(?:-([-a-zA-Z0-9]+))?(?:\+([-a-zA-Z0-9]+))?/.exec(v);
+    return {
+      raw: v,
+      full: m?.[0] ?? "0.0.0",
+      major: m?.[1] ?? "0",
+      minor: m?.[2] ?? "0",
+      patch: m?.[3] ?? "0",
+      preRelease: m?.[4] ?? "",
+      build: m?.[5] ?? "",
+      didParseFail: !m,
+      format(strings: TemplateStringsArray, ...values: readonly ("full" | "major" | "minor" | "patch" | "preRelease" | "build")[]) {
+        let r = strings[0];
+        for (let i = 0; i < values.length; r += this[values[i]] + strings[++i]) {}
+        return r;
+      },
+    };
+  }
+  // #endregion Versioning
+
+  /**
+   * Formats an array into a string via a non-standard join method.  
+   * Ex. ["one"] => "one"
+   *     ["one", "two"] => "one and two"
+   *     ["one", "two", "three"] => "one, two, and three"
+   * @param array Array to format
+   * @param delimiter Delimiter for the last element
+   */
   public static prettyPrintArray(array: string[], delimiter = "and"): string {
     if (array.length == 1) return array[0];
     else if (array.length == 2) return array[0] + " " + delimiter + " " + array[1];
@@ -361,6 +396,3 @@ export default class Util {
   // #endregion replaceTemplateVariables
 }
 type StringReplacer = (key: string, ...args: any[]) => string;
-// interface StringDictionary<B> {
-// 	[index: string]: B;
-// }
