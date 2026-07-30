@@ -1,4 +1,5 @@
 import Danbooru from "../models/api/Danbooru";
+import { User } from "../models/api/site/User";
 import { html } from "../utilities/HtmlTemplate";
 import Component from "./Component";
     
@@ -9,13 +10,11 @@ export default class CiteUser extends Component {
   public static readonly rootPattern = `a[href^="/users/"]`;
   /** Finds user links in comment, forum, & blip sidebars */
   public static readonly publicMessageSelector = `h4.author-name > ${this.rootPattern}`;
-  /** Finds user links on their profile */
-  public static readonly profileSelector = `.profile-name > ${this.rootPattern}`;
   /** Finds presumptively proper user links in DText */
   public static readonly dtextSelector = `${this.rootPattern}.dtext-link`;
   /** Finds users referenced in staff wikis */
   public static readonly staffWikiSelector = `.reference-user > ${this.rootPattern}`;
-  public static readonly collectiveSelector = `${CiteUser.publicMessageSelector}, ${CiteUser.profileSelector}, ${CiteUser.dtextSelector}, ${this.staffWikiSelector}`;
+  public static readonly collectiveSelector = `${CiteUser.publicMessageSelector}, ${User.userProfileLinkSelector}, ${CiteUser.dtextSelector}, ${this.staffWikiSelector}`;
   public constructor() {
     super({
       waitForDOM: CiteUser.collectiveSelector,

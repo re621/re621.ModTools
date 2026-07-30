@@ -1,5 +1,7 @@
 import ErrorHandler from "../../../utilities/ErrorHandler";
 import Util from "../../../utilities/Util";
+import { pullUserNameFromHref, tryPullUserIdFromHrefs, tryPullUserNameFromAnchors } from "./helpers";
+import { User } from "./User";
 
 /** 
  * Allows representing the initial, raw JSON, & the fully reconstructed object
@@ -102,7 +104,7 @@ export namespace StaffNote {
    * @returns The id if found (either from the HTML or the current URL), -1 otherwise.
    */
   export function pullUserIdFromHtml(note: HTMLElement) {
-    return parseInt(new URL(note.querySelector<HTMLAnchorElement>('.content > *:first-child > a[href^="/users/"]')?.href ?? location.href).pathname.match(/\/users\/([0-9]+)/)?.[1] ?? "-1");
+    return tryPullUserIdFromHrefs(note.querySelector<HTMLAnchorElement>('.content > *:first-child > a[href^="/users/"]')?.href, ...User.potentialUserHrefs()) ?? -1;
   }
   /**
    * 
@@ -110,10 +112,10 @@ export namespace StaffNote {
    * @returns The id if found (either from the HTML or the current URL), `undefined` otherwise.
    */
   export function tryPullUserIdFromHtml(note: HTMLElement) {
-    return tryIdShell(pullUserIdFromHtml(note));
+    return tryPullUserIdFromHrefs(note.querySelector<HTMLAnchorElement>('.content > *:first-child > a[href^="/users/"]')?.href, ...User.potentialUserHrefs());
   }
   export function pullUserNameFromHtml(note: HTMLElement) {
-    return (note.querySelector<HTMLAnchorElement>('.content > *:first-child > a[href^="/users/"]') ?? document.querySelector<HTMLAnchorElement>('.profile-name > a:first-child[href^="/users/"]'))?.innerText;
+    return tryPullUserNameFromAnchors(note.querySelector<HTMLAnchorElement>('.content > *:first-child > a[href^="/users/"]'), document.querySelector<HTMLAnchorElement>(User.userProfileLinkSelector)) ?? pullUserNameFromHref(location.href);
   }
   /**
    * 
