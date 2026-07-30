@@ -1,5 +1,5 @@
 import Danbooru from "../models/api/Danbooru";
-import { StaffNote, StaffNoteExtended } from "../models/api/e621/StaffNote";
+import { StaffNote, StaffNoteExtended } from "../models/api/site/StaffNote";
 import { PageDefinition } from "../models/data/Page";
 import { html } from "../utilities/HtmlTemplate";
 import Util from "../utilities/Util";
