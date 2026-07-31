@@ -119,6 +119,8 @@ export default class AutoClickPosts extends Component {
   private initSettingsMenu() {
     this.settingsMenuDialogParameters = {
       elements:[
+        $(this.enabledElement),
+        $(`<br />`),
         $(this.simpleSettingsCheckbox("hideButton", undefined)),
         $(`<br />`),
         $(this.simpleSettingsCheckbox("testMode", undefined)),
@@ -138,6 +140,7 @@ export default class AutoClickPosts extends Component {
       optionsOrTitle: "Auto-Click Posts Settings",
       then: (e: FormData) => {
         if (this.handleResetSettingsDialogElement(e)) return;
+        if (!this.handleEnabledElement(e)) return;
         this.Settings.hideButton = e.get(`${this.settingsIdPrefix}hideButton`) === "true";
         this.Settings.testMode = e.get(`${this.settingsIdPrefix}testMode`) === "true";
         this.Settings.clickBlacklisted = e.get(`${this.settingsIdPrefix}clickBlacklisted`) === "true";

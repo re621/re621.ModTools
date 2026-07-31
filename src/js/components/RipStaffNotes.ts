@@ -95,9 +95,10 @@ export default class RipStaffNotes extends Component {
           undefined,
           { placeholder: `Valid template parameters: ${StaffNote.extendedJsonKeys.join(", ")}` },
         )),
-        // $(`<textarea id="setting-header" name="setting-header" placeholder=""></textarea>`).text(this.Settings.staffNoteTemplate),
         $("<br />"),
         $(this.simpleSettingsCheckbox("reverseOrder")),
+        $("<br />"),
+        $(this.enabledElement),
         $("<br />"),
         $(this.resetSettingsDialogElement),
         $("<br />"),
@@ -105,6 +106,7 @@ export default class RipStaffNotes extends Component {
       optionsOrTitle: "Rip Staff Notes",
       then: (e: FormData) => {
         if (this.handleResetSettingsDialogElement(e)) return;
+        if (!this.handleEnabledElement(e)) return;
         this.Settings.reverseOrder = e.get(`${this.settingsIdPrefix}reverseOrder`) === "true";
       },
     };

@@ -121,6 +121,8 @@ export default class TicketReasons extends Component {
   private initSettingsMenu() {
     this.settingsMenuDialogParameters = {
       elements: [
+        $(this.enabledElement),
+        $(`<br />`),
         $(html`<fieldset title="How should the button's text be added to the text box?">
             <legend>Text insertion mode</legend>
             <label for="setting-insertMode-insert" title="Insert the text at the cursor position.">Insert <input type="radio" id="setting-insertMode-insert" name="setting-insertMode" value="insert"${(this.Settings.insertMode ?? "insert") === "insert" ? " checked" : ""} /></label>
@@ -130,6 +132,7 @@ export default class TicketReasons extends Component {
       ],
       optionsOrTitle: this.settingsButtonLabel,
       then: (e: FormData) => {
+        if (!this.handleEnabledElement(e)) return;
         const v = e.get("setting-insertMode");
         if (v && (v === "insert" || v === "replace")) this.Settings.insertMode = v;
       },

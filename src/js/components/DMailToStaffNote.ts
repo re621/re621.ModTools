@@ -47,6 +47,8 @@ export default class DMailToStaffNote extends Component {
   private revealSettingsDialog(): boolean {
     DialogForm.getRequestedInput(
       [
+        $(this.enabledElement),
+        $(`<br />`),
         $('<label for="setting-header">Default Staff Note Header</label>'),
         $(`<textarea id="setting-header" name="setting-header" placeholder="Valid template parameters: ${Array.from(this.templateVariables.keys()).join(", ")}"></textarea>`).text(this.Settings.header),
         $('<br />'),
@@ -55,6 +57,7 @@ export default class DMailToStaffNote extends Component {
       ],
       "Settings",
       (e: FormData) => {
+        if (!this.handleEnabledElement(e)) return;
         this.Settings.header = e.get("setting-header")?.toString() ?? "";
         this.Settings.footer = e.get("setting-footer")?.toString() ?? "";
         // TODO: Update text boxes
