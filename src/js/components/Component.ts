@@ -339,6 +339,7 @@ export default class Component {
 
   protected get prettyPrintName() { return this.name.replace(/(?<=[a-z])[A-Z]/g, " $&"); }
   protected get settingsDialogTitle() { return `${this.prettyPrintName} Settings`; }
+  // #region Reset settings
   protected get settingsIdPrefix() { return `${this.prettyPrintName.replace(/\s+/g, "-")}-setting-`; }
   protected handleResetSettingsDialogElement(e: FormData, forceConfirm = true) {
     if (
@@ -351,6 +352,18 @@ export default class Component {
     return false;
   }
   protected get resetSettingsDialogElement() { return `<label for="${this.settingsIdPrefix}resetSettings" title="Reset settings to defaults?">Reset<input type="checkbox" id="${this.settingsIdPrefix}resetSettings" name="${this.settingsIdPrefix}resetSettings" value="true" /></label>`; }
+  // #endregion Reset settings
+  // #region Enabled
+  /** Returns the current value of `this.Settings.enabled`. */
+  protected handleEnabledElement(e: FormData, forceConfirm = true) {
+    if (e.get(`${this.settingsIdPrefix}enabled`) !== "true" && (!forceConfirm || confirm(`Are you sure you want to disable ${this.prettyPrintName}? There will be no UI to undo this.`))) {
+      this.Settings.enabled = false;
+      return false;
+    }
+    return this.Settings.enabled = true;
+  }
+  protected get enabledElement() { return `<label for="${this.settingsIdPrefix}enabled" title="Enable this feature?">Enable this feature? <input type="checkbox" id="${this.settingsIdPrefix}enabled" name="${this.settingsIdPrefix}enabled" value="true" ${this.Settings.enabled ? "checked" : ""} /></label>`; }
+  // #endregion Enabled
   protected simpleSettingsCheckbox(setting: keyof typeof this.Settings/* string */, label?: string, title?: string) {
     return /* html */`
         <label for="${this.settingsIdPrefix}${setting}"${title ? ` title="${title}"` : ""}>
