@@ -240,6 +240,8 @@ export default class AutoTaggingButtons extends Component {
   private initSettingsMenu() {
     this.settingsMenuDialogParameters = {
       elements:[
+        $(this.enabledElement),
+        $(`<br />`),
         $(this.simpleSettingsCheckbox("doShow", "Show buttons?", "Should any button be loaded onto this page next time?")),
         $(`<br />`),
         $(this.simpleSettingsCheckbox("forceConfirm", "Force Confirm?", "Should you need to confirm the edit first?")),
@@ -254,6 +256,7 @@ export default class AutoTaggingButtons extends Component {
       optionsOrTitle: "Auto Tag Edits Settings",
       then: (e: FormData) => {
         if (this.handleResetSettingsDialogElement(e)) return;
+        if (!this.handleEnabledElement(e)) return;
         this.Settings.doShow = e.get(`${this.settingsIdPrefix}doShow`) === "true";
         this.Settings.forceConfirm = e.get(`${this.settingsIdPrefix}forceConfirm`) === "true";
         this.Settings.testMode = e.get(`${this.settingsIdPrefix}testMode`) === "true";

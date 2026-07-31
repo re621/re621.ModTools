@@ -75,7 +75,7 @@ export default class FilterOldFeedbacks extends Component {
   private initSettingsMenu() {
     this.settingsMenuDialogParameters = {
       elements:[
-        $(`<label for="setting-enabled" title="Enable this feature?">Enable this feature? <input type="checkbox" id="setting-enabled" name="setting-enabled" value="true" ${this.Settings.enabled ? "checked" : ""} /></label>`),
+        $(this.enabledElement),
         $(`<br />`),
         $(this.simpleSettingsCheckbox("fullHide", "Fully hide the rows?", "This won't leave any indicator they're hidden; be careful.")),
         $(`<br />`),
@@ -90,8 +90,7 @@ export default class FilterOldFeedbacks extends Component {
       ],
       optionsOrTitle: "Filter Old Feedbacks Settings",
       then: (e: FormData) => {
-        if (e.get("setting-enabled") !== "true" && confirm("Are you sure you want to disable the copy button? There is no UI to undo this.")) {
-          this.Settings.enabled = false;
+        if (!this.handleEnabledElement(e)) {
           this.all.forEach(e => e.classList.remove("hiddenForAge"));
           return;
         }

@@ -116,10 +116,15 @@ export default class ReportContentData extends Component {
   private initSettingsMenu() {
     this.settingsMenuDialogParameters = {
       elements: [
+        $(this.enabledElement),
+        $(`<br />`),
         $(`<label for="setting-loadMessage" title="Should the reported content be loaded onto this page next time?">Load Message? <input type="checkbox" id="setting-loadMessage" name="setting-loadMessage" value="true" ${this.Settings.loadMessage ? "checked" : ""}></input></label><br />`),
       ],
-      optionsOrTitle: "Mod Tools Settings",
-      then: (e: FormData) => this.Settings.loadMessage = e.get("setting-loadMessage") === "true",
+      optionsOrTitle: "Reported Message",
+      then: (e: FormData) => {
+        if (!this.handleEnabledElement(e)) return;
+        this.Settings.loadMessage = e.get("setting-loadMessage") === "true";
+      },
     };
   }
 
