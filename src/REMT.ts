@@ -23,6 +23,7 @@ import AutoClickPosts from "./js/components/AutoClickPosts";
 import FilterOldFeedbacks from "./js/components/FilterOldFeedbacks";
 import CiteUser from "./js/components/CiteUser";
 import RipStaffNotes from "./js/components/RipStaffNotes";
+import TimeKeeper from "./js/components/TimeKeeper";
 
 export default class REMT {
 
@@ -47,6 +48,7 @@ export default class REMT {
     FilterOldFeedbacks,
     CiteUser,
     RipStaffNotes,
+    TimeKeeper,
   ];
 
   public async run(): Promise<void> {
@@ -168,4 +170,5 @@ interface ComponentListAnnotated extends Partial<ComponentList> {
     FilterOldFeedbacks?: FilterOldFeedbacks,
     CiteUser?: CiteUser,
     RipStaffNotes?: RipStaffNotes,
+    TimeKeeper?: TimeKeeper,
 }
