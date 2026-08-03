@@ -7,10 +7,10 @@ import Component from "./Component";
 export default class RecordBuilder extends Component {
 
   /**
-     * The element on the HTML from the server where the record text is placed.
-     * 
-     * NOTE: Initialized at the top of `create`, before all usages.
-     */
+   * The element on the HTML from the server where the record text is placed.
+   * 
+   * NOTE: Initialized at the top of `create`, before all usages.
+   */
   private input!: JQuery<HTMLTextAreaElement>;
 
   public constructor() {
