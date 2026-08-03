@@ -12,6 +12,10 @@ div#modal-container {
 
     /* Modal Styling Overrides */
     div.ui-dialog {
+        // IDEA: Restore prior behavior?
+        // The container is the scrollable element b/c making `div.ui-dialog-content` scroll wasn't working.
+        overflow: scroll;
+
         position: absolute !important;
         pointer-events: auto;
         border-radius: 6px;
@@ -38,11 +42,17 @@ div#modal-container {
         }
 
         div.ui-dialog-titlebar {
-            position: relative;
+            // IDEA: Restore prior behavior?
+            // This is a hack to allow the container to be the scrollable element; was previously `relative` w/ no `top`.
+            position: sticky;
+            top: 0;
+
             padding: 0;
             border: 0;
             border-radius: 6px 6px 0 0;
-            background-color: #00000066;
+            // IDEA: Restore translucent effect?
+            // Changed from #00000066 for sticky titlebar.
+            background-color: #000000;
             color: var(--color-text);
             cursor: grab;
             height: 2rem;

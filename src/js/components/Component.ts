@@ -84,9 +84,11 @@ export default class Component {
     // Load in the saved settings values
     for (const [key, defaultValue] of Object.entries(settings || this.Settings)) {
       const savedValue = XM.Storage.getValue(this.name + "." + key, defaultValue);
+      // if (key === "enabled") console.log("%s: %s starts as %o", this.name, key, this.SettingsCache[key] ?? defaultValue);
       this.SettingsCache[key] = savedValue;
       this.SettingsDefaults[key] = defaultValue;
       delete this.Settings[key];
+      // if (key === "enabled") console.log("%s: %s set to %o", this.name, key, this.SettingsCache[key] ?? defaultValue);
 
       // Define custom setters and getters
       Object.defineProperty(this.Settings, key, {
@@ -337,7 +339,7 @@ export default class Component {
     }
   }
 
-  protected get prettyPrintName() { return this.name.replace(/(?<=[a-z])[A-Z]/g, " $&"); }
+  protected get prettyPrintName() { return Util.pascalToTitle(this.name); }
   protected get settingsDialogTitle() { return `${this.prettyPrintName} Settings`; }
   // #region Reset settings
   protected get settingsIdPrefix() { return `${this.prettyPrintName.replace(/\s+/g, "-")}-setting-`; }
@@ -354,27 +356,41 @@ export default class Component {
   protected get resetSettingsDialogElement() { return `<label for="${this.settingsIdPrefix}resetSettings" title="Reset settings to defaults?">Reset<input type="checkbox" id="${this.settingsIdPrefix}resetSettings" name="${this.settingsIdPrefix}resetSettings" value="true" /></label>`; }
   // #endregion Reset settings
   // #region Enabled
-  /** Returns the current value of `this.Settings.enabled`. */
+  /**
+   * 
+   * @param e The data to read
+   * @param forceConfirm Should the user confirm a pop up warning before
+   * performing the operation?
+   * @returns The resultant value of `this.Settings.enabled`.
+   */
   protected handleEnabledElement(e: FormData, forceConfirm = true) {
     if (e.get(`${this.settingsIdPrefix}enabled`) !== "true" && (!forceConfirm || confirm(`Are you sure you want to disable ${this.prettyPrintName}? There will be no UI to undo this.`))) {
-      this.Settings.enabled = false;
-      return false;
+      return this.Settings.enabled = false;
     }
     return this.Settings.enabled = true;
   }
   protected get enabledElement() { return `<label for="${this.settingsIdPrefix}enabled" title="Enable this feature?">Enable this feature? <input type="checkbox" id="${this.settingsIdPrefix}enabled" name="${this.settingsIdPrefix}enabled" value="true" ${this.Settings.enabled ? "checked" : ""} /></label>`; }
   // #endregion Enabled
-  protected simpleSettingsCheckbox(setting: keyof typeof this.Settings/* string */, label?: string, title?: string) {
+  private wrapSimpleInputWithLabel(interior: string, setting: keyof typeof this.Settings/* string */, label?: string, title?: string) {
     return /* html */`
         <label for="${this.settingsIdPrefix}${setting}"${title ? ` title="${title}"` : ""}>
-          ${label ?? `${setting[0].toUpperCase()}${(setting as string).slice(1).replace(/(?<=[a-z])[A-Z]/g, " $&")}?`}
+          ${label ?? `${Util.camelToTitle(setting as string)}?`}
           &nbsp;
-          <input type="checkbox"
-                 id="${this.settingsIdPrefix}${setting}"
-                 name="${this.settingsIdPrefix}${setting}"
-                 value="true"
-                 ${this.Settings[setting] ? " checked" : ""} />
+          ${interior}
         </label>`;
+  }
+  protected simpleSettingsCheckbox(setting: keyof typeof this.Settings/* string */, label?: string, title?: string) {
+    return this.wrapSimpleInputWithLabel(
+      /* html */`<input
+        type="checkbox"
+        id="${this.settingsIdPrefix}${setting}"
+        name="${this.settingsIdPrefix}${setting}"
+        value="true"
+        ${this.Settings[setting] ? " checked" : ""} />`,
+      setting,
+      label,
+      title,
+    );
   }
   protected simpleSettingsNumber(
     setting: keyof typeof this.Settings/* string */,
@@ -388,19 +404,20 @@ export default class Component {
     }  = { step: 1 }) {
     options.step ??= 1;
     const { max, min, placeholder, step } = options;
-    return /* html */`
-        <label for="${this.settingsIdPrefix}${setting}"${title ? ` title="${title}"` : ""}>
-          ${label ?? `${setting[0].toUpperCase()}${(setting as string).slice(1).replace(/(?<=[a-z])[A-Z]/g, " $&")}?`}
-          &nbsp;
-          <input type="number"
-                 id="${this.settingsIdPrefix}${setting}"
-                 name="${this.settingsIdPrefix}${setting}"
-                 ${(min !== undefined) ? `min="${min}"` : ""}
-                 ${(max !== undefined) ? `max="${max}"` : ""}
-                 ${(step !== undefined) ? `step="${step}"` : ""}
-                 ${placeholder ? `placeholder="${placeholder}"` : ""}
-                 value="${this.Settings[setting]}" />
-        </label>`;
+    return this.wrapSimpleInputWithLabel(
+      /* html */`<input
+        type="number"
+        id="${this.settingsIdPrefix}${setting}"
+        name="${this.settingsIdPrefix}${setting}"
+        ${(min !== undefined) ? `min="${min}"` : ""}
+        ${(max !== undefined) ? `max="${max}"` : ""}
+        ${(step !== undefined) ? `step="${step}"` : ""}
+        ${placeholder ? `placeholder="${placeholder}"` : ""}
+        value="${this.Settings[setting]}" />`,
+      setting,
+      label,
+      title,
+    );
   }
   protected simpleSettingsTextArea(
     setting: keyof typeof this.Settings/* string */,
@@ -412,19 +429,19 @@ export default class Component {
       placeholder?: string,
     }  = {}) {
     const { maxlength, minlength, placeholder } = options;
-    return `
-        <label for="${this.settingsIdPrefix}${setting}"${title ? ` title="${title}"` : ""}>
-          ${label ?? `${setting[0].toUpperCase()}${(setting as string).slice(1).replace(/(?<=[a-z])[A-Z]/g, " $&")}?`}
-          &nbsp;
-          <textarea
+    return this.wrapSimpleInputWithLabel(
+      /* html */`<textarea
             id="${this.settingsIdPrefix}${setting}"
             name="${this.settingsIdPrefix}${setting}"
             ${(minlength !== undefined) ? `minlength="${minlength}"` : ""}
             ${(maxlength !== undefined) ? `maxlength="${maxlength}"` : ""}
             ${placeholder ? `placeholder="${placeholder}"` : ""}>` +
-            `${this.Settings[setting]}`+
-          `</textarea>
-        </label>`;
+              `${this.Settings[setting]}`+
+          `</textarea>`,
+      setting,
+      label,
+      title,
+    );
   }
   protected simpleSettingsInputText(
     setting: keyof typeof this.Settings/* string */,
@@ -437,19 +454,63 @@ export default class Component {
       required?: boolean,
     }  = {}) {
     const { maxlength, minlength, placeholder, required } = options;
-    return /* html */`
-        <label for="${this.settingsIdPrefix}${setting}"${title ? ` title="${title}"` : ""}>
-          ${label ?? `${setting[0].toUpperCase()}${(setting as string).slice(1).replace(/(?<=[a-z])[A-Z]/g, " $&")}?`}
-          &nbsp;
-          <input type="text"
-                 id="${this.settingsIdPrefix}${setting}"
-                 name="${this.settingsIdPrefix}${setting}"
-                 ${(minlength !== undefined) ? `minlength="${minlength}"` : ""}
-                 ${(maxlength !== undefined) ? `maxlength="${maxlength}"` : ""}
-                 ${placeholder ? `placeholder="${placeholder}"` : ""}
-                 ${required ? "required" : ""}
-                 value="${this.Settings[setting]}" />
-        </label>`;
+    return this.wrapSimpleInputWithLabel(
+      /* html */`<input
+        type="text"
+        id="${this.settingsIdPrefix}${setting}"
+        name="${this.settingsIdPrefix}${setting}"
+        ${(minlength !== undefined) ? `minlength="${minlength}"` : ""}
+        ${(maxlength !== undefined) ? `maxlength="${maxlength}"` : ""}
+        ${placeholder ? `placeholder="${placeholder}"` : ""}
+        ${required ? "required" : ""}
+        value="${this.Settings[setting]}" />`,
+      setting,
+      label,
+      title,
+    );
+  }
+  /**
+   * 
+   * @param setting 
+   * @param options 
+   * @param label 
+   * @param title 
+   * @param attributes 
+   * @returns {string} The constructed `<select>` element (wrapped in a
+   * `<label>`).
+   *
+   * IDEA: Support [`multiple`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/select#multiple)?
+   * IDEA: Support [`optgroup`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/optgroup)s?
+   */
+  protected simpleSettingsSelector(
+    setting: keyof typeof this.Settings/* string */,
+    options: (string | {value: string, label?: string, title?: string, selected?: boolean})[],
+    label?: string,
+    title?: string,
+    attributes: {
+      size?: number,
+      // multiple?: boolean,
+      required?: boolean,
+      disabled?: boolean,
+    }  = {}) {
+    const { size, /* multiple,  */required, disabled } = attributes;
+    const toOption = (value: string, label?: string, title?: string, selected?: boolean) => {
+      return `<option value="${value}"${title ? ` title="${title}"` : ""}${(selected ?? value === this.Settings[setting]) ? " selected" : ""}>${label ?? Util.camelToTitle(value)}</option>`;
+    };
+    return this.wrapSimpleInputWithLabel(
+      /* html */`<select
+        id="${this.settingsIdPrefix}${setting}"
+        name="${this.settingsIdPrefix}${setting}"
+        ${(size !== undefined) ? `size="${size}"` : ""}
+        ${required ? "required" : ""}
+        ${disabled ? "disabled" : ""}
+      >
+        ${options.map(e => typeof e === "string" ? toOption(e) : toOption(e.value, e.label, e.title, e.selected)).join("")}
+      </select>`,
+      setting,
+      label,
+      title,
+    );
   }
   // #endregion Subclass Sandbox
 }

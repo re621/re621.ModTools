@@ -307,11 +307,31 @@ export default class Util {
    *     ["one", "two", "three"] => "one, two, and three"
    * @param array Array to format
    * @param delimiter Delimiter for the last element
+   * @deprecated To be refactored to `joinPretty`.
+   *
+   * IDEA: Allow defining the other delimiter?
+   * IDEA: Flag to remove space padding?
    */
   public static prettyPrintArray(array: string[], delimiter = "and"): string {
-    if (array.length == 1) return array[0];
-    else if (array.length == 2) return array[0] + " " + delimiter + " " + array[1];
-    return array.slice(0, -1).join(", ") + ", " + delimiter + " " + array.slice(-1);
+    delimiter = ` ${delimiter} `;
+    if (array.length < 3) return array.join(delimiter);
+    return array.slice(0, -1).join(", ") + "," + delimiter + array.slice(-1);
+  }
+
+  /**
+   * Formats an array into a string via a non-standard join method.  
+   * Ex. ["one"] => "one"
+   *     ["one", "two"] => "one and two"
+   *     ["one", "two", "three"] => "one, two, and three"
+   * @param array Array to format
+   * @param lastDelimiter Delimiter for the last element
+   *
+   * IDEA: Allow defining the other delimiter?
+   * IDEA: Flag to control space padding?
+   */
+  public static joinPretty(array: string[], lastDelimiter = " and "): string {
+    if (array.length < 3) return array.join(lastDelimiter);
+    return array.slice(0, -1).join(", ") + "," + lastDelimiter + array.slice(-1);
   }
 
   // #region replaceTemplateVariables
@@ -394,5 +414,20 @@ export default class Util {
         new RegExp(varName.source, `g${varName.flags}`);
   }
   // #endregion replaceTemplateVariables
+
+  // #region String Manipulation
+  /**
+   * Changes a Pascal-cased string to a title-cased one.
+   */
+  public static pascalToTitle(s: string) {
+    return s.replace(/(?<=[a-z])[A-Z]/g, " $&");
+  }
+  /**
+   * Changes a camel-cased string to a title-cased one.
+   */
+  public static camelToTitle(s: string) {
+    return s[0].toUpperCase() + this.pascalToTitle(s.slice(1));
+  }
+  // #endregion String Manipulation
 }
 type StringReplacer = (key: string, ...args: any[]) => string;
