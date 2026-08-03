@@ -24,6 +24,8 @@ import FilterOldFeedbacks from "./js/components/FilterOldFeedbacks";
 import CiteUser from "./js/components/CiteUser";
 import RipStaffNotes from "./js/components/RipStaffNotes";
 import TimeKeeper from "./js/components/TimeKeeper";
+import HtmlBuilder from "./js/utilities/HtmlBuilder";
+import XM from "./js/models/api/XM";
 
 export default class REMT {
 
@@ -141,6 +143,30 @@ export default class REMT {
       return;
     }
     Debug.logPrefix("Loading %s settings...", configs.length);
+    const cbs: JQuery<HTMLElement>[] = [];
+    for (const [k, v] of Object.entries(REMT._Registry)) {
+      if (!v) continue;
+      Debug.logPrefix("%s.Settings.enabled:\n\tInstance's accessor: %o\n\tRaw Stored Value: %o", k, v?.Settings.enabled, XM.Storage.getValue<any>(k + "." + "enabled", undefined));
+      const cb = HtmlBuilder.inputCheckboxBuilder({
+        checked: XM.Storage.getValue(k + "." + "enabled", v?.Settings.enabled),
+        value: k,
+        id: `${Script.htmlPrefix}-enable-${k}`,
+        name: `${Script.htmlPrefix}-enable-${k}`,
+      });
+      cb.addEventListener("change", _ => XM.Storage.setValue(k + "." + "enabled", v.Settings.enabled = cb.checked));
+      cbs.push($(HtmlBuilder.labelBuilder({
+        forElement: `${Script.htmlPrefix}-enable-${k}`,
+        title: `Fully enable/disable the ${Util.pascalToTitle(k)} component?`,
+        innerHtml: [k, cb, `<br />`],
+      })));
+    }
+    configs.push({
+      elements: [
+        $("<label>Select which components should be enabled. All turned off here cannot be re-enabled with the UI.</label>"),
+        $(`<br />`),
+        ...cbs,
+      ],
+    });
     this.settingsButton = Util.DOM.addSettingsButton({
       id: `${Script.htmlPrefix}-component-settings`,
       icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" name="settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>',
