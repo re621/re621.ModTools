@@ -26,6 +26,7 @@ import RipStaffNotes from "./js/components/RipStaffNotes";
 import TimeKeeper from "./js/components/TimeKeeper";
 import HtmlBuilder from "./js/utilities/HtmlBuilder";
 import XM from "./js/models/api/XM";
+import { html } from "./js/utilities/HtmlTemplate";
 
 export default class REMT {
 
@@ -130,42 +131,88 @@ export default class REMT {
    */
   private buildSettingsButton(addListeners = false) {
     this.settingsButton?.remove();
-    Debug.logPrefix("Checking for settings...");
-    const configs = Object.values(REMT._Registry).reduce((p, e) => {
-      if (!e) return p;
-      if (addListeners) e.on("settingsConfigured", () => this.buildSettingsButton());
-      const v = e.settingsMenuDialogParameters;
-      if (v) p.push(v);
-      return p;
-    }, [] as SettingsDialogConfig[]);
-    if (configs.length <= 0) {
-      Debug.logPrefix("No settings registered");
-      return;
-    }
-    Debug.logPrefix("Loading %s settings...", configs.length);
-    const cbs: JQuery<HTMLElement>[] = [];
+    Debug.logPrefix("Checking for component settings menus...");
+    const configs: SettingsDialogConfig[] = [], cbs: JQuery<HTMLElement>[] = [], setTo: ((v: boolean, setCb?: boolean) => void)[] = [];
+    let areAnyEnabled = false;
     for (const [k, v] of Object.entries(REMT._Registry)) {
       if (!v) continue;
-      Debug.logPrefix("%s.Settings.enabled:\n\tInstance's accessor: %o\n\tRaw Stored Value: %o", k, v?.Settings.enabled, XM.Storage.getValue<any>(k + "." + "enabled", undefined));
+      if (addListeners) v.on("settingsConfigured", () => this.buildSettingsButton());
+      const menuParams = v.settingsMenuDialogParameters;
+      if (menuParams) configs.push(menuParams);
+      // Debug.logPrefix("%s.Settings.enabled:\n\tInstance's accessor: %o\n\tRaw Stored Value: %o", k, v?.Settings.enabled, XM.Storage.getValue<any>(k + "." + "enabled", undefined));
       const cb = HtmlBuilder.inputCheckboxBuilder({
         checked: XM.Storage.getValue(k + "." + "enabled", v?.Settings.enabled),
         value: k,
         id: `${Script.htmlPrefix}-enable-${k}`,
         name: `${Script.htmlPrefix}-enable-${k}`,
       });
-      cb.addEventListener("change", _ => XM.Storage.setValue(k + "." + "enabled", v.Settings.enabled = cb.checked));
-      cbs.push($(HtmlBuilder.labelBuilder({
+      areAnyEnabled ||= cb.checked;
+      const st = (value: boolean, setCb = false) => { XM.Storage.setValue(k + "." + "enabled", v.Settings.enabled = value); if (setCb) cb.checked = value; };
+      setTo.push(st);
+      cb.addEventListener("change", _ => st(cb.checked));
+      const resetSettingsButton = HtmlBuilder.button({
+        id: `${Script.htmlPrefix}-reset-${k}`,
+        name: `${Script.htmlPrefix}-reset-${k}`,
+        type: "button",
+        innerHtml: "Reset",
+        title: "Reset to Default Settings?",
+      });
+      resetSettingsButton.addEventListener("click", _ => v.requestResetSettings());
+      cbs.push($(html`<div>${HtmlBuilder.labelBuilder({
         forElement: `${Script.htmlPrefix}-enable-${k}`,
         title: `Fully enable/disable the ${Util.pascalToTitle(k)} component?`,
-        innerHtml: [k, cb, `<br />`],
-      })));
+        innerHtml: [k, ":&nbsp;", cb],
+      })}&nbsp;${resetSettingsButton}</div>` as HTMLDivElement));
     }
+    if (configs.length <= 0) {
+      Debug.logPrefix("No settings menus registered currently.");
+      // Must draw the menu if it has no chance of being drawn otherwise.
+      if (areAnyEnabled) return;
+      Debug.logPrefix("All components disabled; creating global settings menu...");
+    } else
+      Debug.logPrefix("Creating settings menu for %s components...", configs.length);
+    const enableAll = HtmlBuilder.button({
+        id: `${Script.htmlPrefix}-enable-all`,
+        type: "button",
+        innerHtml: "Enable All",
+      }), disableAll = HtmlBuilder.button({
+        id: `${Script.htmlPrefix}-disable-all`,
+        type: "button",
+        innerHtml: "Disable All",
+      });
+    /* enableAll.addEventListener("click", _ => cbs.forEach(e => {
+      const cb = e.children("input")[0];
+      if (!cb.checked) {
+        cb.checked = true;
+        cb.dispatchEvent(new Event("change"));
+      }
+    }));
+    disableAll.addEventListener("click", _ => cbs.forEach(e => {
+      const cb = e.children("input")[0];
+      if (cb.checked) {
+        cb.checked = false;
+        cb.dispatchEvent(new Event("change"));
+      }
+    })); */
+    enableAll.addEventListener("click", _ => setTo.forEach(e => e(true, true)));
+    disableAll.addEventListener("click", _ => setTo.forEach(e => e(false, true)));
+    /* function setAll(to: boolean) {
+      cbs.forEach(e => e.children("input")[0].checked = to);
+    }
+    enableAll.addEventListener("click", () => setAll(true));
+    disableAll.addEventListener("click", () => setAll(false)); */
     configs.push({
       elements: [
-        $("<label>Select which components should be enabled. All turned off here cannot be re-enabled with the UI.</label>"),
+        $("<label>Select which components should be enabled.</label>"),
         $(`<br />`),
         ...cbs,
+        $(enableAll),
+        $(disableAll),
       ],
+      optionsOrTitle: {
+        title: "Global Settings",
+        defaultElements: [],
+      },
     });
     this.settingsButton = Util.DOM.addSettingsButton({
       id: `${Script.htmlPrefix}-component-settings`,
