@@ -1,3 +1,5 @@
+import REMT from "../../REMT";
+import Script from "../models/data/Script";
 import { html } from "../utilities/HtmlTemplate";
 import Component from "./Component";
 
@@ -9,16 +11,28 @@ export default class TimeKeeper extends Component {
     });
   }
   
-  Settings = {
-    enabled: true,
-    addToggle: Timestamp.addToggle,
-  };
+  Settings: {
+    enabled: boolean,
+    addToggle: boolean,
+    alwaysShowToggleIcon: boolean,
+  } = {
+      enabled: true,
+      addToggle: Timestamp.addToggle,
+      alwaysShowToggleIcon: Timestamp.alwaysShowToggleIcon,
+    };
 
   protected create(): Promise<void> {
     this.initSettingsMenu();
     this.on("settings.addToggle", (ev, d) => {
-      if (Timestamp.addToggle !== !!d) {
-        Timestamp.addToggle = !!d;
+      if (Timestamp._addToggle !== !!d) {
+        Timestamp._addToggle = !!d;
+        Timestamp.teardownAll();
+        Timestamp.tryInitAll();
+      }
+    });
+    this.on("settings.alwaysShowToggleIcon", (ev, d) => {
+      if (Timestamp._alwaysShowToggleIcon !== !!d) {
+        Timestamp._alwaysShowToggleIcon = !!d;
         Timestamp.teardownAll();
         Timestamp.tryInitAll();
       }
@@ -38,6 +52,8 @@ export default class TimeKeeper extends Component {
         $(`<br />`),
         $(this.simpleSettingsCheckbox("addToggle", undefined)),
         $(`<br />`),
+        $(this.simpleSettingsCheckbox("alwaysShowToggleIcon", undefined, "Only show the icon for links, or show it for all elements?")),
+        $(`<br />`),
         $(this.resetSettingsDialogElement),
         $(`<br />`),
       ],
@@ -46,6 +62,7 @@ export default class TimeKeeper extends Component {
         if (this.handleResetSettingsDialogElement(e)) return;
         if (!this.handleEnabledElement(e)) return;
         this.Settings.addToggle = e.get(`${this.settingsIdPrefix}addToggle`) === "true";
+        this.Settings.alwaysShowToggleIcon = e.get(`${this.settingsIdPrefix}alwaysShowToggleIcon`) === "true";
       }};
   }
 }
@@ -82,7 +99,10 @@ type FormatSpecMap = {
  * Automatically updates the displayed time in the same format as the server.
  */
 class Timestamp {
-  public static addToggle = true;
+  public static _addToggle = true;
+  public static get addToggle() { return this._addToggle = REMT.Registry.TimeKeeper?.Settings.addToggle ?? this._addToggle; }
+  public static _alwaysShowToggleIcon = false;
+  public static get alwaysShowToggleIcon() { return this._alwaysShowToggleIcon = REMT.Registry.TimeKeeper?.Settings.alwaysShowToggleIcon ?? this._alwaysShowToggleIcon; }
   public static tryInitAll () {
     Array.from(document.querySelectorAll("time")).forEach((e) => {
       if (!this.instances.some(e1 => e1.element === e)) Timestamp.tryInit(e);
@@ -132,10 +152,25 @@ class Timestamp {
           title="Toggles the time display."
           style="cursor: help;">ⓘ</span>` as HTMLSpanElement;
         element.parentElement?.parentElement?.appendChild(icon);
+      } else if (Timestamp.alwaysShowToggleIcon) {
+        const icon = this.toggleIcon = html`<span class="time-toggler-icon"
+          title="Toggles the time display."
+          style="cursor: help;"> ⓘ</span>` as HTMLSpanElement;
+        if (!element.parentElement?.classList.contains(`${Script.htmlPrefix}-time-container`)) {
+          const span = html`<span class=${Script.htmlPrefix}-time-container></span>` as HTMLSpanElement;
+          const initialParent = element.parentElement;
+          const i = Array.from(initialParent?.children ?? []).indexOf(element);
+          // element.parentElement?.replaceChild(span, element)
+          element.remove();
+          initialParent?.children[i - 1].insertAdjacentElement("afterend", span);
+
+          span.appendChild(element);
+        }
+        element.parentElement?.appendChild(icon);
       }
       (this.toggleIcon ?? this.element).addEventListener("click", this.toggleDisplayedStyle);
     }
-    const currentText = element.innerText;
+    const currentText = element.innerText.trim();
     for (const range of Timestamp.ranges) {
       const m = range.matcher.exec(currentText);
       if (!m || !m[0]) continue;
@@ -272,8 +307,17 @@ class Timestamp {
       matcher: /^(?<in>in )?about (?<count>a|x|[0-9]+) hour(?<plural>s)?(?<ago> ago)?\s*$/,
       get updateIntervalMs () { return 60 * 60 * 1000; },
       get lowerBoundMs () { return Timestamp.formats[this.nextSmallestFormat].upperBoundMs; },
-      upperBoundMs: 24 * 60 * 60 * 1000, // 24 hours
+      upperBoundMs: 90 * 60 * 1000, // 90 minutes
       nextSmallestFormat: "x_minutes",
+      nextLargestFormat: "x_hours",
+    }),
+    x_hours: Object.freeze({
+      format: "x_hours",
+      matcher: /^(?<in>in )?(?<count>a|x|[0-9]+) hour(?<plural>s)?(?<ago> ago)?\s*$/,
+      get updateIntervalMs () { return 60 * 60 * 1000; },
+      get lowerBoundMs () { return Timestamp.formats[this.nextSmallestFormat].upperBoundMs; },
+      upperBoundMs: 24 * 60 * 60 * 1000, // 24 hours
+      nextSmallestFormat: "about_x_hours",
       nextLargestFormat: "x_days",
     }),
     x_days: Object.freeze({
@@ -310,6 +354,15 @@ class Timestamp {
       get lowerBoundMs () { return Timestamp.formats[this.nextSmallestFormat].upperBoundMs; },
       upperBoundMs: Infinity,
       nextSmallestFormat: "x_months",
+      nextLargestFormat: "x_years",
+    }),
+    x_years: Object.freeze({
+      format: "x_years",
+      matcher: /^(?<in>in )?(?<count>a|x|[0-9]+) year(?<plural>s)?(?<ago> ago)?\s*$/,
+      get updateIntervalMs () { return this.lowerBoundMs; },
+      lowerBoundMs: 365 * 24 * 60 * 60 * 1000, // 365 days
+      upperBoundMs: Infinity,
+      nextSmallestFormat: "about_x_years",
       nextLargestFormat: "over_x_years",
     }),
     over_x_years: Object.freeze({
@@ -318,7 +371,7 @@ class Timestamp {
       get updateIntervalMs () { return this.lowerBoundMs; },
       lowerBoundMs: 365 * 24 * 60 * 60 * 1000, // 365 days
       upperBoundMs: Infinity,
-      nextSmallestFormat: "about_x_years",
+      nextSmallestFormat: "x_years",
       nextLargestFormat: "almost_x_years",
     }),
     almost_x_years: Object.freeze({
@@ -338,10 +391,12 @@ class Timestamp {
     this.formats["less_than_x_minutes"],
     this.formats["x_minutes"],
     this.formats["about_x_hours"],
+    this.formats["x_hours"],
     this.formats["x_days"],
     this.formats["about_x_months"],
     this.formats["x_months"],
     this.formats["about_x_years"],
+    this.formats["x_years"],
     this.formats["over_x_years"],
     this.formats["almost_x_years"],
   ]);
@@ -410,7 +465,7 @@ class Timestamp {
         return { format: "about_x_hours", count: 1 };
         // 90 mins up to 24 hours
       case deltaMinutes >= 90 && deltaMinutes < this.MINUTES_IN_DAY:
-        return { format: "about_x_hours", count: Math.round(deltaMinutes / 60.0) };
+        return { format: "x_hours", count: Math.round(deltaMinutes / 60.0) };
         // 24 hours up to 42 hours
       case deltaMinutes >= this.MINUTES_IN_DAY && deltaMinutes < 2520:
         return { format: "x_days", count: 1 };
@@ -454,6 +509,8 @@ class Timestamp {
     const remainder = (minutes_with_offset % this.MINUTES_IN_YEAR);
     const distance_in_years = (minutes_with_offset / this.MINUTES_IN_YEAR);
     if (remainder < this.MINUTES_IN_QUARTER_YEAR)
+      return { format: "x_years", count: distance_in_years };
+    else if (remainder < this.MINUTES_IN_QUARTER_YEAR * 2)
       return { format: "about_x_years", count: distance_in_years };
     else if (remainder < this.MINUTES_IN_THREE_QUARTERS_YEAR)
       return { format: "over_x_years", count: distance_in_years };
