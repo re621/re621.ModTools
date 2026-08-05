@@ -12,20 +12,41 @@ import Util from "../utilities/Util";
 
 export default class Component {
 
-  protected name: string;                         // Unique identifier for this component. Defaults to the class name.
+  /**
+   * Unique identifier for this component. Defaults to the class name.
+   */
+  protected name: string;
 
-  private initialized = false;                    // Whether or not the component is currently running
-  private eventIndex = 0;                         // Used to provide IDs to the component event listeners
-  private constraintMatches: boolean;             // Whether or not the declared page constraints match
-  private DOMLoadConditions: boolean | string;    // DOM conditions that must be met for the component to load
-  private waitForFocus: boolean;                  // Wait for the window to come into focus before loading
-  private dependencies: string[];                 // List of components names that need to be enabled
+  /**
+   * Whether or not the component is currently running
+   */
+  private initialized = false;
+  /**
+   * Used to provide IDs to the component event listeners
+   */
+  private eventIndex = 0;
+  /**
+   * Whether or not the declared page constraints match
+   */
+  private constraintMatches: boolean;
+  /**
+   * DOM conditions that must be met for the component to load
+   */
+  private DOMLoadConditions: boolean | string;
+  /**
+   * Wait for the window to come into focus before loading
+   */
+  private waitForFocus: boolean;
+  /**
+   * List of components names that need to be enabled
+   */
+  private dependencies: string[];
 
   /**
 	 * Component settings
 	 * 
-	 * Defines default values and is used to access them via dynamic setters and getters,
-	 * which are assigned over the values provided by child classes.
+	 * Defines default values and is used to access them via dynamic setters and
+   * getters, which are assigned over the values provided by child classes.
 	 * The original values are stored in `SettingsDefaults`.
 	 * 
 	 * The `SettingsCache` object stores the current values of the settings.
@@ -43,7 +64,7 @@ export default class Component {
 	 * overwritten with dynamic setters and getters.
 	 */
   private get SettingsDefaults(): Settings {
-    if (!this._SettingsDefaults) throw Error("Component.SettingsDefaults is not yet defined.");
+    if (!this._SettingsDefaults) throw Error(`${this.name}.SettingsDefaults is not yet defined.`);
     return this._SettingsDefaults;
   }
   /**
@@ -333,10 +354,22 @@ export default class Component {
     this._settingsMenuDialogParameters = v;
     this.trigger("settingsConfigured");
   }
+
+  /**
+   * @todo Make protected again after creating the global settings component.
+   */
   protected resetSettings() {
     for (const [k, v] of Object.entries(this.SettingsDefaults)) {
       this.Settings[k] = v;
     }
+  }
+
+  public requestResetSettings(label = this.settingsDialogTitle) {
+    if (confirm(`Reset ${label} to defaults?`)) {
+      this.resetSettings();
+      return true;
+    }
+    return false;
   }
 
   protected get prettyPrintName() { return Util.pascalToTitle(this.name); }
@@ -344,10 +377,8 @@ export default class Component {
   // #region Reset settings
   protected get settingsIdPrefix() { return `${this.prettyPrintName.replace(/\s+/g, "-")}-setting-`; }
   protected handleResetSettingsDialogElement(e: FormData, forceConfirm = true) {
-    if (
-      e.get(`${this.settingsIdPrefix}resetSettings`) === "true" &&
-        (!forceConfirm || confirm(`Reset ${this.settingsDialogTitle} to defaults?`))
-    ) {
+    if (e.get(`${this.settingsIdPrefix}resetSettings`) === "true") {
+      if (forceConfirm) return this.requestResetSettings();
       this.resetSettings();
       return true;
     }
