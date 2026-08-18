@@ -10,7 +10,7 @@ export default class ErrorHandler {
       `<p>${Script.projectNameFormatted} had encountered an error during script execution.</p>`,
       `<p>Please, report this message, including the error log below, through the <a href="${Script.url.issues}">issue tracker</a>, or in the <a href="${Script.url.thread}">forum thread</a>.</p>`,
     ].join("\n"));
-    const textarea = $("<textarea>").val([
+    const textarea = $<HTMLTextAreaElement>("<textarea>").val([
       Script.versionObj.format`REMT v.${"major"}.${"minor"}.${"patch"} for ` + `${Script.handler.name} v.${Script.handler.version}`,
       window.navigator.userAgent,
       message,
@@ -37,20 +37,19 @@ export default class ErrorHandler {
     const dialog = new Modal({
       title: "Error",
       autoOpen: true,
-
       width: 650,
-      position: { my: "center", at: "center center-15%" }
-
+      position: { my: "center", at: "center center-15%" },
+      destroyOnClose: true,
     });
-    dialog.getElement()
+    dialog.element
       .addClass("error-handler")
       .append(notice)
       .append(textarea);
   }
 
   /**
-     * @deprecated
-     */
+   * @deprecated
+   */
   public static async log(_module: "ModuleController" | "DOM" | string, message: string, error?: Error): Promise<void> {
     return this.write(message, error);
   }

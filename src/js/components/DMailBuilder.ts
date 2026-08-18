@@ -161,7 +161,8 @@ export default class DMailBuilder extends Component {
     return Promise.resolve();
   }
 
-  protected async destroy(): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/require-await
+  protected override async destroy() {
     this.builder?.destroy();
   }
 

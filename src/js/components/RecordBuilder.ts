@@ -46,7 +46,7 @@ export default class RecordBuilder extends Component {
   private buildInterface(wrapper: JQuery<HTMLElement>): JQuery<HTMLElement> {
     const id = Util.ID.make();
 
-    const container = $("<form>")
+    const container = $<HTMLFormElement>("<form>")
       .addClass("record-builder")
       .data({
         reason: "",
@@ -55,10 +55,10 @@ export default class RecordBuilder extends Component {
       })
       .appendTo(wrapper);
 
-    const reasonSelector: JQuery<HTMLElement> = $("<select>")
-      .attr("id", "record-reason-" + id)
-      .addClass("record-reason"),
-      reasonInput: JQuery<HTMLElement> = $("<textarea>")
+    const reasonSelector = $<HTMLSelectElement>("<select>")
+        .attr("id", "record-reason-" + id)
+        .addClass("record-reason"),
+      reasonInput = $<HTMLTextAreaElement>("<textarea>")
         .attr({
           id: "custom-reason-" + id,
           class: "custom-reason",
@@ -86,11 +86,11 @@ export default class RecordBuilder extends Component {
 
           reasonSelector.val(prebuilt.reason);
           reasonInput
-            .val(reason.text)
+            .val(reason?.text ?? "")
             .trigger(`${Script.eventPrefix}:input`, true);
 
           container.find("button.rules-button").removeClass("active");
-          for (const rule of [prebuilt.rules])
+          for (const rule of prebuilt.rules instanceof Array ? prebuilt.rules : [prebuilt.rules])
             container.find("button.rules-button[name='" + rule + "']").addClass("active");
           container.trigger(`${Script.eventPrefix}:buttons`, true);
 
@@ -126,13 +126,13 @@ export default class RecordBuilder extends Component {
     reasonSelector
       .appendTo(reasonContainer)
       .on(`change ${Script.eventPrefix}:change`, (event, preventChange) => {
-        const reason = Records.Reasons[reasonSelector.val() + ""];
+        const reason = Records.Reasons[(reasonSelector.val() as string | undefined) + ""];
         reasonInput
-          .val(reason.text || "")
+          .val(reason?.text || "")
           .trigger(`${Script.eventPrefix}:input`, preventChange);
 
         container.find("button.rules-button").removeClass("active");
-        for (const rule of [reason.rules])
+        for (const rule of [reason?.rules])
           container.find("button.rules-button[name='" + rule + "']").addClass("active");
         container.trigger(`${Script.eventPrefix}:buttons`, true);
 
@@ -145,7 +145,7 @@ export default class RecordBuilder extends Component {
     for (const [id, data] of Object.entries(Records.Reasons)) {
       $("<option>")
         .attr("value", id)
-        .text(data.text.split("\n")[0])
+        .text(data!.text.split("\n")[0])
         .appendTo(reasonSelector);
     }
 
@@ -176,7 +176,7 @@ export default class RecordBuilder extends Component {
 
 
     let sourcesInputTimer: number | undefined;
-    const sourcesInput = $("<textarea>")
+    const sourcesInput = $<HTMLTextAreaElement>("<textarea>")
       .attr({
         id: "record-sources-" + id,
         placeholder: "One source link per line"
@@ -245,8 +245,8 @@ export default class RecordBuilder extends Component {
 
     const result: string[] = [];
 
-    for (const form of $("form.record-builder")) {
-      result.push(this.processForm($(form)));
+    for (const form of $<HTMLFormElement>("form.record-builder")) {
+      result.push(this.processForm($<HTMLFormElement>(form)));
     }
 
     this.input.val(result.join("\n"));
@@ -254,7 +254,7 @@ export default class RecordBuilder extends Component {
 
   private static readonly sourceMatcher = new RegExp(`https:\\/\\/(?:${Script.domains.join("|")})\\/`, "g");
 
-  private processForm(form: JQuery<HTMLElement>): string {
+  private processForm(form: JQuery<HTMLFormElement>): string {
     // console.log(form.data());
 
     // Reason
@@ -262,16 +262,17 @@ export default class RecordBuilder extends Component {
 
 
     // Sources
-    const sourceList: string[] = (form.data("sources") || "").split("\n").filter(n => n.trim());
+    const sourceList = ((form.data("sources") as string | undefined) || "")
+      .split("\n")
+      .filter(n => n.trim());
     let sourceOutput: string[] = [];
-    if (sourceList.length == 0) sourceOutput = [];
-    else if (sourceList.length == 1) sourceOutput = [`"[Source]":${processSource(sourceList[0])}`];
+    if (sourceList.length == 1) sourceOutput = [`"[Source]":${processSource(sourceList[0])}`];
     else
       for (const [index, source] of sourceList.entries()) sourceOutput.push(`"[${index + 1}]":${processSource(source)}`);
 
     // Append rules excerpts
     const rulesOutput: string[] = [];
-    for (const name of (form.data("buttons") || [])) {
+    for (const name of (form.data("buttons") || []) as string[]) {
       const ruleData = Records.Rules[name];
 
       const ruleLines: string[] = [];

@@ -1,6 +1,8 @@
 import REMT from "../../REMT";
 import Danbooru from "../models/api/Danbooru";
 import { PageDefinition } from "../models/data/Page";
+import Script from "../models/data/Script";
+import Debug from "../models/Debug";
 import ErrorHandler from "../utilities/ErrorHandler";
 import { html } from "../utilities/HtmlTemplate";
 import Util from "../utilities/Util";
@@ -209,21 +211,26 @@ export default class AutoTaggingButtons extends Component {
   private constructButton(postId: number, diff: string | undefined, title: string, label: string, reason?: string) {
     if (!Number.isInteger(postId)) throw new Error("Non-integer post id");
     const button = html`
-    <button class="re6-auto-tag-button"
-            title="${title}${reason ? `\nReason: ${reason}` : ""}"
+    <button class="${Script.htmlPrefix}-auto-tag-button"
+            title="${title}${reason ? `\nReason: ${reason}\n\t` : ""}${diff || "NO ACTION"}"
             ${!diff ? " disabled" : ""}
-    >
-      ${label}
-    </button>` as HTMLButtonElement;
+    >${label}</button>` as HTMLButtonElement;
+    if (!diff) return button;
     button.onclick = () => {
       if (this.Settings.forceConfirm && !confirm(`Are you sure you want to perform this edit?\n\t${reason ? `REASON: ${reason}\n\t` : ""}${diff}`))
         return;
-      const body: /* PostUpdateParams */any = { tag_string_diff: diff };
+      const body: /* PostUpdateParams */Record<string, string> = { tag_string_diff: diff };
       if (reason) body.edit_reason = reason;
-      REMT.API.Posts.update(postId, body).then(() => {
-        if (this.Settings.reloadAfterEdit) location.reload();
-        else Danbooru.notice("REMT: Successfully edited tags!", false);
-      });
+      REMT.API.Posts.update(postId, body).then(
+        () => {
+          if (this.Settings.reloadAfterEdit) location.reload();
+          else Danbooru.notice("REMT: Successfully edited tags!", false);
+        },
+        e => {
+          Danbooru.error("REMT: Failed to edit tags");
+          Debug.logPrefix(e);
+        }
+      );
     };
     return button;
   }
@@ -254,16 +261,22 @@ export default class AutoTaggingButtons extends Component {
         $(`<br />`),
       ],
       optionsOrTitle: "Auto Tag Edits Settings",
-      then: (e: FormData) => {
+      then: /* async  */(e: FormData) => {
         if (this.handleResetSettingsDialogElement(e)) return;
         if (!this.handleEnabledElement(e)) return;
         this.Settings.doShow = e.get(`${this.settingsIdPrefix}doShow`) === "true";
         this.Settings.forceConfirm = e.get(`${this.settingsIdPrefix}forceConfirm`) === "true";
         this.Settings.testMode = e.get(`${this.settingsIdPrefix}testMode`) === "true";
+        // TODO: Use `readSettingFromFormDataAsync`.
+        const rawInput = e.get(`${this.settingsIdPrefix}buttons`);
+        // IDEA: Allow empty value to clear buttons?
+        if (typeof rawInput !== "string") return;
+        // if (!rawInput) return;
+        // const input = (typeof rawInput !== "string") ? await rawInput.text() : rawInput;
         try {
-          this.Settings.buttons = JSON.parse(e.get(`${this.settingsIdPrefix}buttons`)?.toString() ?? JSON.stringify(this.Settings.buttons)) as AutoTaggingAction[];
+          this.Settings.buttons = JSON.parse(rawInput/*  || "[]" */) as AutoTaggingAction[];
         } catch (error) {
-          ErrorHandler.write("Failed to parse JSON input", error);
+          void ErrorHandler.write("Failed to parse JSON input", error);
         }
       }};
   }

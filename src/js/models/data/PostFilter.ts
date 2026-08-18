@@ -1,5 +1,5 @@
 import Util from "../../utilities/Util";
-import Post, { PostFlag, PostRating } from "./Post";
+import Post, { FileExtension, PostFlag, PostRating } from "./Post";
 import { Tag } from "./Tag";
 import User from "./User";
 
@@ -133,7 +133,7 @@ export default class PostFilter {
           result = PostFilterUtils.compareNumbers(post.file.size, value, filter.comparison);
           break;
         case FilterType.Type:
-          result = post.file.ext === value;
+          result = post.file.ext === FileExtension.fromString(value);
           break;
         case FilterType.Duration:
           result = post.meta.duration == null || PostFilterUtils.compareNumbers(post.meta.duration, value, filter.comparison);
@@ -305,7 +305,8 @@ namespace FilterType {
     export function test(input: string): FilterType {
       input = input.toLowerCase();
       for (const key of Object.keys(FilterType))
-        if (input.startsWith(FilterType[key] + ":")) return FilterType[key];
+        if (input.startsWith(FilterType[key] + ":"))
+          return (FilterType[key] as FilterType | undefined) ?? FilterType.Tag;
       return FilterType.Tag;
     }
 }

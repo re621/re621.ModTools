@@ -1,3 +1,4 @@
+/* eslint @typescript-eslint/no-deprecated: ["warn", {allow: ["Form"]}] */
 import Component from "../../components/Component";
 import Util from "../../utilities/Util";
 import XM from "../api/XM";
@@ -72,7 +73,6 @@ export class Form implements PreparedStructure {
     // Build form elements
     this.element[0].innerHTML = "";
     if (!this.element.attr("id")) Debug.log("WARN: Form.element has no id; giving it a unique id...");
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const formID = this.element.attr("id") || this.element.uniqueId().attr("id") || "!!NO-FORM-ID-FOUND!!";
 
     for (const entry of this.content) {
@@ -502,7 +502,7 @@ export class Form implements PreparedStructure {
       .makeInputWrapper(options.label, options.wrapper, options.width)
       .addClass("keyinput");
 
-    const $input = $("<input>")
+    const $input = $<HTMLInputElement>("<input>")
       .attr({
         "type": "text",
         "id": options.name,
@@ -531,7 +531,7 @@ export class Form implements PreparedStructure {
       $input.attr("key", $input.val() + "");
     }
 
-    const $warning = $("<span>")
+    const $warning = $<HTMLSpanElement>("<span>")
       .addClass("keyinput-warning")
       .attr("title", "Duplicate Keybinding")
       .appendTo($element);
@@ -665,7 +665,7 @@ export class Form implements PreparedStructure {
 
     const $element = FormUtils.makeInputWrapper(options.label, options.wrapper, options.width);
 
-    const $input = $("<input>")
+    const $input = $<HTMLInputElement>("<input>")
       .attr({
         "type": "text",
         "id": options.name,
@@ -715,7 +715,10 @@ export class Form implements PreparedStructure {
       if (changed) changed($input.val()?.toString() ?? "", $input);
     });
 
-    if (options.value) { $selectContainer.find("a[data-value='" + options.value + "']").first().trigger("click"); }
+    if (options.value && !["object", "function"].includes(typeof options.value)) {
+      // eslint-disable-next-line @typescript-eslint/restrict-plus-operands, @typescript-eslint/no-base-to-string
+      $selectContainer.find("a[data-value='" + options.value + "']").first().trigger("click");
+    }
     else { $selectContainer.find("a").first().trigger("click"); }
 
     // When the field value is set externally, this event needs to be triggered on the text input field.
@@ -872,7 +875,8 @@ export class Form implements PreparedStructure {
       .appendTo($element);
 
     if (content !== undefined) {
-      if (typeof content === "function") content = content();
+      // NOTE: Bizarre, but resolving to "not an object" over "is a function" is better for typing.
+      if (typeof content !== "object") content = content();
       for (const key in content)
         $("<option>").val(key).text(content[key]).appendTo($input);
     }

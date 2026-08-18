@@ -37,12 +37,13 @@ export default class AppealReasons extends Component {
   };
 
   private readonly settingsButtonLabel = "Appeal Template Settings";
-  protected create(): Promise<void> {
-    if (!this.isEnabled) return Promise.resolve();
+  // eslint-disable-next-line @typescript-eslint/require-await
+  protected override async create() {
+    if (!this.isEnabled) return;
     this.initSettingsMenu();
 
     const target = document.querySelector<HTMLTextAreaElement>("textarea[name='appeal[response]']");
-    if (!target) return Promise.resolve();
+    if (!target) return;
 
     this.reporterName = document.querySelector<HTMLElement>("#c-appeals .appeal-display-report-creator a")?.innerText ?? "";
 
@@ -69,10 +70,10 @@ export default class AppealReasons extends Component {
       },
     });
     this.builder.mount();
-    return Promise.resolve();
   }
 
-  protected async destroy(): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/require-await
+  protected override async destroy() {
     this.builder?.destroy();
   }
 

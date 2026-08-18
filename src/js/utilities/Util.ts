@@ -208,7 +208,7 @@ export default class Util {
   }
 
   /** Takes in an object, and returns a regular expression with its keys */
-  public static getKeyRegex(object: any): RegExp {
+  public static getKeyRegex(object: Record<string | number | symbol, unknown>): RegExp {
     const result: string[] = [];
     for (const key of Object.keys(object))
       result.push(key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
@@ -315,7 +315,7 @@ export default class Util {
   public static prettyPrintArray(array: string[], delimiter = "and"): string {
     delimiter = ` ${delimiter} `;
     if (array.length < 3) return array.join(delimiter);
-    return array.slice(0, -1).join(", ") + "," + delimiter + array.slice(-1);
+    return array.slice(0, -1).join(", ") + "," + delimiter + array.slice(-1)[0];
   }
 
   /**
@@ -331,7 +331,7 @@ export default class Util {
    */
   public static joinPretty(array: string[], lastDelimiter = " and "): string {
     if (array.length < 3) return array.join(lastDelimiter);
-    return array.slice(0, -1).join(", ") + "," + lastDelimiter + array.slice(-1);
+    return array.slice(0, -1).join(", ") + "," + lastDelimiter + array.slice(-1)[0];
   }
 
   // #region replaceTemplateVariables
@@ -418,12 +418,20 @@ export default class Util {
   // #region String Manipulation
   /**
    * Changes a Pascal-cased string to a title-cased one.
+   *
+   * IDEA: What should the matcher be?
+   * * `/(?<=[a-z])[A-Z]/g`
+   * * `/(?<=[a-z0-9])[A-Z]/g`
+   * * `/(?<![A-Z])[A-Z]/g`
    */
   public static pascalToTitle(s: string) {
-    return s.replace(/(?<=[a-z])[A-Z]/g, " $&");
+    return s.replace(/(?<![A-Z])[A-Z]/g, " $&");
   }
   /**
    * Changes a camel-cased string to a title-cased one.
+   *
+   * If given a Pascal cased string, will be functionally equivalent to
+   * {@link pascalToTitle}.
    */
   public static camelToTitle(s: string) {
     return s[0].toUpperCase() + this.pascalToTitle(s.slice(1));

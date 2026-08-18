@@ -77,12 +77,11 @@ export function template<T extends Node, T1 extends Node, T2 extends Node>(rende
       const walker = document.createTreeWalker(root, NodeFilter.SHOW_COMMENT, null);
       while (walker.nextNode()) {
         const node = walker.currentNode;
-        if (/^o:/.test(node.nodeValue || "")) { // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        if (/^o:/.test(node.nodeValue || "")) {
           nodes[+node.nodeValue!.slice(2)] = node;
         }
       }
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      for (let i = 0, node = nodes[i]!; i < k; node = nodes[++i]!) { // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      for (let i = 0, node = nodes[i]!; i < k; node = nodes[++i]!) {
         node?.parentNode?.replaceChild(parts[i]!, node);
       }
     }
@@ -92,7 +91,6 @@ export function template<T extends Node, T1 extends Node, T2 extends Node>(rende
     // … a document fragment? Replace the fragment with an element.
     // … some other node? Return it.
     return (root.childNodes.length === 1
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       ? root.removeChild(root.firstChild!)
       : root.nodeType === Node.DOCUMENT_FRAGMENT_NODE
         ? ((node = wrapper()).appendChild(root), node)

@@ -10,7 +10,7 @@ const validKeys = [
   "up", "down", "left", "right",
 ];
 
-const replacedKeys = {
+const replacedKeys: { [k: string]: string; enter: string; control: string; arrow: string; "!": string; "@": string; "#": string; $: string; "%": string; "^": string; "&": string; "*": string; "(": string; ")": string; _: string; "+": string; "<": string; ">": string; "?": string; ":": string; '"': string; "{": string; "}": string; } = {
   // event.key returns a different name to what jquery.hotkeys expects
   "enter": "return",
   "control": "ctrl",
@@ -78,9 +78,7 @@ export default class KeybindManager {
     $(document).on(`keydown.${Script.eventPrefix}.record`, (event) => {
       const key = event.key
         .toLowerCase()
-        .replace(replacedRegExp, (matched) => {
-          return replacedKeys[matched];
-        });
+        .replace(replacedRegExp, matched => replacedKeys[matched]!);
       if (validKeys.indexOf(key) == -1) return;
       keys.push(key);
     });
@@ -133,9 +131,8 @@ export default class KeybindManager {
         if (!selector) selector = undefined;
 
         let cooldown: number | undefined;
-        $element.on(`keydown.${Script.eventPrefix}.hotkey-` + key, selector, key, (event: Event) => {
-          if (keydown) return;
-          if (cooldown) return;
+        $element.on(`keydown.${Script.eventPrefix}.hotkey-${key}`, selector, key, (event: Event) => {
+          if (keydown || cooldown) return;
 
           keydown = true;
           if (!KeybindManager.enabled || KeybindManager.listening) return false;

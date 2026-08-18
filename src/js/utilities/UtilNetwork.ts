@@ -50,7 +50,7 @@ export class UtilNetwork {
    */
   public static get authHeader() {
     const authLogin = REMT.API.getAuthLogin();
-    return authLogin ? `Basic ${btoa(authLogin.username + ":" + authLogin.apiKey)}` : undefined;
+    return authLogin ? `Basic ${window.btoa(authLogin.username + ":" + authLogin.apiKey)}` : undefined;
   }
 
   /**

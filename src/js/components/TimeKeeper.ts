@@ -265,6 +265,7 @@ class Timestamp {
     this.scheduleNextUpdate(false);
   }
 
+  /* eslint-disable @typescript-eslint/no-unsafe-return */
   public static formats: Readonly<FormatSpecMap> = Object.freeze({
     less_than_x_seconds: Object.freeze({
       format: "less_than_x_seconds",
@@ -384,6 +385,7 @@ class Timestamp {
       nextLargestFormat: undefined,
     }),
   });
+  /* eslint-enable @typescript-eslint/no-unsafe-return */
 
   public static readonly ranges: Readonly<FormatSpecification[]> = Object.freeze([
     this.formats["less_than_x_seconds"],

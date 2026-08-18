@@ -22,6 +22,7 @@ export class Confirm extends Modal {
       autoOpen: true,
       width: "auto",
       minHeight: 50,
+      destroyOnClose: false,
     });
 
     const $body = Confirm.buildBody(message, opts);
@@ -37,7 +38,7 @@ export class Confirm extends Modal {
       };
       $body.find("[data-confirm-action='cancel']").on("click", () => done(false));
       $body.find("[data-confirm-action='confirm']").on("click", () => done(true));
-      this.getElement().on("dialogclose", () => done(false));
+      this.element.on("dialogclose", () => done(false));
     });
   }
 

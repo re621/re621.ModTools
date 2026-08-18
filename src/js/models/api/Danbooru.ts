@@ -1,11 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+
 /* Type definitions for the Danbooru Javascript methods */
 
 import XM from "./XM";
 
 export default class Danbooru {
 
-  private static _cachedModules: any;
-  private static get Modules(): any {
+  private static _cachedModules: Record<string, any>;
+  private static get Modules(): Record<string, any> {
     if (!this._cachedModules) this._cachedModules = XM.Window["Danbooru"];
     return this._cachedModules;
   }
@@ -17,29 +19,29 @@ export default class Danbooru {
   public static Autocomplete = {
     initialize_all(): void {
       if (!Danbooru.hasModules) return;
-      Danbooru.Modules.Autocomplete.initialize_all();
+      Danbooru.Modules.Autocomplete?.initialize_all();
     }
   }
 
   public static Blacklist = {
     apply(): void {
       if (!Danbooru.hasModules) return;
-      Danbooru.Modules.Blacklist.apply();
+      Danbooru.Modules.Blacklist?.apply();
     },
 
     initialize_anonymous_blacklist(): void {
       if (!Danbooru.hasModules) return;
-      Danbooru.Modules.Blacklist.initialize_anonymous_blacklist();
+      Danbooru.Modules.Blacklist?.initialize_anonymous_blacklist();
     },
 
     initialize_all(): void {
       if (!Danbooru.hasModules) return;
-      Danbooru.Modules.Blacklist.initialize_all();
+      Danbooru.Modules.Blacklist?.initialize_all();
     },
 
     initialize_disable_all_blacklists(): void {
       if (!Danbooru.hasModules) return;
-      Danbooru.Modules.Blacklist.initialize_disable_all_blacklists();
+      Danbooru.Modules.Blacklist?.initialize_disable_all_blacklists();
     },
 
     stub_vanilla_functions(): void {
@@ -51,28 +53,41 @@ export default class Danbooru {
 
     postShow(post: JQuery<HTMLElement>) {
       if (!Danbooru.hasModules) return;
-      Danbooru.Modules.Blacklist.postShow(post);
+      Danbooru.Modules.Blacklist?.postShow(post);
     },
 
     postHide(post: JQuery<HTMLElement>) {
       if (!Danbooru.hasModules) return;
-      Danbooru.Modules.Blacklist.postHide(post);
+      Danbooru.Modules.Blacklist?.postHide(post);
     },
   }
 
   public static Toast = {
     notice(text: string, timeout = 0) {
       if (!Danbooru.hasModules) return;
-      Danbooru.Modules.Toast.notice(text, timeout);
+      Danbooru.Modules.Toast?.notice(text, timeout);
     },
 
     alert(text: string) {
       if (!Danbooru.hasModules) return;
-      Danbooru.Modules.Toast.alert(text);
+      Danbooru.Modules.Toast?.alert(text);
     },
   }
 
-  public static get DTextFormatter() { return this.Modules?.DTextFormatter; }
+  public static DTextFormatter = { 
+    get ButtonDefinitions() {
+      if (!Danbooru.hasModules) return;
+      return Danbooru.Modules.DTextFormatter?.ButtonDefinitions;
+    },
+    get ButtonOrder() {
+      if (!Danbooru.hasModules) return;
+      return Danbooru.Modules.DTextFormatter?.ButtonOrder;
+    },
+    get buildFromTextarea(): ((e: JQuery<HTMLTextAreaElement>) => object) | undefined {
+      if (!Danbooru.hasModules) return;
+      return Danbooru.Modules.DTextFormatter?.buildFromTextarea;
+    },
+  }
 
   /** The page-side jQuery instance. Required when interacting with page-side jQuery state (e.g. `.data()`), since the userscript runs in a sandbox with its own jQuery. */
   public static get jQuery(): typeof $ | undefined { return XM.Window["jQuery"]; }

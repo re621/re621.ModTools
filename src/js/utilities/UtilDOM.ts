@@ -140,15 +140,11 @@ export class UtilDOM {
   }
 
   /**
-	 * Build a DText input element with the same style, form, & function of the ones supplied by the server.
-	 * @param textarea The main text entry element.
-	 * @param options 
-	 * @returns Either the root element or an array w/ the root element & the help text.
-	 * @todo Better utilize `innerHTML` to slim down.
-	 * @todo Turn into a web component for consistent interop.
+	 * @deprecated Use {@link Danbooru.DTextFormatter.buildFromTextarea}; will be
+   * removed in next major release.
 	 */
-  public static buildDTextInput(textarea: HTMLTextAreaElement): HTMLDivElement | HTMLElement[] {
-    return Danbooru.DTextFormatter?.buildFromTextarea(textarea);
+  public static buildDTextInput(textarea: HTMLTextAreaElement) {
+    return Danbooru.DTextFormatter.buildFromTextarea?.($(textarea));
   }
 
   static getPlaceholderImage(): string {

@@ -73,12 +73,13 @@ export default class TicketReasons extends Component {
   };
 
   private readonly settingsButtonLabel = "Ticket Template Settings";
-  protected create(): Promise<void> {
-    if (!this.isEnabled) return Promise.resolve();
+  // eslint-disable-next-line @typescript-eslint/require-await
+  protected override async create() {
+    if (!this.isEnabled) return;
     this.initSettingsMenu();
 
     const target = document.querySelector<HTMLTextAreaElement>("textarea[name='ticket[response]']");
-    if (!target) return Promise.resolve();
+    if (!target) return;
 
     // Lift the reporter name out of the ticket info table for `%reporterName%` substitution.
     const rows = Array.from(document.querySelectorAll<HTMLElement>("#c-tickets .section tr"));
@@ -111,10 +112,11 @@ export default class TicketReasons extends Component {
       },
     });
     this.builder.mount();
-    return Promise.resolve();
+    return;
   }
 
-  protected async destroy(): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/require-await
+  protected override async destroy() {
     this.builder?.destroy();
   }
 

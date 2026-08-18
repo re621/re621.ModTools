@@ -1,7 +1,6 @@
 import { DialogConfig } from "./DialogForm";
 import Modal from "./Modal";
 
-type PromiseCallbacks<T, Err> = { then?: { (e: FormData): T }, onError?: { (e: unknown): Err }, onComplete?: { (): void } }
 /**
  * Creates a draggable window creating a form with the given elements that resolves a promise with the contents of the input elements in a `FormData` object on completion.
  */
@@ -21,13 +20,10 @@ export class MultiDialogForm extends Modal {
       minHeight: 50,
     } as DialogConfig, e.optionsOrTitle));
     const normalizedParams = params as { elements: JQuery<HTMLElement>[], optionsOrTitle: DialogConfig }[];
-    /* super(Object.assign({
-      title: "MultiDialogForm",
-      minHeight: 50,
-    } as DialogConfig, options)); */
     super({
       title: "MultiDialogForm",
       minHeight: 50,
+      destroyOnClose: true,
     });
 
     this.elements = [];
@@ -67,10 +63,11 @@ export class MultiDialogForm extends Modal {
             resolve((event.originalEvent as FormDataEvent).formData);
           });
           if (params.optionsOrTitle.rejectOnClose) {
-            this.getElement().on("dialogclose", params.optionsOrTitle.onClose ?? ((event) => {
+            this.element.on("dialogclose", params.optionsOrTitle.onClose ?? ((event) => {
               event.preventDefault();
               event.stopImmediatePropagation();
               this.destroy();
+              // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
               reject("Canceled");
             }));
           }

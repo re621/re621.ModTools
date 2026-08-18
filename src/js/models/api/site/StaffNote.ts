@@ -181,12 +181,12 @@ export namespace StaffNote {
         e => {
           if (e["body"]) return e["body"] as string;
           if (reportErrors)
-            ErrorHandler.write(`Failed to retrieve staff note #${id} from server (empty body).`)
+            void ErrorHandler.write(`Failed to retrieve staff note #${id} from server (empty body).`)
           else throw new Error(`Failed to retrieve staff note #${id} from server (empty body).`);
         },
         err => {
           if (reportErrors)
-            ErrorHandler.write(`Failed to retrieve staff note #${id} from server (error parsing response as json).`, err);
+            void ErrorHandler.write(`Failed to retrieve staff note #${id} from server (error parsing response as json).`, err);
           else throw err;
         },
       ),

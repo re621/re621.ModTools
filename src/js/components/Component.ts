@@ -18,6 +18,11 @@ export default class Component {
   protected name: string;
 
   /**
+   * @todo Deprecate in favor of a getter.
+   */
+  public getName(): string { return this.name; }
+
+  /**
    * Whether or not the component is currently running
    */
   private initialized = false;
@@ -98,18 +103,20 @@ export default class Component {
 
   private _verboseLogging = false;
   private get verboseLogging() { return this._verboseLogging || this.Settings["testMode"] || false; }
-  /** Loads the settings from storage, and sets up listeners to sync them across tabs */
+  /**
+   * Loads the settings from storage, and sets up listeners to sync them across tabs
+   * @todo Should this be async?
+   */
+  // eslint-disable-next-line @typescript-eslint/require-await
   public async bootstrapSettings(settings?: Settings): Promise<void> {
     this._SettingsDefaults = { enabled: true };
 
     // Load in the saved settings values
     for (const [key, defaultValue] of Object.entries(settings || this.Settings)) {
       const savedValue = XM.Storage.getValue(this.name + "." + key, defaultValue);
-      // if (key === "enabled") console.log("%s: %s starts as %o", this.name, key, this.SettingsCache[key] ?? defaultValue);
       this.SettingsCache[key] = savedValue;
       this.SettingsDefaults[key] = defaultValue;
       delete this.Settings[key];
-      // if (key === "enabled") console.log("%s: %s set to %o", this.name, key, this.SettingsCache[key] ?? defaultValue);
 
       // Define custom setters and getters
       Object.defineProperty(this.Settings, key, {
@@ -132,9 +139,8 @@ export default class Component {
             try {
               if (this.verboseLogging) console.log(`Setting ${this.name}.${key} from ${JSON.stringify(old)} to ${JSON.stringify(newValue)}...`);
               XM.Storage.setValue(this.name + "." + key, newValue);
-              if (XM.Storage.getValue(this.name + "." + key, old) !== newValue) {
-                throw "Failed to set value with `GM_setValue`; retrying with `GM.setValue`";
-              }
+              if (XM.Storage.getValue(this.name + "." + key, old) !== newValue)
+                throw new Error("Failed to set value with `GM_setValue`; retrying with `GM.setValue`");
             } catch (error) {
               console.warn(error);
               XM.Storage.setValueAsync(this.name + "." + key, newValue).then(() => {
@@ -143,7 +149,7 @@ export default class Component {
                 if (stored !== newValue)
                   console.warn("...and it failed to write the value.\n\tStored: %o\n\tOld: %o\n\tAttempted new: %o", stored, old, newValue);
                 else if (this.verboseLogging) console.log("...& it worked; resultant value: %o (initially %o, attempted value: %o)", stored, old, newValue);
-              });
+              }, e => console.warn(e));
             }
           }
           if (this.verboseLogging) console.log("Initial resultant value: %o (should be %o)", XM.Storage.getValue(this.name + "." + key, old), newValue);
@@ -169,9 +175,9 @@ export default class Component {
   }
 
   /**
-     * Loads the component's functionality.  
-     * Aborted if some of the load conditions do not match.
-     */
+   * Loads the component's functionality.  
+   * Aborted if some of the load conditions do not match.
+   */
   public async load(): Promise<void> {
     if (!this.constraintMatches || !this.Settings.enabled) return Promise.resolve();
 
@@ -188,16 +194,22 @@ export default class Component {
 
         // Determine when to create the DOM structure
         if (typeof this.DOMLoadConditions == "string") {
+          /** @todo Should this be awaited? */
+          /* eslint-disable @typescript-eslint/no-misused-promises, @typescript-eslint/no-floating-promises */
           PageObserver.watch(this.DOMLoadConditions).then((status) => {
             if (!status) {
               // TODO Page loaded, but the element was not found
               return;
             }
+            /** @todo Should this be awaited? */
             this.execCreate();
           });
         } else if (this.DOMLoadConditions) {
+          /** @todo Should this be awaited? */
           $(() => this.execCreate());
+          /** @todo Should this be awaited? */
         } else this.execCreate();
+        /* eslint-enable @typescript-eslint/no-misused-promises, @typescript-eslint/no-floating-promises */
         this.trigger("load");
       });
   }
@@ -217,65 +229,74 @@ export default class Component {
   }
 
   /**
-     * Loads necessary component data.
-     * Executed before any initialization occurs, and runs even if the load conditions do not match
-     */
+   * Loads necessary component data.
+   * Executed before any initialization occurs, and runs even if the load conditions do not match.
+   * @virtual Core lifecycle function; override optional.
+   */
   protected async prepare(): Promise<void> { }
 
-  /** Runs the component's `prepare()` function and loads settings */
+  /** Runs the component's {@linkcode prepare()} function and loads settings */
   private async execPrepare(): Promise<void> {
     try { await this.prepare(); }
     catch (error) {
-      ErrorHandler.write(`[${this.name}] Fatal crash during "prepare"`, error)
+      void ErrorHandler.write(`[${this.name}] Fatal crash during "prepare"`, error);
       return;
     }
     this.trigger("prepare");
   }
 
   /**
-     * Creates the component's DOM structure.  
-     * Executed as soon as the load conditions match.
-     */
+   * Creates the component's DOM structure.  
+   * Executed as soon as the load conditions match.
+   * @virtual Core lifecycle function; override optional.
+   * @todo Figure out if these lifecycle functions need to be asynchronous.
+   */
   protected async create(): Promise<void> { }
+  // protected createSynchronous?: VoidFunction;
 
   /** Runs the component's `create()` function, sets corresponding variables and triggers events. */
   private async execCreate(): Promise<void> {
-    if (this.initialized) {
-      ErrorHandler.write(`[${this.name}] Attempted to create an initialized module`, new Error());
-      return;
-    }
+    if (this.initialized)
+      return await ErrorHandler.write(`[${this.name}] Attempted to create an initialized module`, new Error());
 
     try { await this.create(); }
     catch (error) {
-      ErrorHandler.write(`[${this.name}] Fatal crash during "create"`, error);
-      return;
+      return await ErrorHandler.write(`[${this.name}] Fatal crash during "create"`, error);
     }
+    /** @todo Should this be awaited? */
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.resetHotkeys();
     this.initialized = true;
     this.trigger("create");
   }
 
   /**
-     * Completely removes the component's DOM structure and restores the original state.  
-     * Typically executed when a component is disabled.
-     */
+   * Completely removes the component's DOM structure and restores the original state.  
+   * Typically executed when a component is disabled.
+   * @virtual Core lifecycle function; override optional.
+   */
   protected async destroy(): Promise<void> { }
 
   private async execDestroy(): Promise<void> {
     if (!this.initialized) {
-      // TODO Throw an error?
+      // TODO: Throw an error?
       return;
     }
 
     try { await this.destroy(); }
-    catch (error) {
-      // TODO Error handling
+    catch {
+      // TODO: Error handling
     }
     this.initialized = false;
     this.trigger("destroy");
   }
 
-  public async resetHotkeys(): Promise<void> {
+  /** 
+   * @todo Figure out what this did & what to do with it.
+   * @todo Should this be async? It seems like that should be the invoker's call.
+   */
+  // eslint-disable-next-line @typescript-eslint/require-await
+  public async resetHotkeys() {
     const keyMeta: string[] = [];
     const keybindObj: Keybind[] = [];
 
@@ -313,9 +334,9 @@ export default class Component {
   }
 
   /** 
-     * Attach a handler function for the specified event to the component
-     * @returns Event ID, unique to this component, that can be used to unbind this handler
-     */
+   * Attach a handler function for the specified event to the component
+   * @returns Event ID, unique to this component, that can be used to unbind this handler
+   */
   public on(event: string, handler: (event: JQuery.TriggeredEvent, data?: PrimitiveType | PrimitiveType[] | PrimitiveMap) => void): number {
     const eventList = event.split(" ");
     for (const one of eventList)
@@ -332,8 +353,6 @@ export default class Component {
   public off(event: string, eventID?: number): void {
     $(document).off(`${Script.eventPrefix}.${this.name}.${event}` + (eventID ? `.${eventID}` : ""));
   }
-
-  public getName(): string { return this.name; }
 
   public updateContentHeader(headers: { [name: string]: boolean }, selector = "body") {
     const content = $(selector);
@@ -410,6 +429,18 @@ export default class Component {
           ${interior}
         </label>`;
   }
+  protected readSettingFromFormData(setting: keyof Settings, formData: FormData, readFromFile?: false): string | undefined;
+  protected readSettingFromFormData(setting: keyof Settings, formData: FormData, readFromFile: true): Promise<string> | string | undefined;
+  protected readSettingFromFormData(setting: keyof typeof this.Settings, formData: FormData, readFromFile = false) {
+    const rawInput = formData.get(`${this.settingsIdPrefix}${setting}`);
+    return (typeof rawInput !== "string") ? (readFromFile ? rawInput?.text() : undefined) : rawInput;
+  }
+  /** NOTE: Is a different method from {@linkcode readSettingFromFormData} for better promise rejection debugging. */
+  protected async readSettingFromFormDataAsync(setting: keyof typeof this.Settings, formData: FormData) {
+    const rawInput = formData.get(`${this.settingsIdPrefix}${setting}`);
+    if (!rawInput) return;
+    return (typeof rawInput !== "string") ? await rawInput.text() : rawInput;
+  }
   protected simpleSettingsCheckbox(setting: keyof typeof this.Settings/* string */, label?: string, title?: string) {
     return this.wrapSimpleInputWithLabel(
       /* html */`<input
@@ -423,6 +454,12 @@ export default class Component {
       title,
     );
   }
+  protected readSettingsCheckbox(setting: keyof typeof this.Settings, e: FormData) {
+    return this.readSettingFromFormData(setting, e, false) === "true";
+  }
+  protected async readSettingsCheckboxAsync(setting: keyof typeof this.Settings, e: FormData) {
+    return (await this.readSettingFromFormDataAsync(setting, e)) === "true";
+  }
   protected simpleSettingsNumber(
     setting: keyof typeof this.Settings/* string */,
     label?: string,
@@ -432,7 +469,7 @@ export default class Component {
       min?: number,
       placeholder?: string,
       step?: number | "any",
-    }  = { step: 1 }) {
+    } = { step: 1 }) {
     options.step ??= 1;
     const { max, min, placeholder, step } = options;
     return this.wrapSimpleInputWithLabel(
@@ -444,11 +481,19 @@ export default class Component {
         ${(max !== undefined) ? `max="${max}"` : ""}
         ${(step !== undefined) ? `step="${step}"` : ""}
         ${placeholder ? `placeholder="${placeholder}"` : ""}
-        value="${this.Settings[setting]}" />`,
+        value="${JSON.stringify(this.Settings[setting])}" />`,
       setting,
       label,
       title,
     );
+  }
+  protected readSettingsNumber(setting: keyof typeof this.Settings, e: FormData, type: "Int" | "Float" = "Int") {
+    const r = this.readSettingFromFormData(setting, e, false);
+    return r ? Number[`parse${type}`](r) : undefined;
+  }
+  protected async readSettingsNumberAsync(setting: keyof typeof this.Settings, e: FormData, type: "Int" | "Float" = "Int") {
+    const r = await this.readSettingFromFormDataAsync(setting, e);
+    return r ? Number[`parse${type}`](r) : undefined;
   }
   protected simpleSettingsTextArea(
     setting: keyof typeof this.Settings/* string */,
@@ -458,7 +503,7 @@ export default class Component {
       maxlength?: number,
       minlength?: number,
       placeholder?: string,
-    }  = {}) {
+    } = {}) {
     const { maxlength, minlength, placeholder } = options;
     return this.wrapSimpleInputWithLabel(
       /* html */`<textarea
@@ -467,13 +512,15 @@ export default class Component {
             ${(minlength !== undefined) ? `minlength="${minlength}"` : ""}
             ${(maxlength !== undefined) ? `maxlength="${maxlength}"` : ""}
             ${placeholder ? `placeholder="${placeholder}"` : ""}>` +
-              `${this.Settings[setting]}`+
+              `${JSON.stringify(this.Settings[setting])}`+
           `</textarea>`,
       setting,
       label,
       title,
     );
   }
+  protected readonly readSettingsText = this.readSettingFromFormData.bind(this);
+  protected readonly readSettingsTextAsync = this.readSettingFromFormDataAsync.bind(this);
   protected simpleSettingsInputText(
     setting: keyof typeof this.Settings/* string */,
     label?: string,
@@ -483,7 +530,7 @@ export default class Component {
       minlength?: number,
       placeholder?: string,
       required?: boolean,
-    }  = {}) {
+    } = {}) {
     const { maxlength, minlength, placeholder, required } = options;
     return this.wrapSimpleInputWithLabel(
       /* html */`<input
@@ -494,7 +541,7 @@ export default class Component {
         ${(maxlength !== undefined) ? `maxlength="${maxlength}"` : ""}
         ${placeholder ? `placeholder="${placeholder}"` : ""}
         ${required ? "required" : ""}
-        value="${this.Settings[setting]}" />`,
+        value="${JSON.stringify(this.Settings[setting])}" />`,
       setting,
       label,
       title,
@@ -523,7 +570,7 @@ export default class Component {
       // multiple?: boolean,
       required?: boolean,
       disabled?: boolean,
-    }  = {}) {
+    } = {}) {
     const { size, /* multiple,  */required, disabled } = attributes;
     const toOption = (value: string, label?: string, title?: string, selected?: boolean) => {
       return `<option value="${value}"${title ? ` title="${title}"` : ""}${(selected ?? value === this.Settings[setting]) ? " selected" : ""}>${label ?? Util.camelToTitle(value)}</option>`;
@@ -589,26 +636,26 @@ export interface ComponentOptions {
 }
 
 export interface ComponentList {
-    [name: string]: Component;
+  [name: string]: Component;
 }
 
 export type PrimitiveType = string | number | boolean;
 export type PrimitiveMap = {
-    [prop: string]: PrimitiveType | PrimitiveType[];
+  [prop: string]: PrimitiveType | PrimitiveType[];
 }
 
 export type JSONObject = JsonStrictObject;
 
 export interface Settings extends JSONObject {
-    enabled: boolean;
+  enabled: boolean;
 }
 
 interface KeybindDefinition {
-    keys: string;               // Key the triggers the function
-    response: ResponseFunction; // Function that is executed when the key is pressed
-    element?: string;           // Element to which the listener gets bound. Defaults to `document`
-    selector?: string;          // Selector within the element for deferred listeners. Defaults to `null`
-    page?: RegExp | RegExp[];   // Pages on which the shortcuts must work. Leave blank for all.
-    ignoreShift?: boolean;      // If true, the hotkey will work regardless if it's accompanied by a shift
-    holdable?: boolean;         // If true, the function will run repeatedly as long as the key is held
+  keys: string;               // Key the triggers the function
+  response: ResponseFunction; // Function that is executed when the key is pressed
+  element?: string;           // Element to which the listener gets bound. Defaults to `document`
+  selector?: string;          // Selector within the element for deferred listeners. Defaults to `null`
+  page?: RegExp | RegExp[];   // Pages on which the shortcuts must work. Leave blank for all.
+  ignoreShift?: boolean;      // If true, the hotkey will work regardless if it's accompanied by a shift
+  holdable?: boolean;         // If true, the function will run repeatedly as long as the key is held
 }

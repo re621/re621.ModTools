@@ -117,11 +117,8 @@ export default class Post {
   }
 
   public static tryFromThumbnail($element: JQuery<HTMLElement>): Post | null {
-    try {
-      return this.fromThumbnail($element);
-    } catch (error) {
-      return null;
-    }
+    try { return this.fromThumbnail($element); }
+    catch { return null; }
   }
 
   private static fromThumbnailAB($element: JQuery<HTMLElement>): Post {
@@ -233,9 +230,9 @@ export default class Post {
 
       meta: {
         duration: null,
-        animated: tagSet.has("animated") || data.fileExt == "webm" || data.fileExt == "gif" || data.fileExt == "swf",
+        animated: tagSet.has("animated") || data.fileExt == FileExtension.WEBM || data.fileExt == FileExtension.GIF || data.fileExt == FileExtension.SWF,
         sound: tagSet.has("sound"),
-        interactive: data.fileExt == "webm" || data.fileExt == "swf",
+        interactive: data.fileExt == FileExtension.WEBM || data.fileExt == FileExtension.SWF,
       },
 
       warning: {
@@ -318,9 +315,9 @@ export default class Post {
 
       meta: {
         duration: null,
-        animated: data.post.tags.includes("animated") || data.post.file.ext == "webm" || data.post.file.ext == "gif" || data.post.file.ext == "swf",
+        animated: data.post.tags.includes("animated") || data.post.file.ext == FileExtension.WEBM || data.post.file.ext == FileExtension.GIF || data.post.file.ext == FileExtension.SWF,
         sound: data.post.tags.includes("sound"),
-        interactive: data.post.file.ext == "webm" || data.post.file.ext == "swf",
+        interactive: data.post.file.ext == FileExtension.WEBM || data.post.file.ext == FileExtension.SWF,
       },
 
       warning: {
@@ -531,9 +528,9 @@ export default class Post {
 
       meta: {
         duration: data.duration,
-        animated: tagSet.has("animated") || data.file.ext == FileExtension.WEBM || data.file.ext == FileExtension.GIF || data.file.ext == FileExtension.SWF,
+        animated: tagSet.has("animated") || FileExtension.fromString(data.file.ext) == FileExtension.WEBM || FileExtension.fromString(data.file.ext) == FileExtension.GIF || FileExtension.fromString(data.file.ext) == FileExtension.SWF,
         sound: tagSet.has("sound"),
-        interactive: data.file.ext == FileExtension.WEBM || data.file.ext == FileExtension.SWF,
+        interactive: FileExtension.fromString(data.file.ext) == FileExtension.WEBM || FileExtension.fromString(data.file.ext) == FileExtension.SWF,
       },
 
       warning: {
@@ -598,6 +595,17 @@ export namespace FileExtension {
       }
       return null;
     }
+    export function tryFromString(input: string): FileExtension | undefined {
+      switch (input) {
+        case "jpeg":
+        case "jpg": return FileExtension.JPG;
+        case "png": return FileExtension.PNG;
+        case "gif": return FileExtension.GIF;
+        case "swf": return FileExtension.SWF;
+        case "webm": return FileExtension.WEBM;
+      }
+      return;
+    }
 }
 
 
@@ -609,7 +617,7 @@ export enum PostRating {
 }
 
 export namespace PostRating {
-    const ratingRef = {
+    const ratingRef: { [k: string]: PostRating | undefined; s: PostRating; safe: PostRating; q: PostRating; questionable: PostRating; e: PostRating; explicit: PostRating; } = {
       "s": PostRating.Safe,
       "safe": PostRating.Safe,
       "q": PostRating.Questionable,
@@ -619,7 +627,9 @@ export namespace PostRating {
     };
 
     export function fromValue(value: string): PostRating {
-      return ratingRef[value.toLowerCase()];
+      const r = ratingRef[value.toLowerCase()];
+      if (!r) throw new Error(`"${value}" is not a valid Rating value.`);
+      return r;
     }
 
     export function toString(postRating: PostRating): string {

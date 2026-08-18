@@ -99,6 +99,7 @@ export default class ReportContentData extends Component {
     info.onclick = () => new Modal({
       autoOpen: true,
       title: "Comment Information",
+      destroyOnClose: true,
     }).addContent(
       $(`<table>${commentKeys.map(e => `<tr><th scope="row"><b>${e}</b></th><td>${data[e]}</td></tr>`).join("\n")}</table>`)
     );
@@ -107,9 +108,9 @@ export default class ReportContentData extends Component {
 
     if (!this.Settings.loadMessage) return;
     try {
-      this.drawMessage(data);
+      await this.drawMessage(data);
     } catch(error) {
-      ErrorHandler.write(`${error}`);
+      await ErrorHandler.write("Failed to draw message", error);
     }
   }
 
@@ -132,14 +133,12 @@ export default class ReportContentData extends Component {
     // Display comment
     const table = document.querySelector<HTMLTableElement>(ReportContentData.tableSelector);
     if (!table) return;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const tableContainer = table.parentElement! as HTMLDivElement;
     let replacer: (e: HTMLDivElement) => void;
     if (tableContainer.firstElementChild === table) {
       replacer = e => tableContainer.insertAdjacentElement("afterbegin", e);
     } else if (tableContainer.lastElementChild !== table) {
       const index = Array.from(tableContainer.children).indexOf(table);
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       replacer = e => tableContainer.children.item(index)!.insertAdjacentElement("beforebegin", e);
     } else {
       replacer = e => tableContainer.appendChild(e);

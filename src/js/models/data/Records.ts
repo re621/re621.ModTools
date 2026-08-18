@@ -3,7 +3,9 @@ import Script from "./Script";
 export default class Records {
 
 
-  public static readonly Reasons = {
+  /** @todo Improve typing here (see commented `ReasonKey`). */
+  // public static readonly Reasons: { [k in ReasonKey]: Reason } = {
+  public static readonly Reasons: { [k: string]: Reason | undefined } = {
     vandalism: {
       text: "Don't remove valid tags from posts.",
       rules: "tagging",
@@ -392,5 +394,16 @@ interface SiteRule {
 interface Prebuilt {
     title: string,
     reason: string,
+    /** @todo In practice, none of these are arrays; should this be changed? */
     rules: string | string[],
 }
+
+type Reason = {
+  text: string,
+  rules: string,
+};
+
+// type ReasonKey = "vandalism" | "tagging" | "mintags" | "inappropriate" | "tmi" |
+//   "spamming" | "trolling" | "blacklist" | "blacklist2" | "roleplay" |
+//   "roleplay2" | "plagiarism" | "dnp" | "cdnp" | "paysite" | "deleted" |
+//   "banevasion" | "votecheating" | "votecheating1" | "underage";
