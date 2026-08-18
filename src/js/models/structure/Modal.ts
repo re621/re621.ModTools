@@ -10,6 +10,8 @@ export default class Modal {
 
   private id: string;
   private $modal: JQuery<HTMLElement>;
+  /** The modal element */
+  public get element() { return this.$modal; }
 
   // private config: ModalConfig;
 
@@ -23,9 +25,17 @@ export default class Modal {
   public get isOpen() { return this.$modal.dialog("isOpen") }
   public set isOpen(open: boolean) { this.$modal.dialog(open ? "open" : "close"); }
   public open(): void { this.isOpen = true; }
+  /** Hides the modal window from view. To dispose the window, call {@link destroy}. */
   public close(): void { this.isOpen = false; }
   public toggle(): void { this.isOpen = !this.isOpen; }
 
+  /**
+   * @deprecated {@link ModalConfig.destroyOnClose} will default to `true` next
+   * major release. Update calls to explicitly pass in `false` to preserve
+   * current behavior, or `true` to preemptively opt into the new behavior.
+   */
+  public constructor(initialConfig: Omit<ModalConfig, "destroyOnClose"> | Omit<ModalConfig, "destroyOnClose"> & { destroyOnClose?: undefined });
+  public constructor(initialConfig: Omit<ModalConfig, "destroyOnClose"> & { destroyOnClose: boolean });
   public constructor(initialConfig: ModalConfig) {
     this.id = Util.ID.make();
     const config = Object.freeze(this.validateConfig(initialConfig));
@@ -68,6 +78,7 @@ export default class Modal {
         }
       });
 
+    if (config.destroyOnClose) this.$modal.on("dialogclose", () => this.destroy())
     const ui = this.$modal.closest('.ui-dialog');
     ui.draggable('option', 'containment', '#modal-container');
 
@@ -78,7 +89,6 @@ export default class Modal {
     if (config.structure)
       this.$modal.one("dialogopen.lazyload", () => {
         this.$modal.html("");
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.$modal.append(config.structure!.render());
       });
 
@@ -106,12 +116,13 @@ export default class Modal {
    * @param config Configuration to parse
    * @todo Convert to using `Object.assign` with a default object instead.
    */
-  private validateConfig(config: ModalConfig): RequiredModalConfig | Required<ModalConfig> {
+  private validateConfig(config: ModalConfig): RequiredModalConfig {
     // const result: ModalConfig = Object.assign({}, Modal.defaultConfig, config);
 
     return {
       title: config.title ?? "Dialog",
       autoOpen: config.autoOpen ?? false,
+      destroyOnClose: config.destroyOnClose ?? false,
       triggers: config.triggers ?? [],
       triggerMulti: config.triggerMulti ?? false,
 
@@ -189,7 +200,7 @@ export default class Modal {
   }
 
   /**
-	 * 
+	 * @deprecated Use {@linkcode element}
 	 * @returns The modal element
 	 */
   public getElement(): JQuery<HTMLElement> { return this.$modal; }
@@ -197,17 +208,21 @@ export default class Modal {
 
   /**
    * Completely and irreversibly destroys the modal window
+   *
+   * @param {boolean} [close=false] Should `close` be called first? Required to actually remove it from the DOM. Defaults to `false`.
    */
-  public destroy(): void {
+  public destroy(close = false): void {
+    if (close) this.close();
     this.$modal.dialog("destroy");
     this.$modal.remove();
   }
 
   /**
    * Returns the element that triggered the modal
-   * @returns JQuery<HTMLElement> trigger
+   * @returns {JQuery<HTMLElement> | undefined} trigger
+   * @todo Replace with getter
    */
-  public getActiveTrigger(): JQuery<HTMLElement> | undefined {
+  public getActiveTrigger() {
     return this.activeTrigger;
   }
 
@@ -225,7 +240,7 @@ export default class Modal {
 }
 
 /**
- * @todo Make strict & require a `Partial<ModalConfig>` in the constructor.
+ * @todo Make strict & require a `Partial<ModalConfig>` in the constructor for next major version.
  */
 export interface ModalConfig {
     /** String displayed on top of the modal window */
@@ -233,6 +248,9 @@ export interface ModalConfig {
 
     /** Should the modal open on initialization */
     autoOpen?: boolean;
+
+    /** Should the modal be destroyed (see {@link Modal.destroy}) when closed? */
+    destroyOnClose?: boolean;
 
     /** Modal content, created on page load */
     content?: JQuery<HTMLElement>;
@@ -251,8 +269,8 @@ export interface ModalConfig {
     height?: number | "auto";
     minWidth?: number;
     minHeight?: number;
-    maxWidth?: number;
-    maxHeight?: number;
+    maxWidth?: number | undefined;
+    maxHeight?: number | undefined;
 
     /** If true, triggers are disabled */
     disabled?: boolean;
@@ -264,24 +282,7 @@ export interface ModalConfig {
         my: string;
     };
 }
-interface RequiredModalConfig extends ModalConfig {
-    title: string;
-    autoOpen: boolean;
-    content: JQuery<HTMLElement>;
-    structure: PreparedStructure | null;
-    triggers: ModalTrigger | ModalTrigger[];
-    triggerMulti: boolean;
-    width: number | "auto";
-    height: number | "auto";
-    minWidth: number;
-    minHeight: number;
-    disabled: boolean;
-    dialogClass: string;
-    position: {
-        at: string;
-        my: string;
-    };
-}
+type RequiredModalConfig = Required<Omit<ModalConfig, "maxWidth" | "maxHeight">> & Pick<ModalConfig, "maxWidth" | "maxHeight">;
 
 interface ModalTrigger {
     /** Query selector containing a trigger - or a collection of triggers */

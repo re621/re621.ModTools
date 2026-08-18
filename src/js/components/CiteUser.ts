@@ -53,7 +53,7 @@ export default class CiteUser extends Component {
 
   private userLinkData?: [HTMLAnchorElement, string, string][];
 
-  private static processLink(e: HTMLAnchorElement) {
+  private static processLink(this: void, e: HTMLAnchorElement) {
     return [e, new URL(e.href).pathname, `"${e.innerText}":[${new URL(e.href).pathname}]`] as [HTMLAnchorElement, string, string];
   }
 

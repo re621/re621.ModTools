@@ -39,7 +39,8 @@ export default class LocalStorage {
         else LocalStorage.set(LocalStorage.Index.a0, value + "");
       },
       get Cache(): PrimitiveMap {
-        return JSON.parse(LocalStorage.get(LocalStorage.Index.a1) || "{}");
+        // IDEA: Improve type validation?
+        return JSON.parse(LocalStorage.get(LocalStorage.Index.a1) || "{}") as PrimitiveMap;
       },
       set Cache(value: PrimitiveMap) {
         const text = JSON.stringify(value);
@@ -81,7 +82,7 @@ export default class LocalStorage {
       let data: any;
       try { data = JSON.parse(LocalStorage.get(LocalStorage.Index.d3) || "[]"); }
       catch (error) {
-        console.error("Unable to parse DNP cache (1)");
+        console.error("Unable to parse DNP cache (1) (%o)", error);
         LocalStorage.DNP.clear();
         return new Set();
       }
@@ -128,10 +129,9 @@ export default class LocalStorage {
 
     get TagsDisabled(): string[] {
       const value = LocalStorage.get(LocalStorage.Index.b2) || "[]";
-      let parsed: string[];
-      try { parsed = JSON.parse(value); }
-      catch (error) { return []; }
-      return parsed;
+      // IDEA: Improve type validation?
+      try { return (JSON.parse(value) as string[] | undefined) || []; }
+      catch { return []; }
     },
     set TagsDisabled(value: string[]) {
       if (value.length == 0) LocalStorage.remove(LocalStorage.Index.b2);

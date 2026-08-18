@@ -22,6 +22,8 @@ export class Prompt extends Modal {
       autoOpen: true,
       width: "auto",
       minHeight: 50,
+      // We want to return a value of null & manually destroy when this happens
+      destroyOnClose: false,
     });
 
     const $body = Prompt.buildBody(message, opts);
@@ -43,7 +45,7 @@ export class Prompt extends Modal {
         event.preventDefault();
         done($input.val() as string);
       });
-      this.getElement().on("dialogclose", () => done(null));
+      this.element.on("dialogclose", () => done(null));
     });
   }
 

@@ -27,6 +27,7 @@ export default class XMConnect {
     const validDetails = XMConnect.validateXHRDetails(details);
     return new Promise((resolve, reject) => {
       const callbacks = {
+        /* eslint-disable @typescript-eslint/unbound-method */
         onabort: validDetails.onabort,
         onerror: validDetails.onerror,
         onload: validDetails.onload,
@@ -34,8 +35,10 @@ export default class XMConnect {
         onprogress: validDetails.onprogress,
         onreadystatechange: validDetails.onreadystatechange,
         ontimeout: validDetails.ontimeout,
+        /* eslint-enable @typescript-eslint/unbound-method */
       };
 
+      /* eslint-disable @typescript-eslint/prefer-promise-reject-errors */
       details.onabort = (event): void => { callbacks.onabort?.(event); reject(event); };
       details.onerror = (event): void => { callbacks.onerror?.(event); reject(event); };
       details.onload = (event): void => { callbacks.onload?.(event); resolve(event); };
@@ -43,6 +46,7 @@ export default class XMConnect {
       details.onprogress = (event): void => { callbacks.onprogress?.(event); };
       details.onreadystatechange = (event): void => { callbacks.onreadystatechange?.(event); };
       details.ontimeout = (event): void => { callbacks.ontimeout?.(event); reject(event); };
+      /* eslint-enable @typescript-eslint/prefer-promise-reject-errors */
 
       XMConnect.xmlHttpRequest(validDetails);
     });
@@ -141,7 +145,7 @@ export default class XMConnect {
         XMConnect.download(a, b!);
       }
       else if (a.onerror) a.onerror(event);
-      else throw "Error: unable to download file" + (event.error ? (` [${event.error}]`) : "");
+      else throw new Error("Error: unable to download file" + (event.error ? (` [${event.error}]`) : ""));
     }
 
     // All script managers should have a GM_download function

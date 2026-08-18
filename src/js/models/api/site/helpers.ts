@@ -12,7 +12,7 @@ export function pullUserNameFromHref(href: string) {
     const name = new URL(href).pathname.match(/^\/users\/[^/\s]+/)?.[1];
     if (name && !(/^[0-9]+$/.test(name)))
       return name;
-  } catch (_) {}
+  } catch {}
 }
 /**
  * 
@@ -34,7 +34,7 @@ export function pullUserIdFromHref(href: string) {
       const r = parseInt(id);
       if (r >= 0) return r;
     }
-  } catch (_) {}
+  } catch {}
 }
 export function tryPullUserIdFromHrefs(...hrefs: (string | null | undefined)[]) {
   return reduceToDefined(hrefs, pullUserIdFromHref);

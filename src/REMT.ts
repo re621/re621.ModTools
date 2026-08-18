@@ -2,6 +2,8 @@ import ZestyAPI from "@re621/zestyapi";
 import css from "./css/style.module.scss";
 
 import { ComponentList, SettingsDialogConfig } from "./js/components/Component";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Used for documentation
+import type Component from "./js/components/Component";
 import RecordBuilder from "./js/components/RecordBuilder";
 import TicketData from "./js/components/TicketData";
 import TicketReasons from "./js/components/TicketReasons";
@@ -87,16 +89,20 @@ export default class REMT {
         User.init();
       });
 
-      PageObserver.watch("head meta[name=csrf-token]").then((result) => {
+      /** @todo Figure out if handling this promise screws stuff up. */
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      PageObserver.watch("head meta[name=csrf-token]").then(result => {
         if (!result) {
           Debug.log("+ API logged out");
           return;
         }
         const token = $("head meta[name=csrf-token]");
         if (token) REMT.API.login(token.attr("content") ?? "");
-      });
+      }/* , error => {
+        void ErrorHandler.write("An error occurred during API initialization", error);
+      } */);
     } catch (error) {
-      ErrorHandler.write("An error occurred during script initialization", error);
+      void ErrorHandler.write("An error occurred during script initialization", error);
       return;
     }
 
@@ -104,30 +110,37 @@ export default class REMT {
     // Start loading components
     await Promise.all([headLoaded, bodyLoaded]);
 
-    // Bootstrap settings (synchronous)
+    // #region Bootstrap settings (synchronous)
     for (const module of this.loadOrder) {
       const instance = new module();
       REMT._Registry[instance.getName()] = instance;
       await instance.bootstrapSettings();
     }
     Util.Events.trigger(`${Script.eventPrefixLegacy}:bootstrap`);
+    // #endregion Bootstrap settings (synchronous)
 
-    // Load modules (asynchronous)
+    // #region Load modules (asynchronous)
     const promises: Promise<void>[] = [];
     for (const instance of Object.values(REMT._Registry))
       promises.push(instance?.load() ?? Promise.resolve());
-    Promise.all(promises).then(() => {
+    await Promise.all(promises).then(() => {
       Debug.logPrefix("Loaded.");
       this.buildSettingsButton(true);
       Debug.logPrefix("Fully loaded.");
+    }, error => {
+      void ErrorHandler.write("An error occurred during component initialization", error);
+      return;
     });
+    // #endregion Load modules (asynchronous)
   }
 
   private settingsButton?: JQuery<HTMLElement>;
   // private configs?: SettingsDialogConfig[];
   /**
-   * @param addListeners Whether to add event handlers for if `settingsMenuDialogParameters` changes. Should only happen once.
-   * @todo Convert to just storing & refresh the configs, & removing/adding the button if need be
+   * @param addListeners Whether to add event handlers for if
+   * {@link Component.settingsMenuDialogParameters} changes. Should only happen
+   * once.
+   * @todo Convert to just storing & refresh the configs, & removing/adding the button if need be.
    */
   private buildSettingsButton(addListeners = false) {
     this.settingsButton?.remove();
@@ -149,7 +162,7 @@ export default class REMT {
       areAnyEnabled ||= cb.checked;
       const st = (value: boolean, setCb = false) => { XM.Storage.setValue(k + "." + "enabled", v.Settings.enabled = value); if (setCb) cb.checked = value; };
       setTo.push(st);
-      cb.addEventListener("change", _ => st(cb.checked));
+      cb.addEventListener("change", () => st(cb.checked));
       const resetSettingsButton = HtmlBuilder.button({
         id: `${Script.htmlPrefix}-reset-${k}`,
         name: `${Script.htmlPrefix}-reset-${k}`,
@@ -157,7 +170,7 @@ export default class REMT {
         innerHtml: "Reset",
         title: "Reset to Default Settings?",
       });
-      resetSettingsButton.addEventListener("click", _ => v.requestResetSettings());
+      resetSettingsButton.addEventListener("click", () => v.requestResetSettings());
       cbs.push($(html`<div>${HtmlBuilder.labelBuilder({
         forElement: `${Script.htmlPrefix}-enable-${k}`,
         title: `Fully enable/disable the ${Util.pascalToTitle(k)} component?`,
@@ -180,27 +193,8 @@ export default class REMT {
         type: "button",
         innerHtml: "Disable All",
       });
-    /* enableAll.addEventListener("click", _ => cbs.forEach(e => {
-      const cb = e.children("input")[0];
-      if (!cb.checked) {
-        cb.checked = true;
-        cb.dispatchEvent(new Event("change"));
-      }
-    }));
-    disableAll.addEventListener("click", _ => cbs.forEach(e => {
-      const cb = e.children("input")[0];
-      if (cb.checked) {
-        cb.checked = false;
-        cb.dispatchEvent(new Event("change"));
-      }
-    })); */
-    enableAll.addEventListener("click", _ => setTo.forEach(e => e(true, true)));
-    disableAll.addEventListener("click", _ => setTo.forEach(e => e(false, true)));
-    /* function setAll(to: boolean) {
-      cbs.forEach(e => e.children("input")[0].checked = to);
-    }
-    enableAll.addEventListener("click", () => setAll(true));
-    disableAll.addEventListener("click", () => setAll(false)); */
+    enableAll.addEventListener("click", () => setTo.forEach(e => e(true, true)));
+    disableAll.addEventListener("click", () => setTo.forEach(e => e(false, true)));
     configs.push({
       elements: [
         $("<label>Select which components should be enabled.</label>"),
@@ -218,13 +212,13 @@ export default class REMT {
       id: `${Script.htmlPrefix}-component-settings`,
       icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" name="settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>',
       name: Script.shortName,
-      onClick: () => MultiDialogForm.getRequestedInput(configs),
+      onClick: () => void MultiDialogForm.getRequestedInput(configs),
     });
     Debug.logPrefix("Settings button built.");
   }
 
 }
-new REMT().run();
+void new REMT().run();
 
 interface ComponentListAnnotated extends Partial<ComponentList> {
     AutoTaggingButtons?: AutoTaggingButtons,

@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+  },
+  "include": [
+    "./**/*.ts",
+    "./**/*.js",
+    "./**/*.cjs",
+    "./**/*.mjs",
+    "./*.ts",
+    "./*.js",
+    "./*.cjs",
+    "./*.mjs",
+    // "./**/*.json",
+    // "./.eslint*",
+    // "./.eslintrc.cjs",
+    "**/*.ts",
+    "**/*.js",
+    "**/*.cjs",
+    "**/*.mjs",
+  ]
+}

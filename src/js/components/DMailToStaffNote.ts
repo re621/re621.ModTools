@@ -6,26 +6,28 @@ import Util from "../utilities/Util";
 import { DialogForm } from "../models/structure/DialogForm";
 import Debug from "../models/Debug";
 import { html } from "../utilities/HtmlTemplate";
+import { DMailJson } from "../models/api/site/DMail";
+import ErrorHandler from "../utilities/ErrorHandler";
 
 export default class DMailToStaffNote extends Component {
   public static readonly TICKET_MATCHER = /^"Your ticket":\/tickets\/([0-9]+) has been updated by /;
   private readonly templateVariables = new Map<string|RegExp, string|((key: string, ...args: any[]) => string)>([
-    ["dmailId", () => this.dmailJson["id"].toString()],
+    ["dmailId", () => this.dmailJson?.id?.toString() ?? ""],
     ["dmailQuery", () => new URL(
       document.querySelector<HTMLAnchorElement>("a#share-link")?.href ?? location.href,
     ).search],
-    ["title", () => this.dmailJson["title"].toString()],
+    ["title", () => this.dmailJson?.title?.toString() ?? ""],
     ["ticketId", (v) => {
       if (!this.dmailJson || !(this.dmailJson["body"])) return v;
       const b: string = this.dmailJson["body"].toString();
       return DMailToStaffNote.TICKET_MATCHER.exec(b)?.[1]?.toString() ?? v;
     }],
-    ["sender", () => this.dmailJson["from_name"].toString()],
-    ["recipient", () => this.dmailJson["to_name"].toString()],
-    ["senderId", () => this.dmailJson["from_id"].toString()],
-    ["recipientId", () => this.dmailJson["to_id"].toString()],
+    ["sender", () => this.dmailJson?.from_name?.toString() ?? ""],
+    ["recipient", () => this.dmailJson?.to_name?.toString() ?? ""],
+    ["senderId", () => this.dmailJson?.from_id?.toString() ?? ""],
+    ["recipientId", () => this.dmailJson?.to_id?.toString() ?? ""],
   ]);
-  private dmailJson: any | undefined;
+  private dmailJson: DMailJson | Partial<DMailJson> | undefined;
   /** Indicates if we're currently getting the DMail JSON. */
   private isFetching = false;
   /** Indicates if we've previously gotten the DMail JSON. */
@@ -45,7 +47,7 @@ export default class DMailToStaffNote extends Component {
   };
 
   private revealSettingsDialog(): boolean {
-    DialogForm.getRequestedInput(
+    void DialogForm.getRequestedInput(
       [
         $(this.enabledElement),
         $(`<br />`),
@@ -71,7 +73,8 @@ export default class DMailToStaffNote extends Component {
 	 * IDEA: Add option to edit a preexisting staff note.
 	 * @todo: Disable textarea & reenable it when the submit button is pressed so it's actually included in the form's output.
 	 */
-  protected async create(): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/require-await
+  protected override async create() {
     const dmailInfo = DMailToStaffNote.findDMailIds();
     if (!dmailInfo) {
       Debug.log("Failed to pull required info from URL in `DMailToStaffNote`.");
@@ -138,20 +141,20 @@ export default class DMailToStaffNote extends Component {
       </form>` as HTMLFormElement;
 
     const updateStaffNoteBodyDisplay = noteHeader.oninput = noteFooter.oninput = () => {
-      staff_note_body.value = `${Util.replaceTemplateVariables(noteHeader.value, this.templateVariables)}\n${this.dmailJson["body"] || ""}\n${Util.replaceTemplateVariables(noteFooter.value, this.templateVariables)}`;
+      staff_note_body.value = `${Util.replaceTemplateVariables(noteHeader.value, this.templateVariables)}\n${this.dmailJson?.body || ""}\n${Util.replaceTemplateVariables(noteFooter.value, this.templateVariables)}`;
       $(staff_note_body).trigger("input.danbooru.formatter");
     }
 
     const fetchDMailJSON = async () => {
-      const t = await (await fetch(`/dmails/${dmailInfo.id}.json`)).json();
+      const t = await (await fetch(`/dmails/${dmailInfo.id}.json`)).json() as DMailJson;
       this.dmailJson = t;
-      userDropdownRecipient.innerText = t["to_name"];
-      userDropdownSender.innerText = t["from_name"];
-      userDropdownRecipient.value = t["to_id"];
-      userDropdownSender.value = t["from_id"];
-      submit.disabled = false;
       this.isFetching = false;
       this.wasFetched = true;
+      userDropdownRecipient.innerText = t["to_name"];
+      userDropdownSender.innerText = t["from_name"];
+      userDropdownRecipient.value = t["to_id"].toString();
+      userDropdownSender.value = t["from_id"].toString();
+      submit.disabled = false;
       // Update header/footer values
       // IDEA: Somehow also move cursor accordingly if currently being edited?
       noteHeader.value = Util.replaceTemplateVariables(noteHeader.value, this.templateVariables);
@@ -166,7 +169,11 @@ export default class DMailToStaffNote extends Component {
         form.style.display = inputBox.style.display = "revert";
         if (!this.wasFetched && !this.isFetching) {
           this.isFetching = true;
-          fetchDMailJSON();
+          fetchDMailJSON().catch(e => {
+            void ErrorHandler.write("Failed to retrieve DMail from server", e);
+            // If it failed early, allow it to try again.
+            this.isFetching = false;
+          });
         } else {
           submit.disabled = false;
         }
@@ -186,7 +193,7 @@ export default class DMailToStaffNote extends Component {
     // #endregion Settings Button
     content.insertAdjacentElement("beforeend", inputBox);
     content.insertAdjacentElement("beforeend", form);
-    if (Danbooru.DTextFormatter?.buildFromTextarea) Danbooru.DTextFormatter.buildFromTextarea($(staff_note_body));
+    Danbooru.DTextFormatter.buildFromTextarea?.($(staff_note_body));
     return;
   }
 
@@ -195,7 +202,7 @@ export default class DMailToStaffNote extends Component {
 	 * @returns An object containing all the info about the DMail exchange that could be pulled from the page's HTML w/o querying the server.
 	 */
   public static findDMailIds() {
-    const id = Page.getPageID();
+    const id = parseInt(Page.getPageID());
     const { id: recipientId, name: recipientName } = this.pullIdAndName(2);
     const { id: senderId, name: senderName } = this.pullIdAndName(1);
     const title = Util.DOM.querySelector<HTMLAnchorElement>(".dmail h2").innerText;
@@ -216,11 +223,11 @@ export default class DMailToStaffNote extends Component {
 	 */
   private static pullIdAndName(number: number) {
     const user = Util.DOM.querySelector<HTMLAnchorElement>(`.dmail ul li:nth-of-type(${number}) a[href^='/users/']`);
-    const id = /^\/users\/([0-9]+)/.exec(new URL(user.href).pathname)?.[1];
-    if (!id) throw new Error("Expected URL path segment not found (`/users/:id`; no `:id` found).");
+    const id = parseInt(/^\/users\/([0-9]+)/.exec(new URL(user.href).pathname)?.[1] ?? "NaN");
+    if (!id/*  && id !== 0 */) throw new Error("Expected URL path segment not found (`/users/:id`; no `:id` found).");
     return {
       id: id,
-      name: user.innerText,
+      name: user.innerText || user.innerHTML,
     };
   }
 }

@@ -27,10 +27,12 @@ export class DialogForm extends Modal {
     options: string | DialogConfig = { title: "DialogForm" },
   ) {
     options = DialogForm._fixTitle(options);
-    super(Object.assign({
-      title: "DialogForm",
-      minHeight: 50,
-    } as DialogConfig, options));
+    super({
+      ...options,
+      title: options.title ?? "DialogForm",
+      minHeight: options.minHeight ?? 50,
+      destroyOnClose: options.destroyOnClose ?? true,
+    });
 
     this.elements = elements;
     this.createForm(options.defaultElements);
@@ -45,10 +47,11 @@ export class DialogForm extends Modal {
         resolve((event.originalEvent as FormDataEvent).formData);
       });
       if ((options as DialogConfig).rejectOnClose) {
-        this.getElement().on("dialogclose", (options as DialogConfig).onClose ?? ((event) => {
+        this.element.on("dialogclose", (options as DialogConfig).onClose ?? ((event) => {
           event.preventDefault();
           event.stopImmediatePropagation();
           this.destroy();
+          // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
           reject("Canceled");
         }));
       }

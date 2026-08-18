@@ -150,8 +150,9 @@ export class TemplateBuilder {
       autoOpen: true,
       width: 880,
       height: "auto",
+      destroyOnClose: false,
     });
-    this.modal.getElement().on("dialogclose", () => this.disposeModal());
+    this.modal.element.on("dialogclose", () => this.disposeModal());
 
     this.refreshChips();
     this.refreshForm();
@@ -163,7 +164,7 @@ export class TemplateBuilder {
 
   private disposeModal(): void {
     if (!this.modal) return;
-    this.modal.destroy();
+    this.modal.destroy(false); // Modal closing triggered this, don't do it again.
     this.modal = undefined;
     this.modalEl = undefined;
     this.chipsAreaEl = undefined;
@@ -177,12 +178,12 @@ export class TemplateBuilder {
     if (!this.chipsAreaEl) return;
     const templates = this.config.getTemplates();
     const pendingIndex = this.pending ? templates.length : -1;
-    const totalChips = templates.length + (this.pending ? 1 : 0);
+    const hasChips = templates.length > 0 || !!this.pending;
 
     this.chipsAreaEl.replaceChildren();
 
     const chipsArea = this.chipsAreaEl;
-    if (totalChips === 0) {
+    if (!hasChips) {
       const empty = document.createElement("div");
       empty.className = "template-builder-manager__empty";
       empty.textContent = "No templates yet. Click + to add one.";
@@ -228,7 +229,7 @@ export class TemplateBuilder {
     if (!this.formAreaEl) return;
     const templates = this.config.getTemplates();
     const pendingIndex = this.pending ? templates.length : -1;
-    const totalChips = templates.length + (this.pending ? 1 : 0);
+    const hasChips = templates.length > 0 || !!this.pending;
     const pinned = this.selectedIndex === PINNED_INDEX ? this.config.pinnedChip : undefined;
     const isPinned = !!pinned;
     const selected: TemplateData | undefined = pinned
@@ -259,7 +260,7 @@ export class TemplateBuilder {
       this.bodyTextareaEl = undefined;
       const empty = document.createElement("div");
       empty.className = "template-builder-manager__form-empty";
-      empty.textContent = totalChips
+      empty.textContent = hasChips
         ? "Select a template to edit, or click + to add a new one"
         : "Click + to add your first template";
       this.formAreaEl.replaceChildren(empty);
@@ -341,7 +342,7 @@ export class TemplateBuilder {
       if (this.selectedIndex === PINNED_INDEX) return;
       this.updateTemplate(this.selectedIndex, { title: titleInput.value });
     });
-    const deleteBtn = this.iconButton("trash", "Delete template", () => this.deleteSelected());
+    const deleteBtn = this.iconButton("trash", "Delete template", () => void this.deleteSelected());
     deleteBtn.classList.add("template-builder-icon-button--danger");
     this.deleteBtnEl = deleteBtn;
     titleRow.append(titleInput, deleteBtn);
@@ -372,13 +373,13 @@ export class TemplateBuilder {
   }
 
   private attachDText(textarea: HTMLTextAreaElement): void {
-    const formatter = Danbooru.DTextFormatter;
+    const formatter = Danbooru.DTextFormatter.buildFromTextarea;
     const page$ = Danbooru.jQuery;
     if (!formatter || !page$) return;
     // Marker class makes the formatter dispatch a native `input` event after its buttons
     // modify the textarea. Without it, only a namespaced jQuery event fires and our listener misses it.
     textarea.classList.add("dtext-vue");
-    formatter.buildFromTextarea(page$(textarea) as JQuery<HTMLTextAreaElement>);
+    formatter(page$(textarea) as JQuery<HTMLTextAreaElement>);
   }
 
   // #endregion
@@ -500,7 +501,7 @@ export class TemplateBuilder {
     input.addEventListener("change", () => {
       const file = input.files?.[0];
       if (!file) return;
-      file.text().then((text) => this.applyImport(text));
+      void file.text().then(this.applyImport.bind(this));
     });
     input.click();
   }
@@ -555,7 +556,7 @@ export class TemplateBuilder {
     menu.className = "template-builder-menu";
 
     const items: Array<{ icon: IconName; label: string; onClick: () => void }> = [
-      { icon: "reset", label: "Reset to defaults", onClick: () => this.reset() },
+      { icon: "reset", label: "Reset to defaults", onClick: () => void this.reset() },
       { icon: "copy", label: "Export to file", onClick: () => this.exportToFile() },
       { icon: "paste", label: "Import from file", onClick: () => this.importFromFile() },
       ...(this.config.extraMenuItems ?? []),

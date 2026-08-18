@@ -39,7 +39,7 @@ export namespace UtilTime {
           break;
       }
 
-      const timeFormats = [
+      const timeFormats: [number, string, number | string][] = [
         [60, 'seconds', 1], // 60
         [120, '1 minute ago', '1 minute from now'], // 60*2
         [3600, 'minutes', 60], // 60*60, 60
@@ -58,7 +58,7 @@ export namespace UtilTime {
       ];
       let seconds = (+new Date() - time) / 1000,
         token = 'ago',
-        listChoice = 1;
+        listChoice: 1 | 2 = 1;
 
       if (seconds >= 0 && seconds < 2) { return 'Just now'; }
       if (seconds < 0) {
@@ -67,12 +67,12 @@ export namespace UtilTime {
         listChoice = 2;
       }
       let i = 0,
-        format;
+        format: [number, string, number | string] | undefined;
         // eslint-disable-next-line no-cond-assign
       while (format = timeFormats[i++])
         if (seconds < format[0]) {
           if (typeof format[2] == 'string')
-            return format[listChoice];
+            return format[listChoice] as string;
           else
             return Math.floor(seconds / format[2]) + ' ' + format[1] + ' ' + token;
         }

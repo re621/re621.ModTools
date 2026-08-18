@@ -32,7 +32,8 @@ export default class ForumBuilder extends Component {
     return Promise.resolve();
   }
 
-  protected async destroy(): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/require-await
+  protected override async destroy() {
     this.builder?.destroy();
     this.builders?.forEach(e => e.destroy());
   }

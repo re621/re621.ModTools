@@ -56,7 +56,7 @@ export default class Debug {
   /** Logs the provided data as a table */
   public static table(obj: any, properties?: readonly string[]): void {
     if (!Debug.Enabled) return;
-    console.table(obj, properties);
+    console.table(obj, properties as string[]);
   }
 
   /** Logs the provided data into the console log if connections logging is enabled */

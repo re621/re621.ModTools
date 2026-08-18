@@ -27,6 +27,7 @@ export default class Script {
   /**
    * An object containing the parsed version info.
    */
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   public static readonly versionObj = Object.freeze(Util.parseVersion(this.version));
   public static readonly handler = Object.freeze({
     name: GM_info.scriptHandler,
@@ -92,6 +93,7 @@ export default class Script {
    * 
    * @deprecated Use {@link Util.Network.userAgent} instead.
    */
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   public static readonly userAgent = this.projectNameFormatted + this.trimVersion(Script.versionObj.raw);
 
   /**
@@ -124,7 +126,10 @@ export default class Script {
 
   /** E.g. For e621, should be `["e621", "e926"]`. */
   public static readonly secondLevelDomains = Object.freeze(
-    this.domains.map(e => e.split(".").at(-2) ?? e.split(".")[0] ?? e),
+    this.domains.map(e => {
+      const t = e.split(".");
+      return t[t.length - 2] ?? t[0] ?? e;
+    }),
   );
   public static readonly primarySecondLevelDomain = this.secondLevelDomains[0] ?? "e621";
 
